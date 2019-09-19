@@ -16,17 +16,19 @@ class Curve: Equatable {
     var parent: SketchPad?
     var path: NSBezierPath
     var shape = CAShapeLayer()
+    var mask = CAShapeLayer()
+    var gradient = CAGradientLayer()
     let canvas = CALayer()
 
     var strokeColor = set.strokeColor {
         willSet(value) {
-            self.shape.strokeColor = value.cgColor.sRGB(alpha: self.alpha)
+            self.shape.strokeColor = value.cgColor.sRGB(alpha: self.alpha[0])
         }
     }
     var fillColor = set.fillColor {
         willSet(value) {
             if self.isFilled {
-                self.shape.fillColor = value.cgColor.sRGB(alpha: self.alpha)
+                self.shape.fillColor = value.cgColor.sRGB(alpha: self.alpha[1])
             } else {
                 self.shape.fillColor = nil
             }
@@ -39,14 +41,14 @@ class Curve: Equatable {
         }
     }
     var angle: CGFloat = 0.0
-    var alpha: CGFloat = 1.0 {
+    var alpha: [CGFloat] = [1.0,1.0] {
         willSet(value) {
+            self.shape.strokeColor = self.shape.strokeColor?.sRGB(alpha: value[0])
             if self.isFilled {
-                self.shape.fillColor = self.shape.fillColor?.sRGB(alpha: value)
+                self.shape.fillColor = self.shape.fillColor?.sRGB(alpha: value[1])
             } else {
                 self.shape.fillColor = nil
             }
-            self.shape.strokeColor = self.shape.strokeColor?.sRGB(alpha: value)
         }
     }
 
@@ -57,7 +59,7 @@ class Curve: Equatable {
         }
     }
 
-    var shadow: [CGFloat] = [0.0,0.0,0.0,0.0] {
+    var shadow: [CGFloat] = set.shadow {
         willSet(value) {
             self.canvas.shadowRadius = value[0]
             self.canvas.shadowOpacity = Float(value[1])
@@ -69,6 +71,48 @@ class Curve: Equatable {
     var shadowColor: NSColor = set.shadowColor {
         willSet(value) {
             self.canvas.shadowColor = value.cgColor
+        }
+    }
+
+    var gradientColor: [NSColor] = set.gradientColor {
+        willSet(value) {
+            var alphaColors: [NSColor] = []
+            for (i, color) in value.enumerated(){
+                let srgb = color.sRGB(alpha: self.gradientOpacity[i])
+                alphaColors.append(srgb)
+
+            }
+            self.gradient.colors = [alphaColors[0].cgColor,
+                                    alphaColors[1].cgColor,
+                                    alphaColors[2].cgColor]
+
+        }
+    }
+
+    var gradientOpacity: [CGFloat] = [0.0,0.0,0.0] {
+        willSet(value) {
+            var alphaColors: [NSColor] = []
+            for (i, color) in self.gradientColor.enumerated(){
+                let srgb = color.sRGB(alpha: value[i])
+                alphaColors.append(srgb)
+
+            }
+            self.gradient.colors = [alphaColors[0].cgColor,
+                                    alphaColors[1].cgColor,
+                                    alphaColors[2].cgColor]
+        }
+    }
+
+    var gradientDirection: [CGPoint] = set.gradientDirection {
+        willSet(value) {
+            self.gradient.startPoint = value[0]
+            self.gradient.endPoint = value[1]
+        }
+    }
+
+    var gradientLocation: [NSNumber] = set.gradientLocation {
+        willSet(value) {
+            self.gradient.locations = value
         }
     }
 
@@ -107,6 +151,8 @@ class Curve: Equatable {
                                "strokeColor" : NSNull(),
                                "fillColor" : NSNull(),
                                "lineWidth" : NSNull()]
+        self.gradient.actions = ["position" : NSNull(),
+                                 "bounds": NSNull()]
         self.canvas.actions = ["position" : NSNull(),
                                "bounds" : NSNull(),
                                "filters" : NSNull(),
@@ -114,8 +160,9 @@ class Curve: Equatable {
                                "shadowOpacity": NSNull(),
                                "shadowOffset": NSNull(),
                                "shadowColor": NSNull()]
-        
-        self.canvas.insertSublayer(self.shape, at: 0)
+
+        self.canvas.addSublayer(self.shape)
+        self.canvas.addSublayer(self.gradient)
         self.parent!.layer?.addSublayer(self.canvas)
         self.updateLayer()
     }
@@ -159,11 +206,16 @@ class Curve: Equatable {
 //    MARK: Layer func
     func updateLayer() {
         self.shape.path = self.path.cgPath
+        self.mask.path = self.path.cgPath
+        self.gradient.mask = self.mask
 
         self.canvas.bounds = self.path.bounds
+        self.gradient.bounds = self.canvas.bounds
+
         self.canvas.position = CGPoint(
             x: self.path.bounds.midX,
             y: self.path.bounds.midY)
+        self.gradient.position = self.canvas.position
     }
 
 //    MARK: ControlFrame func

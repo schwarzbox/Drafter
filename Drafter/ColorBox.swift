@@ -10,6 +10,7 @@ import Cocoa
 
 class ColorBox: NSControl {
     var state: StateValue = .off
+    @IBInspectable var alternateTitle: String = ""
 
     func restore() {
         if self.state == .on {
@@ -29,7 +30,7 @@ class ColorBox: NSControl {
         } else {
             self.state = .off
         }
-        self.restore()
+        
         if let action = self.action {
             NSApp.sendAction(action, to: self.target, from: self)
         }

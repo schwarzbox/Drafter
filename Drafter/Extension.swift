@@ -129,12 +129,27 @@ extension CALayer {
 
 extension NSStackView {
     func isOn(title: String) {
-        for view in self.subviews {
-            let button = view as! NSButton
-            if  button.alternateTitle == title {
-                button.state =  NSControl.StateValue.on
+        func restore(alttitle: String,
+                     state: inout NSControl.StateValue) {
+            if alttitle == title {
+                state = NSControl.StateValue.on
             } else {
-                button.state = NSControl.StateValue.off
+                state = NSControl.StateValue.off
+            }
+        }
+
+        for view in self.subviews {
+            if let button = view as? NSButton {
+                restore(alttitle: button.alternateTitle,
+                        state: &button.state)
+            } else if let panel = view as? ColorPanel {
+                if let box = panel.subviews.last as? NSBox,
+                    let colorbox = box.subviews.last as? ColorBox {
+
+                    restore(alttitle: colorbox.alternateTitle,
+                            state: &colorbox.state)
+                    colorbox.restore()
+                }
             }
         }
     }
@@ -160,14 +175,6 @@ extension NSSavePanel {
         self.makeKeyAndOrderFront(self)
     }
 }
-
-//    func createArc(origin: NSPoint, radius: CGFloat,
-//                   startAngle: CGFloat, endAngle: CGFloat) {
-//        self.editedPath = NSBezierPath()
-//        self.editedPath.appendArc(withCenter: CGPoint(x: origin.x, y: origin.y),
-//                       radius: radius,startAngle: startAngle, endAngle: endAngle,
-//                       clockwise: false)
-//    }
 
 //        if isMousePoint(event.locationInWindow, in: self.frame) {
 

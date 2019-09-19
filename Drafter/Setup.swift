@@ -23,14 +23,18 @@ struct Set {
     let maxLineWidth: CGFloat = 256
     let maxBlur: Double = 128
 
-    let strokeColor = NSColor.white
-    let fillColor = NSColor.systemBlue
-    let guiColor = NSColor.systemGray
+    let strokeColor = NSColor.white.sRGB()
+    let fillColor = NSColor.systemBlue.sRGB()
+    let guiColor = NSColor.systemGray.sRGB()
     let shadow: [CGFloat] = [2.0,0.5,8.0,8.0]
     let shadowColor =  NSColor.black
-    let maxShadowRadius: Double = 16
-    let maxShadowOffsetX: Double = 256
-    let maxShadowOffsetY: Double = 256
+    let gradientDirection = [CGPoint(x: 0.0, y: 0.0),
+                             CGPoint(x: 1.0, y: 0.0)]
+    let gradientColor = [NSColor.systemPink,
+                         NSColor.systemBlue,
+                         NSColor.systemPurple]
+    let gradientLocation: [NSNumber] = [0.0, 0.50, 1.0]
+    let maxShadowRadius: Double = 32
     let opacityIncrement: Double = 0.1
     let offsetIncrement: Double = 8
     let dotSize: CGFloat =  8

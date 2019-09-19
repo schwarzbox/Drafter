@@ -8,8 +8,11 @@
 
 import Cocoa
 class Dot: CALayer {
-    init(x: CGFloat, y: CGFloat, size: CGFloat, offset: CGPoint, radius: CGFloat,
-         bg: Bool = false, hidden: Bool = false) {
+    init(x: CGFloat, y: CGFloat, size: CGFloat, offset: CGPoint,
+         radius: CGFloat, lineWidth: CGFloat = set.lineWidth,
+         strokeColor: NSColor? = set.strokeColor,
+         bgColor: NSColor? = set.fillColor,
+         hidden: Bool = false) {
 
         super.init()
         // disable animation
@@ -18,11 +21,10 @@ class Dot: CALayer {
                             width: size, height: size)
 
         self.cornerRadius = radius
-        self.borderWidth = set.lineWidth
-        self.borderColor = set.strokeColor.cgColor
-        if bg {
-            self.backgroundColor = set.fillColor.cgColor
-        }
+        self.borderWidth = lineWidth
+        self.borderColor = strokeColor?.cgColor
+        self.backgroundColor = bgColor?.cgColor
+
         self.isHidden = hidden
     }
     // need for change position
