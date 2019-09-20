@@ -20,7 +20,6 @@
 		1E4A3F2D23011B7A0038D924 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1E4A3F2B23011B7A0038D924 /* Main.storyboard */; };
 		1E4A3F3623011BC40038D924 /* SketchPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A3F3523011BC40038D924 /* SketchPad.swift */; };
 		1EA051992327E2BC004F693F /* Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA051982327E2BC004F693F /* Setup.swift */; };
-		1EA0519B232B04C5004F693F /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA0519A232B04C5004F693F /* TextField.swift */; };
 		1EA0519D232DB449004F693F /* ColorBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA0519C232DB449004F693F /* ColorBox.swift */; };
 /* End PBXBuildFile section */
 
@@ -41,7 +40,6 @@
 		1E4A3F2F23011B7A0038D924 /* Drafter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Drafter.entitlements; sourceTree = "<group>"; };
 		1E4A3F3523011BC40038D924 /* SketchPad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SketchPad.swift; sourceTree = "<group>"; };
 		1EA051982327E2BC004F693F /* Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Setup.swift; sourceTree = "<group>"; };
-		1EA0519A232B04C5004F693F /* TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
 		1EA0519C232DB449004F693F /* ColorBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorBox.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -83,7 +81,6 @@
 				1E038A4D2315837B006D6C2A /* Dot.swift */,
 				1E157C592332299200B191DF /* ColorPanel.swift */,
 				1EA0519C232DB449004F693F /* ColorBox.swift */,
-				1EA0519A232B04C5004F693F /* TextField.swift */,
 				1E056DE2231337210078A488 /* Extension.swift */,
 				1EA051982327E2BC004F693F /* Setup.swift */,
 				1E4A3F2523011B790038D924 /* AppDelegate.swift */,
@@ -172,7 +169,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1E038A5023159BA9006D6C2A /* ControlPoint.swift in Sources */,
-				1EA0519B232B04C5004F693F /* TextField.swift in Sources */,
 				1E056DE523135D500078A488 /* ControlFrame.swift in Sources */,
 				1E056DE12313344A0078A488 /* Curve.swift in Sources */,
 				1EA051992327E2BC004F693F /* Setup.swift in Sources */,

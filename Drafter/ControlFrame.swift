@@ -15,7 +15,8 @@ class ControlFrame: CALayer {
     static let labelSize: CGFloat = dotSize + 4
     static let label50Size: CGFloat = labelSize / 2
     static let defaultWidth: CGFloat = set.lineWidth
-    static let defaultColor: CGColor = set.fillColor.cgColor
+    static let defaultFillColor: NSColor = set.fillColor
+    static let defaultStrokeColor: NSColor = set.strokeColor
     static let controlPad: CGFloat = set.dotSize * 4
     static let controlPad50: CGFloat = set.dotSize * 2
 
@@ -29,7 +30,7 @@ class ControlFrame: CALayer {
                              height: curve.path.bounds.height + curve.lineWidth)
 
         self.borderWidth = ControlFrame.defaultWidth
-        self.borderColor = ControlFrame.defaultColor
+        self.borderColor = ControlFrame.defaultFillColor.cgColor
 
         let gradientLoc0 = self.bounds.minX + CGFloat(truncating: curve.gradientLocation[0]) * self.bounds.width
         let gradientLoc1 = self.bounds.minX + CGFloat(truncating: curve.gradientLocation[1]) * self.bounds.width
@@ -55,7 +56,7 @@ class ControlFrame: CALayer {
             CGPoint(x: self.bounds.maxX, y: self.bounds.midY),
             CGPoint(x: self.bounds.maxX, y: self.bounds.minY),
             CGPoint(x: self.bounds.midX, y: self.bounds.minY),
-            CGPoint(x: self.bounds.maxX+ControlFrame.controlPad,
+            CGPoint(x: self.bounds.maxX + ControlFrame.controlPad,
                     y: self.bounds.midY),
             gradientDirStart,
             gradientDirFinal,
@@ -78,17 +79,15 @@ class ControlFrame: CALayer {
             path.line(to: CGPoint(x: grad,
                                   y: self.bounds.minY - ControlFrame.controlPad50))
         }
+
+        self.makeShape(path: path, color: ControlFrame.defaultFillColor)
+
+        path.removeAllPoints()
         path.move(to: gradientDirStart)
         path.line(to: gradientDirFinal)
+        self.makeShape(path: path, color: ControlFrame.defaultStrokeColor)
 
-        let line = CAShapeLayer()
-        line.path = path.cgPath
-        line.lineWidth = ControlFrame.defaultWidth
-        line.strokeColor = ControlFrame.defaultColor
-        self.addSublayer(line)
-
-
-        var bgColor = set.fillColor
+        var bgColor = ControlFrame.defaultFillColor
         var gradIndex = 0
         for i in 0..<dots.count {
             var radius: CGFloat = 0
@@ -97,47 +96,94 @@ class ControlFrame: CALayer {
             } else if i==dots.count-5 || i==dots.count-4 {
                 radius = ControlFrame.dot50Size
                 bgColor = set.strokeColor
-            } else if i>dots.count-4 {
+            } else if i==dots.count-3 || i==dots.count-2 || i==dots.count-1 {
                 radius = ControlFrame.dot50Size/2
                 bgColor = curve.gradientColor[gradIndex]
                 gradIndex += 1
             }
-            let cp = Dot.init(x: dots[i].x,y: dots[i].y,
-                              size: ControlFrame.dotSize,
-                              offset: CGPoint(
-                                x: ControlFrame.dot50Size,
-                                y: ControlFrame.dot50Size),
-                              radius: radius,
-                              bgColor: bgColor)
-            // mouse track dots
-            let options: NSTrackingArea.Options = [.mouseEnteredAndExited,
-                                                   .activeInActiveApp]
-            let area = NSTrackingArea(
-                rect: NSRect(
-                    x: self.frame.minX + cp.frame.minX,
-                    y: self.frame.minY + cp.frame.minY,
-                    width: cp.frame.width,height: cp.frame.height),
-                options: options, owner: parent)
-    
-            parent.addTrackingArea(area)
+            self.makeDot(parent: parent, tag: i, x: dots[i].x, y: dots[i].y,
+                         radius: radius,bgColor: bgColor)
+        }
 
-            cp.name = String(i)
+        if let rounded = curve.rounded {
+            let bgColor = NSColor.green
 
-            let label = Dot.init(x: cp.bounds.midX,y: cp.bounds.midY,
-                                 size: ControlFrame.labelSize,
-                                 offset: CGPoint(
-                                    x: ControlFrame.label50Size,
-                                    y: ControlFrame.label50Size),
-                                 radius: ControlFrame.label50Size,
-                                 bgColor: nil,
-                                 hidden: true)
-            cp.addSublayer(label)
-            self.addSublayer(cp)
+            let wid = self.bounds.width/2
+            let hei = self.bounds.height/2
+            let roundedX = CGPoint(
+                x: self.bounds.maxX - rounded.x * wid,
+                y: self.bounds.maxY + ControlFrame.controlPad50)
+            let roundedY = CGPoint(
+                x: self.bounds.maxX + ControlFrame.controlPad50,
+                y: self.bounds.maxY - rounded.y * hei)
+
+            path.removeAllPoints()
+            path.move(to: CGPoint(x: roundedX.x,y: self.bounds.maxY))
+            path.line(to: roundedX)
+            self.makeShape(path: path, color: ControlFrame.defaultFillColor)
+
+            path.removeAllPoints()
+            path.move(to: CGPoint(x: self.bounds.maxX,y: roundedY.y))
+            path.line(to: roundedY)
+            self.makeShape(path: path, color: ControlFrame.defaultFillColor)
+
+            self.makeDot(parent: parent, tag: dots.count,
+                         x: roundedX.x, y: roundedX.y,
+                         radius: ControlFrame.dot50Size,
+                         bgColor: bgColor)
+
+            self.makeDot(parent: parent, tag: dots.count+1,
+                         x: roundedY.x, y: roundedY.y,
+                         radius: ControlFrame.dot50Size,
+                         bgColor: bgColor)
         }
     }
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+
+    func makeDot(parent: SketchPad, tag: Int, x: CGFloat, y: CGFloat,
+                 radius: CGFloat, bgColor: NSColor) {
+        let cp = Dot.init(x: x, y: y,
+                          size: ControlFrame.dotSize,
+                          offset: CGPoint(
+                            x: ControlFrame.dot50Size,
+                            y: ControlFrame.dot50Size),
+                          radius: radius,
+                          bgColor: bgColor)
+        // mouse track dots
+        let options: NSTrackingArea.Options = [.mouseEnteredAndExited,
+                                               .activeInActiveApp]
+        let area = NSTrackingArea(
+            rect: NSRect(
+                x: self.frame.minX + cp.frame.minX,
+                y: self.frame.minY + cp.frame.minY,
+                width: cp.frame.width,height: cp.frame.height),
+            options: options, owner: parent)
+
+        parent.addTrackingArea(area)
+
+        cp.tag = tag
+        let label = Dot.init(x: cp.bounds.midX,y: cp.bounds.midY,
+                             size: ControlFrame.labelSize,
+                             offset: CGPoint(
+                                x: ControlFrame.label50Size,
+                                y: ControlFrame.label50Size),
+                             radius: ControlFrame.label50Size,
+                             bgColor: nil,
+                             hidden: true)
+        cp.addSublayer(label)
+        self.addSublayer(cp)
+    }
+
+    func makeShape(path: NSBezierPath, color: NSColor,
+                   width: CGFloat = ControlFrame.defaultWidth) {
+        let line = CAShapeLayer()
+        line.path = path.cgPath
+        line.strokeColor = color.cgColor
+        line.lineWidth = width
+        self.addSublayer(line)
     }
 
     func collideLabel(pos: NSPoint) -> Dot? {

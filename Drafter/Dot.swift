@@ -8,6 +8,7 @@
 
 import Cocoa
 class Dot: CALayer {
+    var tag: Int?
     init(x: CGFloat, y: CGFloat, size: CGFloat, offset: CGPoint,
          radius: CGFloat, lineWidth: CGFloat = set.lineWidth,
          strokeColor: NSColor? = set.strokeColor,

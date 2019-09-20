@@ -4,25 +4,31 @@ Vector Editor for MacOS.
 
 WIP
 
-v0.4
+v0.45
 
 ![Screenshot](screenshot/screenshot1.png)
 
 
 v0.5
 
+Edit curves
+
+Implement Shift(propotrtional resize) and default cmd-C cmd-V cmd-X events
+
 Save blur to .png
-
-Gradients
-
-Font panel
 
 Open file panel
 
 Show filename and select extension in save panel
 
-Selection frame
+v0.6
 
-Group images
+Rulers (Figma style)
 
+Grid (NSDrawTiledRect & snap to grid)
 
+v0.7
+
+Selection frame (new tool)
+
+Group curves

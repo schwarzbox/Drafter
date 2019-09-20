@@ -15,6 +15,9 @@ class ViewController: NSViewController {
     @IBOutlet weak var FrameButtons: NSStackView!
     @IBOutlet weak var ActionBox: NSStackView!
 
+//    @IBOutlet weak var tmpSlider: NSSlider!
+//    @IBOutlet weak var tmpLabel: NSTextField!
+
     @IBOutlet weak var ZoomSketch: NSSlider!
     @IBOutlet weak var ZoomDefaultSketch: NSPopUpButton!
 
@@ -27,15 +30,15 @@ class ViewController: NSViewController {
     @IBOutlet weak var CurveOpacityFill: NSSlider!
     @IBOutlet weak var CurveWidth: NSSlider!
     @IBOutlet weak var CurveBlur: NSSlider!
-    @IBOutlet weak var CurveXLabel: TextField!
-    @IBOutlet weak var CurveYLabel: TextField!
-    @IBOutlet weak var CurveWidLabel: TextField!
-    @IBOutlet weak var CurveHeiLabel: TextField!
-    @IBOutlet weak var CurveRotateLabel: TextField!
-    @IBOutlet weak var CurveWidthLabel: TextField!
-    @IBOutlet weak var CurveOpacityStrokeLabel: TextField!
-    @IBOutlet weak var CurveOpacityFillLabel: TextField!
-    @IBOutlet weak var CurveBlurLabel: TextField!
+    @IBOutlet weak var CurveXLabel: NSTextField!
+    @IBOutlet weak var CurveYLabel: NSTextField!
+    @IBOutlet weak var CurveWidLabel: NSTextField!
+    @IBOutlet weak var CurveHeiLabel: NSTextField!
+    @IBOutlet weak var CurveRotateLabel: NSTextField!
+    @IBOutlet weak var CurveWidthLabel: NSTextField!
+    @IBOutlet weak var CurveOpacityStrokeLabel: NSTextField!
+    @IBOutlet weak var CurveOpacityFillLabel: NSTextField!
+    @IBOutlet weak var CurveBlurLabel: NSTextField!
 
     @IBOutlet weak var CurveColorBox: NSBox!
     @IBOutlet weak var CurveColors: NSStackView!
@@ -43,8 +46,8 @@ class ViewController: NSViewController {
     @IBOutlet weak var CurveFillColorPanel: ColorPanel!
     @IBOutlet weak var CurveStrokeColor: NSBox!
     @IBOutlet weak var CurveFillColor: NSBox!
-    @IBOutlet weak var CurveStrokeLabel: TextField!
-    @IBOutlet weak var CurveFillLabel: TextField!
+    @IBOutlet weak var CurveStrokeLabel: NSTextField!
+    @IBOutlet weak var CurveFillLabel: NSTextField!
 
     @IBOutlet weak var CurveGradientStartPanel: ColorPanel!
     @IBOutlet weak var CurveGradientMiddlePanel: ColorPanel!
@@ -52,24 +55,24 @@ class ViewController: NSViewController {
     @IBOutlet weak var CurveGradientStartColor: NSBox!
     @IBOutlet weak var CurveGradientMiddleColor: NSBox!
     @IBOutlet weak var CurveGradientFinalColor: NSBox!
-    @IBOutlet weak var CurveGradientStartLabel: TextField!
-    @IBOutlet weak var CurveGradientMiddleLabel: TextField!
-    @IBOutlet weak var CurveGradientFinalLabel: TextField!
+    @IBOutlet weak var CurveGradientStartLabel: NSTextField!
+    @IBOutlet weak var CurveGradientMiddleLabel: NSTextField!
+    @IBOutlet weak var CurveGradientFinalLabel: NSTextField!
 
     @IBOutlet weak var CurveGradientStartOpacity: NSSlider!
-    @IBOutlet weak var CurveGradientStartOpacityLabel: TextField!
+    @IBOutlet weak var CurveGradientStartOpacityLabel: NSTextField!
     @IBOutlet weak var CurveGradientMiddleOpacity: NSSlider!
-    @IBOutlet weak var CurveGradientMiddleOpacityLabel: TextField!
+    @IBOutlet weak var CurveGradientMiddleOpacityLabel: NSTextField!
     @IBOutlet weak var CurveGradientFinalOpacity: NSSlider!
-    @IBOutlet weak var CurveGradientFinalOpacityLabel: TextField!
+    @IBOutlet weak var CurveGradientFinalOpacityLabel: NSTextField!
 
     @IBOutlet weak var CurveShadowColorPanel: ColorPanel!
     @IBOutlet weak var CurveShadowColor: NSBox!
-    @IBOutlet weak var CurveShadowLabel: TextField!
+    @IBOutlet weak var CurveShadowLabel: NSTextField!
     @IBOutlet weak var CurveShadowOpacity: NSSlider!
-    @IBOutlet weak var CurveShadowOpacityLabel: TextField!
+    @IBOutlet weak var CurveShadowOpacityLabel: NSTextField!
     @IBOutlet weak var CurveShadowRadius: NSSlider!
-    @IBOutlet weak var CurveShadowRadiusLabel: TextField!
+    @IBOutlet weak var CurveShadowRadiusLabel: NSTextField!
     @IBOutlet weak var CurveShadowOffsetX: NSSlider!
     @IBOutlet weak var CurveShadowOffsetY: NSSlider!
 
@@ -77,7 +80,13 @@ class ViewController: NSViewController {
     @IBOutlet weak var CurveJoin: NSSegmentedControl!
     @IBOutlet weak var CurveDashGap: NSStackView!
 
+    @IBOutlet weak var CurveTextTool: NSStackView!
+    @IBOutlet weak var CurveTextField: NSTextField!
+
+    var textFields: [NSTextField] = []
+
     var SharedColorPanel: NSColorPanel?
+    var SharedFontPanel: NSFontPanel?
 
     override var representedObject: Any? {
         didSet {
@@ -151,10 +160,10 @@ class ViewController: NSViewController {
         CurveShadowRadius.maxValue = set.maxShadowRadius
         CurveShadowOpacity.maxValue = 1
 
-        CurveShadowOffsetX.minValue = -set.maxScreenWidth
-        CurveShadowOffsetY.minValue = -set.maxScreenHeight
-        CurveShadowOffsetX.maxValue = set.maxScreenWidth
-        CurveShadowOffsetY.maxValue = set.maxScreenHeight
+        CurveShadowOffsetX.minValue = -set.screenWidth
+        CurveShadowOffsetY.minValue = -set.screenHeight
+        CurveShadowOffsetX.maxValue = set.screenWidth
+        CurveShadowOffsetY.maxValue = set.screenHeight
 
         CurveShadowRadius.doubleValue = rad
         CurveShadowOpacity.doubleValue = opa
@@ -242,46 +251,42 @@ class ViewController: NSViewController {
         SketchView.CurveJoin = CurveJoin
         SketchView.CurveDashGap = CurveDashGap
 
+        SketchView.CurveTextTool = CurveTextTool
+
         // for precision position create and remove panel
         self.createSharedColorPanel()
         self.closeSharedColorPanel()
 
         // abort text fields
-        let textFields = [CurveStrokeLabel,CurveFillLabel,
-                          CurveShadowLabel,
-                          CurveShadowRadiusLabel, CurveShadowOpacityLabel,
-                          CurveXLabel,CurveYLabel,
-                          CurveWidLabel,CurveHeiLabel,
-                          CurveRotateLabel,
-                          CurveOpacityStrokeLabel,CurveOpacityFillLabel,
-                          CurveWidthLabel,CurveBlurLabel,
-                          CurveGradientStartLabel,
-                          CurveGradientMiddleLabel,
-                          CurveGradientFinalLabel,
-                          CurveGradientStartOpacityLabel,
-                          CurveGradientMiddleOpacityLabel,
-                          CurveGradientFinalOpacityLabel]
+        self.textFields = [
+            CurveStrokeLabel,CurveFillLabel,CurveShadowLabel,
+            CurveShadowRadiusLabel, CurveShadowOpacityLabel,
+            CurveXLabel,CurveYLabel,
+            CurveWidLabel,CurveHeiLabel,
+            CurveRotateLabel,
+            CurveOpacityStrokeLabel,CurveOpacityFillLabel,
+            CurveWidthLabel,CurveBlurLabel,
+            CurveGradientStartLabel,
+            CurveGradientMiddleLabel,
+            CurveGradientFinalLabel,
+            CurveGradientStartOpacityLabel,
+            CurveGradientMiddleOpacityLabel,
+            CurveGradientFinalOpacityLabel,
+            CurveTextField
+        ]
 
-        for view in textFields {
-            if let field = view {
-                SketchView.setTextField(field: field)
-            }
-        }
-        SketchView.abortTextFields()
+        let nc = NotificationCenter.default
+        nc.addObserver(self, selector: #selector(abortTextFields), name: Notification.Name("abortTextFields"), object: nil)
 
-        // keys event
-        NSEvent.addLocalMonitorForEvents(
-            matching: NSEvent.EventTypeMask.keyDown,
-            handler: keyDownEvent)
+        nc.post(name: Notification.Name("abortTextFields"), object: nil)
     }
 
-//    MARK: Event func
-    func keyDownEvent(with event: NSEvent) -> NSEvent? {
-        if event.keyCode == 51 && !set.isActiveTextField {
-            SketchView!.deleteCurve()
+    @ objc func abortTextFields() {
+        for field in self.textFields {
+            field.abortEditing()
         }
-        return event
     }
+
 
 //    MARK: Color panel
     func createSharedColorPanel(sender: ColorBox? = nil) {
@@ -334,7 +339,22 @@ class ViewController: NSViewController {
             SketchView!.ColorPanel = nil
         }
     }
+//     MARK: Font panel
+    func createSharedFontPanel() {
+        SharedFontPanel = NSFontPanel.shared
+        let height = SharedFontPanel?.frame.height ?? 0
+        SharedFontPanel?.setFrameOrigin(NSPoint(
+            x: CurveTextTool.frame.minX+(Window?.frame.minX)!,
+            y: CurveTextTool.frame.minY+(Window?.frame.minY)!-height))
+        SharedFontPanel?.makeKeyAndOrderFront(self)
+    }
 
+    func closeSharedFontPanel() {
+        if let panel = self.SharedFontPanel {
+            panel.close()
+            self.SharedFontPanel = nil
+        }
+    }
 
 //    MARK: Zoom Actions
     @IBAction func zoomOrigin(_ sender: NSPanGestureRecognizer) {
@@ -403,6 +423,14 @@ class ViewController: NSViewController {
         return (tag: tag, value: doubleValue)
     }
 
+    func restoreControlFrame(view: SketchPad) {
+        if NSEvent.pressedMouseButtons == 0 {
+            if let curve = view.selectedCurve {
+                view.createControls(curve: curve)
+            }
+        }
+    }
+
     @IBAction func moveCurve(_ sender: Any) {
         let View = SketchView!
         let v = self.getTagValue(sender: sender)
@@ -414,12 +442,7 @@ class ViewController: NSViewController {
         } else {
             self.CurveYLabel.doubleValue = value
         }
-
-        if NSEvent.pressedMouseButtons == 0 {
-            if let curve = View.selectedCurve {
-                View.createControls(curve: curve)
-            }
-        }
+        self.restoreControlFrame(view: View)
     }
 
     @IBAction func resizeCurve(_ sender: Any) {
@@ -433,11 +456,7 @@ class ViewController: NSViewController {
         } else {
             self.CurveHeiLabel.doubleValue = value
         }
-        if NSEvent.pressedMouseButtons == 0 {
-            if let curve = View.selectedCurve {
-                View.createControls(curve: curve)
-            }
-        }
+        self.restoreControlFrame(view: View)
     }
 
     @IBAction func rotateCurve(_ sender: Any) {
@@ -447,11 +466,7 @@ class ViewController: NSViewController {
         let value = round(v.value * 10) / 10
 
         View.CurveRotateLabel.doubleValue = value
-        if NSEvent.pressedMouseButtons == 0 {
-            if let curve = View.selectedCurve {
-                View.createControls(curve: curve)
-            }
-        }
+        self.restoreControlFrame(view: View)
     }
 
     @IBAction func opacityCurve(_ sender: Any) {
@@ -465,11 +480,7 @@ class ViewController: NSViewController {
         } else if v.tag==1 {
             self.CurveOpacityFillLabel.doubleValue = value
         }
-        if NSEvent.pressedMouseButtons == 0 {
-            if let curve = View.selectedCurve {
-                View.createControls(curve: curve)
-            }
-        }
+        self.restoreControlFrame(view: View)
     }
 
     @IBAction func widthCurve(_ sender: Any) {
@@ -479,11 +490,7 @@ class ViewController: NSViewController {
 
         let value = round(v.value * 10) / 10
         self.CurveWidthLabel.doubleValue = value
-        if NSEvent.pressedMouseButtons == 0 {
-            if let curve = View.selectedCurve {
-                View.createControls(curve: curve)
-            }
-        }
+        self.restoreControlFrame(view: View)
     }
 
     @IBAction func blurCurve(_ sender: Any) {
@@ -493,28 +500,40 @@ class ViewController: NSViewController {
 
         let value = round(v.value * 10) / 10
         self.CurveBlurLabel.doubleValue = value
-        if NSEvent.pressedMouseButtons == 0 {
-            if let curve = View.selectedCurve {
-                View.createControls(curve: curve)
-            }
+        self.restoreControlFrame(view: View)
+    }
+
+//    MARK: TextPanel actions
+    @IBAction func glyphsCurve(_ sender: NSTextField) {
+        SketchView!.glyphsCurve(value: sender.stringValue)
+    }
+
+    @IBAction func hideText(_ sender: NSButton) {
+        SketchView!.hideText()
+    }
+
+    @IBAction func openFontPanel(_ sender: NSButton) {
+        if sender.state == .off {
+            self.closeSharedFontPanel()
+        } else {
+            self.createSharedFontPanel()
         }
     }
 
+//    MARK: ColorPanel actions
     @IBAction func openColorPanel(_ sender: ColorBox) {
-        if sender.state == NSControl.StateValue.off {
+        if sender.state == .off {
             self.CurveColors.isOn(title: "")
             self.closeSharedColorPanel()
         } else {
             self.CurveColors.isOn(title: sender.alternateTitle)
             self.createSharedColorPanel(sender: sender)
         }
-
     }
 
     @IBAction func setStrokeColor(sender: Any) {
         CurveStrokeColorPanel.updateColor(sender: sender,
                                      sharedPanel: &SharedColorPanel)
-
         SketchView!.colorCurve()
     }
 
@@ -561,42 +580,47 @@ class ViewController: NSViewController {
         } else if v.tag == 2 {
             self.CurveGradientFinalOpacityLabel.doubleValue = value
         }
-        if NSEvent.pressedMouseButtons == 0 {
-            if let curve = View.selectedCurve {
-                View.createControls(curve: curve)
-            }
-        }
+        self.restoreControlFrame(view: View)
     }
 
 
     @IBAction func setShadow(_ sender: Any) {
+        let View = SketchView!
+        var values = [self.CurveShadowRadius.doubleValue,
+                      self.CurveShadowOpacity.doubleValue,
+                      self.CurveShadowOffsetX.doubleValue,
+                      self.CurveShadowOffsetY.doubleValue]
         if let slider = sender as? NSSlider {
             let value = slider.doubleValue
             switch slider.tag  {
-            case 0: CurveShadowRadius.doubleValue = value
-            case 1: CurveShadowOpacity.doubleValue = value
-            case 2: CurveShadowOffsetX.doubleValue = value
-            case 3: CurveShadowOffsetY.doubleValue = value
+                case 0: values[0] = value
+                case 1: values[1] = value
+                case 2: values[2] = value
+                case 3: values[3] = value
+                default: break
+            }
+
+        } else if let field = sender as? NSTextField {
+            let value = field.doubleValue
+            switch field.tag  {
+                case 0: values[0] = value
+                case 1: values[1] = value
             default: break
             }
         }
-        var opa = CurveShadowOpacity.doubleValue
-        opa = opa>1 ? 1 : opa < 0 ? 0 : opa
 
-        let values = [CurveShadowRadius.doubleValue,
-                      opa,
-                      CurveShadowOffsetX.doubleValue,
-                      CurveShadowOffsetY.doubleValue]
+        let opa = values[1] > 1 ? 1 : values[1] < 0 ? 0 : values[1]
         CurveShadowRadius.doubleValue = values[0]
-        CurveShadowOpacity.doubleValue = values[1]
+        CurveShadowOpacity.doubleValue = opa
         CurveShadowOffsetX.doubleValue = values[2]
         CurveShadowOffsetY.doubleValue = values[3]
-        CurveShadowRadiusLabel.doubleValue = round(CurveShadowRadius.doubleValue)
+        CurveShadowRadiusLabel.doubleValue = round(values[0])
         CurveShadowOpacityLabel.doubleValue = round(opa * 100) / 100
 
         let floats = values.map({v in CGFloat(v)})
 
         SketchView!.shadowCurve(value: floats)
+        self.restoreControlFrame(view: View)
     }
 
     @IBAction func capCurve(_ sender: NSSegmentedControl) {
@@ -651,11 +675,14 @@ class ViewController: NSViewController {
     }
 
     @IBAction func groupCurve(_ sender: NSButton) {
-
         SketchView!.groupCurve()
     }
 
 //    MARK: Menu actions
+    @IBAction func delete(_ sender: NSMenuItem) {
+        SketchView!.deleteCurve()
+    }
+
     func saveSketch(url: URL, name: String) {
         let View = SketchView!
         if let curve = View.selectedCurve {

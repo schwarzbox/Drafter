@@ -27,7 +27,7 @@ class Curve: Equatable {
     }
     var fillColor = set.fillColor {
         willSet(value) {
-            if self.isFilled {
+            if self.fill {
                 self.shape.fillColor = value.cgColor.sRGB(alpha: self.alpha[1])
             } else {
                 self.shape.fillColor = nil
@@ -44,7 +44,7 @@ class Curve: Equatable {
     var alpha: [CGFloat] = [1.0,1.0] {
         willSet(value) {
             self.shape.strokeColor = self.shape.strokeColor?.sRGB(alpha: value[0])
-            if self.isFilled {
+            if self.fill {
                 self.shape.fillColor = self.shape.fillColor?.sRGB(alpha: value[1])
             } else {
                 self.shape.fillColor = nil
@@ -120,21 +120,22 @@ class Curve: Equatable {
     var join: Int = 1
     var dash: [NSNumber] = []
 
+    var rounded: CGPoint?
     var lock: Bool = false
     var points: [ControlPoint] = []
     var edit: Bool = false
-    var isFilled: Bool
+    var fill: Bool
 
     var controlDot: Dot?
     var controlFrame: ControlFrame?
     var frameAngle: CGFloat = 0
-    let framePad: CGFloat = 8
 
-    init(parent: SketchPad, path: NSBezierPath, isFilled: Bool = true) {
+    init(parent: SketchPad, path: NSBezierPath,
+         fill: Bool = true, rounded: CGPoint?) {
         self.parent = parent
         self.path = path
-        self.isFilled = isFilled
-
+        self.fill = fill
+        self.rounded = rounded
         // filters
         self.canvas.filters = []
     
@@ -390,9 +391,12 @@ class Curve: Equatable {
                 let deltay = self.parent?.bounds.minY {
                 let zoomed = self.parent?.zoomed ?? 1.0
                 let width50 = self.lineWidth/2
+
+                let x = self.path.bounds.minX - set.framePad - width50
+                let y = self.path.bounds.maxY + width50
                 buttons.frame = NSRect(
-                    x: (-deltax+(self.path.bounds.minX - width50)) * zoomed,
-                    y: (-deltay+(self.path.bounds.maxY + self.framePad + width50)) * zoomed,
+                    x: (x-deltax) * zoomed - buttons.bounds.width,
+                    y: (y-deltay) * zoomed - buttons.bounds.height,
                     width: buttons.bounds.width,
                     height: buttons.bounds.height)
 

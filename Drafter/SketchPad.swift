@@ -6,47 +6,35 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
 //0.5
-// send curve
-// rounded rect
-// Font panel
-
-// Use Shift proportionaly
-// Edit curves
-// // add observers refactor references
-
+//Edit curves
+//Implement Shift button and default cmd-C cmd-V cmd-X events
 //Save blur to .png
-
-// groups
-//Selection frame new tool
-
 //Open file panel
-//Show filename and select extension in save panel
+//Show filename and select ext in save panel
 
 //0.6
-// Clue points and rulers
-// Blueprint with grid (NS Draw TiledRect)
-// Snap to grid
+//Rulers (Figma style)
+//Grid (NSDrawTiledRect & snap to grid)
 
 //0.7
-
-// custom filters (proportional)
+//Selection frame (new tool)
+//Group curves
 
 //0.8
-// edit to round rect
-
-// filters
-// flatneess
-// mitter limits
-// fillcRule // strokeStart strokeEnd
-// phase // use line dash phase to animate frame
+// Custom filters (proportional)
+// CA Filters
+// flatneess mitter limits fillRule strokeStart strokeEnd
+// phase (use line dash phase to animate frame)
 
 // 1.0
-// refactor frame zoomed (animation)
+// refactor frame (when zoom same dot size) (animation for labels)
 // gradient handle update
-// refactor init curve
-// layers
 // disable unused actions
 
+// 1.5
+// save svg
+
+//2.0
 // open svg
 
 import Cocoa
@@ -65,15 +53,15 @@ class SketchPad: NSView {
     weak var CurveWidth: NSSlider!
     weak var CurveBlur: NSSlider!
 
-    weak var CurveXLabel: TextField!
-    weak var CurveYLabel: TextField!
-    weak var CurveWidLabel: TextField!
-    weak var CurveHeiLabel: TextField!
-    weak var CurveRotateLabel: TextField!
-    weak var CurveOpacityStrokeLabel: TextField!
-    weak var CurveOpacityFillLabel: TextField!
-    weak var CurveWidthLabel: TextField!
-    weak var CurveBlurLabel: TextField!
+    weak var CurveXLabel: NSTextField!
+    weak var CurveYLabel: NSTextField!
+    weak var CurveWidLabel: NSTextField!
+    weak var CurveHeiLabel: NSTextField!
+    weak var CurveRotateLabel: NSTextField!
+    weak var CurveOpacityStrokeLabel: NSTextField!
+    weak var CurveOpacityFillLabel: NSTextField!
+    weak var CurveWidthLabel: NSTextField!
+    weak var CurveBlurLabel: NSTextField!
 
     weak var ColorPanel: NSColorPanel?
     weak var CurveColors: NSStackView!
@@ -84,24 +72,24 @@ class SketchPad: NSView {
     weak var CurveGradientStartColor: NSBox!
     weak var CurveGradientMiddleColor: NSBox!
     weak var CurveGradientFinalColor: NSBox!
-    weak var CurveStrokeLabel: TextField!
-    weak var CurveFillLabel: TextField!
-    weak var CurveGradientStartLabel: TextField!
-    weak var CurveGradientMiddleLabel: TextField!
-    weak var CurveGradientFinalLabel: TextField!
+    weak var CurveStrokeLabel: NSTextField!
+    weak var CurveFillLabel: NSTextField!
+    weak var CurveGradientStartLabel: NSTextField!
+    weak var CurveGradientMiddleLabel: NSTextField!
+    weak var CurveGradientFinalLabel: NSTextField!
 
     weak var CurveGradientStartOpacity: NSSlider!
-    weak var CurveGradientStartOpacityLabel: TextField!
+    weak var CurveGradientStartOpacityLabel: NSTextField!
     weak var CurveGradientMiddleOpacity: NSSlider!
-    weak var CurveGradientMiddleOpacityLabel: TextField!
+    weak var CurveGradientMiddleOpacityLabel: NSTextField!
     weak var CurveGradientFinalOpacity: NSSlider!
-    weak var CurveGradientFinalOpacityLabel: TextField!
+    weak var CurveGradientFinalOpacityLabel: NSTextField!
 
-    weak var CurveShadowLabel: TextField!
+    weak var CurveShadowLabel: NSTextField!
     weak var CurveShadowOpacity: NSSlider!
     weak var CurveShadowRadius: NSSlider!
-    weak var CurveShadowOpacityLabel: TextField!
-    weak var CurveShadowRadiusLabel: TextField!
+    weak var CurveShadowOpacityLabel: NSTextField!
+    weak var CurveShadowRadiusLabel: NSTextField!
 
     weak var CurveShadowOffsetX: NSSlider!
     weak var CurveShadowOffsetY: NSSlider!
@@ -109,11 +97,9 @@ class SketchPad: NSView {
     weak var CurveCap: NSSegmentedControl!
     weak var CurveJoin: NSSegmentedControl!
     weak var CurveDashGap: NSStackView!
+    weak var CurveTextTool: NSStackView!
 
     var TrackArea: NSTrackingArea!
-
-    var tempTextField: TextField?
-    var textFields: [TextField] = []
 
     var sketchDir: URL?
     var sketchName: String?
@@ -150,6 +136,7 @@ class SketchPad: NSView {
 
     var closedCurve: Bool = false
     var filledCurve: Bool = true
+    var roundedCurve: CGPoint?
 
     var zoomed: CGFloat = 1.0
     var zoomOrigin = CGPoint(x: 0, y: 0)
@@ -220,24 +207,12 @@ class SketchPad: NSView {
         self.sketchBorder = NSBezierPath(rect: sketch)
         self.zoomOrigin = CGPoint(x: self.bounds.midX,
                                   y: self.bounds.midY)
-        // text fields
-        self.abortTextFields()
 
         // filters
 //        self.wantsLayer = true
         self.layerUsesCoreImageFilters = true
-
     }
 
-    func setTextField(field: TextField) {
-        self.textFields.append(field)
-    }
-
-    func abortTextFields() {
-        for field in self.textFields {
-            let _ = field.abortEditing()
-        }
-    }
 
 //    MARK: Zoom func
     func zoomSketch(value: Double) {
@@ -295,6 +270,7 @@ class SketchPad: NSView {
             self.updatePathLayer(layer: self.curveLayer, path: self.curvedPath)
             self.needsDisplay = true
         }
+
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -305,53 +281,57 @@ class SketchPad: NSView {
         } else if let curve = self.selectedCurve, let dot = curve.controlDot {
             let deltax = event.deltaX / self.zoomed
             let deltay = event.deltaY / self.zoomed
-            switch dot.name! {
-            case "0":
+            switch dot.tag! {
+            case 0:
                 let resize = Double(curve.path.bounds.height + deltay)
                 self.resizeCurve(tag: 1, value: resize,anchor: CGPoint(x: 0, y: 1))
                 fallthrough
-            case "1":
+            case 1:
                 let resize = Double(curve.path.bounds.width - deltax)
                 self.resizeCurve(tag: 0, value: resize, anchor: CGPoint(x: 1, y: 0))
-            case "2":
+            case 2:
                 let resize = Double(curve.path.bounds.width - deltax)
                 self.resizeCurve(tag: 0, value: resize, anchor: CGPoint(x: 1, y: 0))
                 fallthrough
-            case "3":
+            case 3:
                 let resize = Double(curve.path.bounds.height - deltay)
                 self.resizeCurve(tag: 1, value: resize)
-            case "4":
+            case 4:
                 let resize = Double(curve.path.bounds.height - deltay)
                 self.resizeCurve(tag: 1, value: resize)
                 fallthrough
-            case "5":
+            case 5:
                 let resize = Double(curve.path.bounds.width + deltax)
                 self.resizeCurve(tag: 0, value: resize)
-            case "6":
+            case 6:
                 let resize = Double(curve.path.bounds.width + deltax)
                 self.resizeCurve(tag: 0, value: resize)
                 fallthrough
-            case "7":
+            case 7:
                 let resize = Double(curve.path.bounds.height + deltay)
                 self.resizeCurve(tag: 1, value: resize,anchor: CGPoint(x: 0, y: 1))
-            case "8":
+            case 8:
                 let rotate = atan2(theEnd.y+deltay-curve.path.bounds.midY,
                             theEnd.x+deltax-curve.path.bounds.midX)
                 let dt = rotate-curve.frameAngle
                 self.rotateCurve(angle:  Double(curve.angle+dt))
                 curve.frameAngle = rotate
-            case "9":
+            case 9:
                 self.gradientDirectionCurve(
                     tag: 0, value: CGPoint(x: deltax, y:deltay))
-            case "10":
+            case 10:
                 self.gradientDirectionCurve(
                     tag: 1, value: CGPoint(x: deltax, y:deltay))
-            case "11":
+            case 11:
                 self.gradientLocationCurve(tag: 0, value: deltax)
-            case "12":
+            case 12:
                 self.gradientLocationCurve(tag: 1, value: deltax)
-            case "13":
+            case 13:
                 self.gradientLocationCurve(tag: 2, value: deltax)
+            case 14:
+                self.roundedCornerCurve(tag: 0, value: deltax)
+            case 15:
+                self.roundedCornerCurve(tag: 1, value: deltay)
             default:
                 break
             }
@@ -413,7 +393,7 @@ class SketchPad: NSView {
                         }
                     }
                 case .text:
-                    self.createText(topLeft: theStart, bottomRight: theEnd)
+                    self.createText(topLeft: theStart)
                 default:
                     self.dragCurve(event: event)
                 }
@@ -428,8 +408,9 @@ class SketchPad: NSView {
     override func mouseDown(with event: NSEvent){
         print("down")
         self.startPoint = convert(event.locationInWindow, from: nil)
-
-        self.abortTextFields()
+        // unfocus text fields
+        let nc = NotificationCenter.default
+        nc.post(name: Notification.Name("abortTextFields"), object: nil)
         if let theStart = self.startPoint {
             if let curve = self.selectedCurve, curve.edit {
                 curve.selectPoint(pos: theStart)
@@ -449,7 +430,6 @@ class SketchPad: NSView {
                     self.controlPoint2 = nil
                     cp2.removeFromSuperlayer()
                 })
-
             } else if let _ = self.movePoint, self.closedCurve {
                 self.finalSegment(fin: {
                     mp,cp1,cp2 in self.addSegment(mp: mp, cp1: cp1, cp2: cp2)
@@ -478,12 +458,14 @@ class SketchPad: NSView {
                 case .curve:
                     self.createCurve(topLeft: theStart)
                 case .text:
-                    self.createText(topLeft: theStart, bottomRight: theEnd)
+                    self.createText(topLeft: theStart)
                 default:
                     self.selectCurve(pos: theStart)
                 }
             }
         }
+
+        self.updatePathLayer(layer: self.editLayer, path: self.editedPath)
         self.needsDisplay = true
     }
 
@@ -494,7 +476,6 @@ class SketchPad: NSView {
             if let curve = self.selectedCurve {
                 self.clearControls(curve: curve, updatePoints: {})
             }
-
             if self.editDone {
                 self.addCurve()
             }
@@ -503,14 +484,26 @@ class SketchPad: NSView {
                 curve.controlDot = nil
                 self.createControls(curve: curve)
             }
-        case .curve, .text:
+        case .curve:
+            if self.editDone {
+                if let curve = self.selectedCurve {
+                    self.clearControls(curve: curve, updatePoints: {})
+                }
+                self.addCurve()
+                if let curve = self.selectedCurve {
+                    curve.frameAngle = 0
+                    curve.controlDot = nil
+                    self.createControls(curve: curve)
+                }
+            }
+        case .text:
             fallthrough
         default:
             break
         }
 
         self.startPoint = nil
-
+        self.roundedCurve=nil
         self.closedCurve = false
         self.filledCurve = true
         self.editDone = false
@@ -521,7 +514,8 @@ class SketchPad: NSView {
 
 //    MARK: Control func
     func initCurve(path: NSBezierPath,
-                   filled: Bool, strokeColor: NSColor, fillColor: NSColor,
+                   fill: Bool, rounded: CGPoint?,
+                   strokeColor: NSColor, fillColor: NSColor,
                    lineWidth: CGFloat, angle: CGFloat, alpha: [CGFloat], blur: Double,
                    shadow: [CGFloat], shadowColor: NSColor,
                    gradientDirection: [CGPoint],
@@ -531,7 +525,8 @@ class SketchPad: NSView {
                    cap: Int, join: Int, dash: [NSNumber],
                    points: [ControlPoint]) -> Curve {
 
-        let curve = Curve.init(parent: self, path: path, isFilled: filled)
+        let curve = Curve.init(parent: self, path: path,
+                               fill: fill, rounded: rounded)
 
         curve.strokeColor = strokeColor
         curve.fillColor = fillColor
@@ -570,27 +565,28 @@ class SketchPad: NSView {
             }
         }
 
-        let curve = self.initCurve(path: path, filled: self.filledCurve,
-               strokeColor: self.CurveStrokeColor.fillColor,
-               fillColor: self.CurveFillColor.fillColor,
-               lineWidth: CGFloat(self.CurveWidth.doubleValue),
-               angle: 0, alpha: [CGFloat(self.CurveOpacityStroke.doubleValue),
-                                 CGFloat(self.CurveOpacityFill.doubleValue)],
-               blur: self.CurveBlur.doubleValue,
-               shadow: shadowValues,
-               shadowColor: self.CurveShadowColor.fillColor,
-               gradientDirection: set.gradientDirection,
-               gradientColor: [self.CurveGradientStartColor.fillColor,
-                               self.CurveGradientMiddleColor.fillColor,
-                               self.CurveGradientFinalColor.fillColor],
-               gradientOpacity: [CGFloat(self.CurveGradientStartOpacity.doubleValue),
-                                 CGFloat(self.CurveGradientMiddleOpacity.doubleValue),
-                                 CGFloat(self.CurveGradientFinalOpacity.doubleValue)],
-               gradientLocation: set.gradientLocation,
-               cap: self.CurveCap.indexOfSelectedItem,
-               join: self.CurveJoin.indexOfSelectedItem,
-               dash: dashPattern,
-               points:  self.controlPoints)
+        let curve = self.initCurve(
+            path: path, fill: self.filledCurve, rounded: self.roundedCurve,
+            strokeColor: self.CurveStrokeColor.fillColor,
+            fillColor: self.CurveFillColor.fillColor,
+            lineWidth: CGFloat(self.CurveWidth.doubleValue),
+            angle: 0, alpha: [CGFloat(self.CurveOpacityStroke.doubleValue),
+                             CGFloat(self.CurveOpacityFill.doubleValue)],
+            blur: self.CurveBlur.doubleValue,
+            shadow: shadowValues,
+            shadowColor: self.CurveShadowColor.fillColor,
+            gradientDirection: set.gradientDirection,
+            gradientColor: [self.CurveGradientStartColor.fillColor,
+                           self.CurveGradientMiddleColor.fillColor,
+                           self.CurveGradientFinalColor.fillColor],
+            gradientOpacity: [CGFloat(self.CurveGradientStartOpacity.doubleValue),
+                             CGFloat(self.CurveGradientMiddleOpacity.doubleValue),
+                             CGFloat(self.CurveGradientFinalOpacity.doubleValue)],
+            gradientLocation: set.gradientLocation,
+            cap: self.CurveCap.indexOfSelectedItem,
+            join: self.CurveJoin.indexOfSelectedItem,
+            dash: dashPattern,
+            points:  self.controlPoints)
 
         self.curves.append(curve)
 
@@ -819,8 +815,6 @@ class SketchPad: NSView {
             self.controlPath.removeAllPoints()
             self.curveLayer.removeFromSuperlayer()
             self.controlLayer.removeFromSuperlayer()
-            self.tool = Tools.drag
-            ToolBox?.isOn(title: "drag")
             self.editDone = true
         }
     }
@@ -874,22 +868,24 @@ class SketchPad: NSView {
     func cloneCurve() {
         if let curve = self.selectedCurve, let index = self.curves.firstIndex(of: curve) {
             let curve = self.curves[index]
-            let clone = self.initCurve(path: curve.path.copy() as! NSBezierPath,
-                                       filled: curve.isFilled,
-                                       strokeColor: curve.strokeColor,
-                                       fillColor: curve.fillColor,
-                                       lineWidth: curve.lineWidth,
-                                       angle: curve.angle,
-                                       alpha: curve.alpha, blur: curve.blur,
-                                       shadow: curve.shadow,
-                                       shadowColor: curve.shadowColor,
-                                       gradientDirection: curve.gradientDirection,
-                                       gradientColor: curve.gradientColor,
-                                       gradientOpacity: curve.gradientOpacity,
-                                       gradientLocation: curve.gradientLocation,
-                                       cap: curve.cap, join: curve.join, dash: curve.dash,
-                                       points: curve.points)
-            self.curves.insert(clone, at: index)
+            let clone = self.initCurve(
+                path: curve.path.copy() as! NSBezierPath,
+                fill: curve.fill, rounded: curve.rounded,
+                strokeColor: curve.strokeColor,
+                fillColor: curve.fillColor,
+                lineWidth: curve.lineWidth,
+                angle: curve.angle,
+                alpha: curve.alpha, blur: curve.blur,
+                shadow: curve.shadow,
+                shadowColor: curve.shadowColor,
+                gradientDirection: curve.gradientDirection,
+                gradientColor: curve.gradientColor,
+                gradientOpacity: curve.gradientOpacity,
+                gradientLocation: curve.gradientLocation,
+                cap: curve.cap, join: curve.join,
+                dash: curve.dash,
+                points: curve.points)
+            self.curves.append(clone)
             self.clearControls(curve: curve, updatePoints: {})
             self.selectedCurve = clone
             self.moveCurve(tag: 0,
@@ -964,11 +960,18 @@ class SketchPad: NSView {
                    width: size.wid,height: size.hei))
     }
 
-    func createRectangle(topLeft: NSPoint, bottomRight: NSPoint) {
-        let size = self.flipSize(topLeft: topLeft, bottomRight: bottomRight)
+    func createRectangle(topLeft: NSPoint, bottomRight: NSPoint,
+                         xRad: CGFloat = 0.0001, yRad: CGFloat = 0.0001) {
+        let botLeft = NSPoint(x: topLeft.x, y: bottomRight.y)
+        let topRight = NSPoint(x: bottomRight.x, y: topLeft.y)
+
+        let size = self.flipSize(topLeft: botLeft, bottomRight: topRight)
+
         self.editedPath = NSBezierPath(
-            rect: NSRect(x: topLeft.x,y: topLeft.y,
-                                width: size.wid, height: size.hei))
+            roundedRect: NSRect(x: botLeft.x, y: botLeft.y,
+                                width: size.wid, height: size.hei),
+            xRadius: xRad, yRadius: yRad)
+        self.roundedCurve = CGPoint(x: 0, y: 0)
     }
 
     func createArc(topLeft: NSPoint, bottomRight: NSPoint) {
@@ -984,7 +987,6 @@ class SketchPad: NSView {
         self.editedPath.appendArc(withCenter: topLeft, radius: size.wid,
                                   startAngle: startAngle, endAngle: endAngle,
                                   clockwise: false)
-        self.editedPath.printPath()
     }
 
     func createCurve(topLeft: NSPoint) {
@@ -1031,49 +1033,31 @@ class SketchPad: NSView {
         }
     }
 
-    func removeText() {
-        if let txt = self.tempTextField {
-            if let index = self.textFields.firstIndex(of: txt) {
-                self.textFields.remove(at: index)
-            }
-            txt.removeFromSuperview()
-        }
+    func createText(topLeft: NSPoint) {
+        self.showText()
+        let height = self.CurveTextTool.frame.height
+        let deltaX = topLeft.x-self.bounds.minX
+        let deltaY = topLeft.y-self.bounds.minY
+        self.CurveTextTool.setFrameOrigin(
+            NSPoint(x: deltaX * self.zoomed,
+                    y: deltaY * self.zoomed - height))
     }
 
-    func createText(topLeft: NSPoint, bottomRight: NSPoint) {
-        self.removeText()
-        let wid = bottomRight.x - topLeft.x
-        let rect = NSRect(x: topLeft.x,y: topLeft.y,
-                         width: wid, height: set.textHeight)
-        self.tempTextField = TextField.init(frame: rect)
-
-        if let txt = self.tempTextField {
-            txt.stringValue = "text"
-            txt.isBordered = true
-            txt.backgroundColor = NSColor.clear
-            txt.cell?.sendsActionOnEndEditing = true
-
-            txt.target = self
-            txt.action = #selector(self.setGlyphs)
-
-            self.setTextField(field: txt)
-            self.addSubview(txt)
-        }
-    }
-
-    @objc func setGlyphs(sender: TextField) {
+    func glyphsCurve(value: String) {
         self.editedPath = NSBezierPath()
 
-        if let txt = self.tempTextField,
-            let font = NSFont(name: set.fontName, size: set.fontSize) {
-            let topLeft = NSPoint(x: txt.frame.minX,
-                                  y: txt.frame.minY)
+        if let font = NSFont(name: set.fontName, size: set.fontSize) {
+            let x = self.CurveTextTool.frame.minX
+            let y = self.CurveTextTool.frame.minY
+            let topLeft = NSPoint(x: x,
+                                  y: y)
             self.editedPath.move(to: topLeft)
-            for char in sender.stringValue {
+            for char in value {
                 let glyph = font.glyph(withName: String(char))
                 self.editedPath.append(withCGGlyph: CGGlyph(glyph), in: font)
             }
         }
+
         if let curve = self.selectedCurve {
             self.clearControls(curve: curve, updatePoints: {})
         }
@@ -1081,8 +1065,17 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve {
             self.createControls(curve: curve)
         }
-        self.removeText()
+        self.hideText()
     }
+
+    func hideText() {
+        self.CurveTextTool.isHidden = true
+    }
+
+    func showText() {
+        self.CurveTextTool.isHidden = false
+    }
+
 
 //    MARK: Key func
     func deleteCurve() {
@@ -1237,7 +1230,7 @@ class SketchPad: NSView {
     func shadowCurve(value: [CGFloat]) {
         if let curve = self.selectedCurve, !curve.lock {
             curve.shadow = value
-            self.needsDisplay = true
+            self.clearControls(curve: curve, updatePoints: {})
         }
     }
 
@@ -1282,6 +1275,30 @@ class SketchPad: NSView {
             self.clearControls(curve: curve, updatePoints: {})
         }
 
+    }
+
+    func roundedCornerCurve(tag: Int, value: CGFloat) {
+        if let curve = self.selectedCurve, !curve.lock, let rounded = curve.rounded {
+            let wid = (curve.path.bounds.width + curve.lineWidth)/2
+            let hei = (curve.path.bounds.height + curve.lineWidth)/2
+
+            if tag==0 {
+                var x = rounded.x - value/wid
+                x  = x < 0 ? 0 : x > 1 ? 1 : x
+                curve.rounded = CGPoint(x: x, y: rounded.y)
+            } else if tag==1 {
+                var y = rounded.y + value/hei
+                y  = y < 0 ? 0 : y > 1 ? 1 : y
+                curve.rounded = CGPoint(x: rounded.x, y: y)
+            }
+            let angle = curve.angle
+            self.rotateCurve(angle: 0)
+            let path = NSBezierPath.init(
+                roundedRect: curve.path.bounds,
+                xRadius: rounded.x * wid, yRadius: rounded.y * hei)
+            curve.path = path
+            self.rotateCurve(angle: Double(angle))
+        }
     }
 
     func capCurve(value: Int) {

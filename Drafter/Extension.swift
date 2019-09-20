@@ -51,6 +51,60 @@ extension NSBezierPath {
     }
 }
 
+extension NSStackView {
+    func isOn(title: String) {
+        func restore(alttitle: String,
+                     state: inout NSControl.StateValue) {
+            if alttitle == title {
+                state = NSControl.StateValue.on
+            } else {
+                state = NSControl.StateValue.off
+            }
+        }
+
+        for view in self.subviews {
+            if let button = view as? NSButton {
+                restore(alttitle: button.alternateTitle,
+                        state: &button.state)
+            } else if let panel = view as? ColorPanel {
+                if let box = panel.subviews.last as? NSBox,
+                    let colorbox = box.subviews.last as? ColorBox {
+
+                    restore(alttitle: colorbox.alternateTitle,
+                            state: &colorbox.state)
+                    colorbox.restore()
+                }
+            }
+        }
+    }
+
+    func isEnable(title: String = "", all: Bool = false) {
+        for view in self.subviews {
+            let button = view as! NSButton
+            if  button.alternateTitle == title || all {
+                button.isEnabled = true
+            } else {
+                button.isEnabled = false
+            }
+        }
+    }
+}
+
+//extension NSTextField {
+//    
+//    open override func takeDoubleValueFrom(_ sender: Any?) {
+//        if let slider = sender as? NSSlider {
+//            var value = slider.doubleValue
+//            if value > 10 {
+//                value = round(value * 10) / 10
+//            } else {
+//                value = round(value * 100) / 100
+//            }
+//            self.doubleValue = value
+//        }
+//    }
+//}
+
 extension CGColor {
     func sRGB(alpha: CGFloat = 1.0) -> CGColor {
         let color  = self.components
@@ -127,45 +181,6 @@ extension CALayer {
     }
 }
 
-extension NSStackView {
-    func isOn(title: String) {
-        func restore(alttitle: String,
-                     state: inout NSControl.StateValue) {
-            if alttitle == title {
-                state = NSControl.StateValue.on
-            } else {
-                state = NSControl.StateValue.off
-            }
-        }
-
-        for view in self.subviews {
-            if let button = view as? NSButton {
-                restore(alttitle: button.alternateTitle,
-                        state: &button.state)
-            } else if let panel = view as? ColorPanel {
-                if let box = panel.subviews.last as? NSBox,
-                    let colorbox = box.subviews.last as? ColorBox {
-
-                    restore(alttitle: colorbox.alternateTitle,
-                            state: &colorbox.state)
-                    colorbox.restore()
-                }
-            }
-        }
-    }
-
-    func isEnable(title: String = "", all: Bool = false) {
-        for view in self.subviews {
-            let button = view as! NSButton
-            if  button.alternateTitle == title || all {
-                button.isEnabled = true
-            } else {
-                button.isEnabled = false
-            }
-        }
-    }
-}
-
 extension NSSavePanel {
     func setup() {
         self.directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
@@ -176,16 +191,8 @@ extension NSSavePanel {
     }
 }
 
-//        if isMousePoint(event.locationInWindow, in: self.frame) {
-
-//func createRRectangle(topLeft: NSPoint, bottomRight: NSPoint,
-//                      xRad: CGFloat = 2.0, yRad: CGFloat = 2.0) {
-//    let size = flipSize(topLeft: topLeft, bottomRight: bottomRight)
-//
-//    self.editedPath = NSBezierPath.init(roundedRect: NSRect(x: topLeft.x, y: topLeft.y,
-//                                                            width: size.wid, height: size.hei),
-//                                        xRadius: xRad, yRadius: yRad)
-//}
+// if isMousePoint(event.locationInWindow, in: self.frame) {
+// }
 
 //func drawCanvas(curve: Curve) {
 //    print("save")
