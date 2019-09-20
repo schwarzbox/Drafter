@@ -15,9 +15,6 @@ class ViewController: NSViewController {
     @IBOutlet weak var FrameButtons: NSStackView!
     @IBOutlet weak var ActionBox: NSStackView!
 
-//    @IBOutlet weak var tmpSlider: NSSlider!
-//    @IBOutlet weak var tmpLabel: NSTextField!
-
     @IBOutlet weak var ZoomSketch: NSSlider!
     @IBOutlet weak var ZoomDefaultSketch: NSPopUpButton!
 
@@ -197,25 +194,12 @@ class ViewController: NSViewController {
         SketchView.parent = self
         SketchView.ToolBox = ToolBox
         SketchView.FrameButtons = FrameButtons
-        SketchView.CurveX = CurveX
-        SketchView.CurveY = CurveY
-        SketchView.CurveWid = CurveWid
-        SketchView.CurveHei = CurveHei
+
         SketchView.CurveRotate = CurveRotate
         SketchView.CurveOpacityStroke = CurveOpacityStroke
         SketchView.CurveOpacityFill = CurveOpacityFill
         SketchView.CurveWidth = CurveWidth
         SketchView.CurveBlur = CurveBlur
-
-        SketchView.CurveXLabel = CurveXLabel
-        SketchView.CurveYLabel = CurveYLabel
-        SketchView.CurveWidLabel = CurveWidLabel
-        SketchView.CurveHeiLabel = CurveHeiLabel
-        SketchView.CurveRotateLabel = CurveRotateLabel
-        SketchView.CurveOpacityStrokeLabel = CurveOpacityStrokeLabel
-        SketchView.CurveOpacityFillLabel = CurveOpacityFillLabel
-        SketchView.CurveWidthLabel = CurveWidthLabel
-        SketchView.CurveBlurLabel = CurveBlurLabel
 
         SketchView.CurveColors = CurveColors
 
@@ -225,24 +209,13 @@ class ViewController: NSViewController {
         SketchView.CurveGradientStartColor = CurveGradientStartColor
         SketchView.CurveGradientMiddleColor = CurveGradientMiddleColor
         SketchView.CurveGradientFinalColor = CurveGradientFinalColor
-        SketchView.CurveStrokeLabel = CurveStrokeLabel
-        SketchView.CurveFillLabel = CurveFillLabel
-        SketchView.CurveGradientStartLabel = CurveGradientStartLabel
-        SketchView.CurveGradientMiddleLabel = CurveGradientMiddleLabel
-        SketchView.CurveGradientFinalLabel = CurveGradientFinalLabel
 
         SketchView.CurveGradientStartOpacity = CurveGradientStartOpacity
-        SketchView.CurveGradientStartOpacityLabel =  CurveGradientStartOpacityLabel
         SketchView.CurveGradientMiddleOpacity = CurveGradientMiddleOpacity
-        SketchView.CurveGradientMiddleOpacityLabel =  CurveGradientMiddleOpacityLabel
         SketchView.CurveGradientFinalOpacity = CurveGradientFinalOpacity
-        SketchView.CurveGradientFinalOpacityLabel =  CurveGradientFinalOpacityLabel
 
-        SketchView.CurveShadowLabel = CurveShadowLabel
         SketchView.CurveShadowRadius = CurveShadowRadius
         SketchView.CurveShadowOpacity = CurveShadowOpacity
-        SketchView.CurveShadowRadiusLabel = CurveShadowRadiusLabel
-        SketchView.CurveShadowOpacityLabel = CurveShadowOpacityLabel
 
         SketchView.CurveShadowOffsetX = CurveShadowOffsetX
         SketchView.CurveShadowOffsetY = CurveShadowOffsetY
@@ -277,15 +250,122 @@ class ViewController: NSViewController {
 
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(abortTextFields), name: Notification.Name("abortTextFields"), object: nil)
+        nc.addObserver(self, selector: #selector(updateSliders), name: Notification.Name("updateSliders"), object: nil)
 
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
     }
 
-    @ objc func abortTextFields() {
+//    MARK: Obserevrs actions
+    @objc func abortTextFields() {
         for field in self.textFields {
             field.abortEditing()
         }
     }
+
+    @objc func updateSliders() {
+        let View = SketchView!
+        if let curve = View.selectedCurve {
+            let x = Double(curve.path.bounds.midX)
+            let y = Double(curve.path.bounds.midY)
+            let wid = Double(curve.path.bounds.width)
+            let hei = Double(curve.path.bounds.height)
+            let angle = Double(curve.angle)
+            let opacity = [Double(curve.alpha[0]),Double(curve.alpha[1])]
+            let width = Double(curve.lineWidth)
+            let blur = Double(curve.blur)
+
+            let strokeColor = curve.strokeColor
+            let fillColor = curve.fillColor
+            let shadowColor = curve.shadowColor
+            let shadow = curve.shadow
+
+            let rad = Double(shadow[0])
+            let opa = Double(shadow[1])
+            let offx = Double(shadow[2])
+            let offy = Double(shadow[3])
+
+            let gradient = curve.gradientColor
+
+            let grad0 = Double(curve.gradientOpacity[0])
+            let grad1 = Double(curve.gradientOpacity[1])
+            let grad2 = Double(curve.gradientOpacity[2])
+
+            self.CurveX.doubleValue = x
+            self.CurveY.doubleValue = y
+            self.CurveWid.doubleValue = wid
+            self.CurveHei.doubleValue = hei
+            self.CurveRotate.doubleValue = angle
+            self.CurveOpacityStroke.doubleValue = opacity[0]
+            self.CurveOpacityFill.doubleValue = opacity[1]
+            self.CurveWidth!.doubleValue = width
+            self.CurveBlur!.doubleValue = blur
+
+            self.CurveStrokeColor.fillColor = strokeColor
+            self.CurveFillColor.fillColor = fillColor
+            self.CurveShadowColor.fillColor = shadowColor
+
+            self.CurveShadowRadius.doubleValue = rad
+            self.CurveShadowOpacity.doubleValue = opa
+            self.CurveShadowOffsetX.doubleValue = offx
+            self.CurveShadowOffsetY.doubleValue = offy
+
+            self.CurveGradientStartColor.fillColor = gradient[0]
+            self.CurveGradientMiddleColor.fillColor = gradient[1]
+            self.CurveGradientFinalColor.fillColor = gradient[2]
+
+            self.CurveGradientStartOpacity.doubleValue = grad0
+            self.CurveGradientMiddleOpacity.doubleValue =  grad1
+            self.CurveGradientFinalOpacity.doubleValue =  grad2
+
+            self.CurveXLabel.doubleValue = round(x*10)/10
+            self.CurveYLabel.doubleValue =  round(y*10)/10
+            self.CurveWidLabel.doubleValue = round(wid*10)/10
+            self.CurveHeiLabel.doubleValue =  round(hei*10)/10
+            self.CurveRotateLabel.doubleValue =  round(angle*100)/100
+            self.CurveOpacityStrokeLabel.doubleValue = round(opacity[0]*100)/100
+            self.CurveOpacityFillLabel.doubleValue =  round(opacity[1]*100)/100
+            self.CurveWidthLabel.doubleValue = round(width*10)/10
+            self.CurveBlurLabel.doubleValue = round(blur*10)/10
+
+            self.CurveStrokeLabel.stringValue = strokeColor.hexString
+            self.CurveFillLabel.stringValue = fillColor.hexString
+            self.CurveShadowLabel.stringValue = shadowColor.hexString
+            self.CurveShadowRadiusLabel.doubleValue = round(rad)
+            self.CurveShadowOpacityLabel.doubleValue = round(opa*100)/100
+
+            self.CurveGradientStartLabel.stringValue = gradient[0].hexString
+            self.CurveGradientMiddleLabel.stringValue = gradient[1].hexString
+            self.CurveGradientFinalLabel.stringValue = gradient[2].hexString
+
+            self.CurveGradientStartOpacityLabel.doubleValue = round(grad0*100)/100
+            self.CurveGradientMiddleOpacityLabel.doubleValue = round(grad1*100)/100
+            self.CurveGradientFinalOpacityLabel.doubleValue = round(grad2*100)/100
+
+            self.CurveCap.selectedSegment = curve.cap
+            self.CurveJoin.selectedSegment = curve.join
+            var index = 0
+            for item in CurveDashGap.subviews {
+                if let slider = item as? NSSlider {
+                    slider.doubleValue = Double(truncating: curve.dash[index])
+                    index += 1
+                }
+            }
+        } else {
+            let x = round(Double(View.sketchBorder.bounds.minX)*10)/10
+            let y = round(Double(View.sketchBorder.bounds.minY)*10)/10
+            let wid = round(Double(View.sketchBorder.bounds.width)*10)/10
+            let hei = round(Double(View.sketchBorder.bounds.height)*10)/10
+            self.CurveX!.doubleValue = x
+            self.CurveY!.doubleValue = y
+            self.CurveWid!.doubleValue = wid
+            self.CurveHei!.doubleValue = hei
+            self.CurveXLabel!.doubleValue = x
+            self.CurveYLabel!.doubleValue = y
+            self.CurveWidLabel!.doubleValue = wid
+            self.CurveHeiLabel!.doubleValue = hei
+        }
+    }
+
 
 
 //    MARK: Color panel
@@ -403,7 +483,7 @@ class ViewController: NSViewController {
         }
     }
 
-//    MARK: Actions
+//    MARK: Tools Actions
     @IBAction func setTool(_ sender: NSButton) {
         ToolBox.isOn(title: sender.alternateTitle)
         SketchView!.tool.set(sender.alternateTitle)
@@ -465,7 +545,7 @@ class ViewController: NSViewController {
         View.rotateCurve(angle: v.value)
         let value = round(v.value * 10) / 10
 
-        View.CurveRotateLabel.doubleValue = value
+        self.CurveRotateLabel.doubleValue = value
         self.restoreControlFrame(view: View)
     }
 
@@ -501,6 +581,31 @@ class ViewController: NSViewController {
         let value = round(v.value * 10) / 10
         self.CurveBlurLabel.doubleValue = value
         self.restoreControlFrame(view: View)
+    }
+
+    @IBAction func capCurve(_ sender: NSSegmentedControl) {
+        SketchView!.capCurve(value: sender.indexOfSelectedItem)
+    }
+
+    @IBAction func joinCurve(_ sender: NSSegmentedControl) {
+        SketchView!.joinCurve(value: sender.indexOfSelectedItem)
+    }
+
+    @IBAction func dashCurve(_ sender: NSSlider) {
+        var dashPattern: [NSNumber] = []
+        for slider in CurveDashGap.subviews {
+            if let s = slider as? NSSlider {
+                dashPattern.append(NSNumber(value: s.doubleValue))
+            }
+        }
+        SketchView!.dashCurve(value: dashPattern)
+    }
+
+    @IBAction func alignLeftRightCurve(_ sender: NSSegmentedControl) {
+        SketchView!.alignLeftRightCurve(value: sender.indexOfSelectedItem)
+    }
+    @IBAction func alignUpDownCurve(_ sender: NSSegmentedControl) {
+        SketchView!.alignUpDownCurve(value: sender.indexOfSelectedItem)
     }
 
 //    MARK: TextPanel actions
@@ -549,6 +654,45 @@ class ViewController: NSViewController {
         SketchView!.shadowColorCurve()
     }
 
+    @IBAction func setShadow(_ sender: Any) {
+        let View = SketchView!
+        var values = [self.CurveShadowRadius.doubleValue,
+                      self.CurveShadowOpacity.doubleValue,
+                      self.CurveShadowOffsetX.doubleValue,
+                      self.CurveShadowOffsetY.doubleValue]
+        if let slider = sender as? NSSlider {
+            let value = slider.doubleValue
+            switch slider.tag  {
+            case 0: values[0] = value
+            case 1: values[1] = value
+            case 2: values[2] = value
+            case 3: values[3] = value
+            default: break
+            }
+
+        } else if let field = sender as? NSTextField {
+            let value = field.doubleValue
+            switch field.tag  {
+            case 0: values[0] = value
+            case 1: values[1] = value
+            default: break
+            }
+        }
+
+        let opa = values[1] > 1 ? 1 : values[1] < 0 ? 0 : values[1]
+        CurveShadowRadius.doubleValue = values[0]
+        CurveShadowOpacity.doubleValue = opa
+        CurveShadowOffsetX.doubleValue = values[2]
+        CurveShadowOffsetY.doubleValue = values[3]
+        CurveShadowRadiusLabel.doubleValue = round(values[0])
+        CurveShadowOpacityLabel.doubleValue = round(opa * 100) / 100
+
+        let floats = values.map({v in CGFloat(v)})
+
+        SketchView!.shadowCurve(value: floats)
+        self.restoreControlFrame(view: View)
+    }
+
     @IBAction func setGradientStartColor(sender: Any) {
         CurveGradientStartPanel.updateColor(sender: sender,
                                             sharedPanel: &SharedColorPanel)
@@ -584,68 +728,6 @@ class ViewController: NSViewController {
     }
 
 
-    @IBAction func setShadow(_ sender: Any) {
-        let View = SketchView!
-        var values = [self.CurveShadowRadius.doubleValue,
-                      self.CurveShadowOpacity.doubleValue,
-                      self.CurveShadowOffsetX.doubleValue,
-                      self.CurveShadowOffsetY.doubleValue]
-        if let slider = sender as? NSSlider {
-            let value = slider.doubleValue
-            switch slider.tag  {
-                case 0: values[0] = value
-                case 1: values[1] = value
-                case 2: values[2] = value
-                case 3: values[3] = value
-                default: break
-            }
-
-        } else if let field = sender as? NSTextField {
-            let value = field.doubleValue
-            switch field.tag  {
-                case 0: values[0] = value
-                case 1: values[1] = value
-            default: break
-            }
-        }
-
-        let opa = values[1] > 1 ? 1 : values[1] < 0 ? 0 : values[1]
-        CurveShadowRadius.doubleValue = values[0]
-        CurveShadowOpacity.doubleValue = opa
-        CurveShadowOffsetX.doubleValue = values[2]
-        CurveShadowOffsetY.doubleValue = values[3]
-        CurveShadowRadiusLabel.doubleValue = round(values[0])
-        CurveShadowOpacityLabel.doubleValue = round(opa * 100) / 100
-
-        let floats = values.map({v in CGFloat(v)})
-
-        SketchView!.shadowCurve(value: floats)
-        self.restoreControlFrame(view: View)
-    }
-
-    @IBAction func capCurve(_ sender: NSSegmentedControl) {
-        SketchView!.capCurve(value: sender.indexOfSelectedItem)
-    }
-
-    @IBAction func joinCurve(_ sender: NSSegmentedControl) {
-        SketchView!.joinCurve(value: sender.indexOfSelectedItem)
-    }
-
-    @IBAction func dashCurve(_ sender: NSSlider) {
-        var dashPattern: [NSNumber] = []
-        for slider in CurveDashGap.subviews {
-            if let s = slider as? NSSlider {
-                dashPattern.append(NSNumber(value: s.doubleValue))
-            }
-        }
-        SketchView!.dashCurve(value: dashPattern)
-    }
-    @IBAction func alignLeftRightCurve(_ sender: NSSegmentedControl) {
-        SketchView!.alignLeftRightCurve(value: sender.indexOfSelectedItem)
-    }
-    @IBAction func alignUpDownCurve(_ sender: NSSegmentedControl) {
-        SketchView!.alignUpDownCurve(value: sender.indexOfSelectedItem)
-    }
 
 //    MARK: Buttons actions
     @IBAction func sendCurve(_ sender: NSButton) {

@@ -43,25 +43,12 @@ class SketchPad: NSView {
     var parent: NSViewController?
     weak var ToolBox: NSStackView?
     weak var FrameButtons: NSStackView?
-    weak var CurveX: NSSlider!
-    weak var CurveY: NSSlider!
-    weak var CurveWid: NSSlider!
-    weak var CurveHei: NSSlider!
+
     weak var CurveRotate: NSSlider!
     weak var CurveOpacityStroke: NSSlider!
     weak var CurveOpacityFill: NSSlider!
     weak var CurveWidth: NSSlider!
     weak var CurveBlur: NSSlider!
-
-    weak var CurveXLabel: NSTextField!
-    weak var CurveYLabel: NSTextField!
-    weak var CurveWidLabel: NSTextField!
-    weak var CurveHeiLabel: NSTextField!
-    weak var CurveRotateLabel: NSTextField!
-    weak var CurveOpacityStrokeLabel: NSTextField!
-    weak var CurveOpacityFillLabel: NSTextField!
-    weak var CurveWidthLabel: NSTextField!
-    weak var CurveBlurLabel: NSTextField!
 
     weak var ColorPanel: NSColorPanel?
     weak var CurveColors: NSStackView!
@@ -72,24 +59,13 @@ class SketchPad: NSView {
     weak var CurveGradientStartColor: NSBox!
     weak var CurveGradientMiddleColor: NSBox!
     weak var CurveGradientFinalColor: NSBox!
-    weak var CurveStrokeLabel: NSTextField!
-    weak var CurveFillLabel: NSTextField!
-    weak var CurveGradientStartLabel: NSTextField!
-    weak var CurveGradientMiddleLabel: NSTextField!
-    weak var CurveGradientFinalLabel: NSTextField!
 
     weak var CurveGradientStartOpacity: NSSlider!
-    weak var CurveGradientStartOpacityLabel: NSTextField!
     weak var CurveGradientMiddleOpacity: NSSlider!
-    weak var CurveGradientMiddleOpacityLabel: NSTextField!
     weak var CurveGradientFinalOpacity: NSSlider!
-    weak var CurveGradientFinalOpacityLabel: NSTextField!
 
-    weak var CurveShadowLabel: NSTextField!
     weak var CurveShadowOpacity: NSSlider!
     weak var CurveShadowRadius: NSSlider!
-    weak var CurveShadowOpacityLabel: NSTextField!
-    weak var CurveShadowRadiusLabel: NSTextField!
 
     weak var CurveShadowOffsetX: NSSlider!
     weak var CurveShadowOffsetY: NSSlider!
@@ -270,7 +246,6 @@ class SketchPad: NSView {
             self.updatePathLayer(layer: self.curveLayer, path: self.curvedPath)
             self.needsDisplay = true
         }
-
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -586,7 +561,7 @@ class SketchPad: NSView {
             cap: self.CurveCap.indexOfSelectedItem,
             join: self.CurveJoin.indexOfSelectedItem,
             dash: dashPattern,
-            points:  self.controlPoints)
+            points: self.controlPoints)
 
         self.curves.append(curve)
 
@@ -648,107 +623,8 @@ class SketchPad: NSView {
 
 //    MARK: Sliders
     func updateSliders() {
-        if let curve = selectedCurve {
-            let x = Double(curve.path.bounds.midX)
-            let y = Double(curve.path.bounds.midY)
-            let wid = Double(curve.path.bounds.width)
-            let hei = Double(curve.path.bounds.height)
-            let angle = Double(curve.angle)
-            let opacity = [Double(curve.alpha[0]),Double(curve.alpha[1])]
-            let width = Double(curve.lineWidth)
-            let blur = Double(curve.blur)
-
-            let strokeColor = curve.strokeColor
-            let fillColor = curve.fillColor
-            let shadowColor = curve.shadowColor
-            let shadow = curve.shadow
-
-            let rad = Double(shadow[0])
-            let opa = Double(shadow[1])
-            let offx = Double(shadow[2])
-            let offy = Double(shadow[3])
-
-            let gradient = curve.gradientColor
-
-            let grad0 = Double(curve.gradientOpacity[0])
-            let grad1 = Double(curve.gradientOpacity[1])
-            let grad2 = Double(curve.gradientOpacity[2])
-
-            self.CurveX.doubleValue = x
-            self.CurveY.doubleValue = y
-            self.CurveWid.doubleValue = wid
-            self.CurveHei.doubleValue = hei
-            self.CurveRotate.doubleValue = angle
-            self.CurveOpacityStroke.doubleValue = opacity[0]
-            self.CurveOpacityFill.doubleValue = opacity[1]
-            self.CurveWidth!.doubleValue = width
-            self.CurveBlur!.doubleValue = blur
-
-            self.CurveStrokeColor.fillColor = strokeColor
-            self.CurveFillColor.fillColor = fillColor
-            self.CurveShadowColor.fillColor = shadowColor
-
-            self.CurveShadowRadius.doubleValue = rad
-            self.CurveShadowOpacity.doubleValue = opa
-            self.CurveShadowOffsetX.doubleValue = offx
-            self.CurveShadowOffsetY.doubleValue = offy
-
-            self.CurveGradientStartColor.fillColor = gradient[0]
-            self.CurveGradientMiddleColor.fillColor = gradient[1]
-            self.CurveGradientFinalColor.fillColor = gradient[2]
-
-            self.CurveGradientStartOpacity.doubleValue = grad0
-            self.CurveGradientMiddleOpacity.doubleValue =  grad1
-            self.CurveGradientFinalOpacity.doubleValue =  grad2
-
-            self.CurveXLabel.doubleValue = round(x*10)/10
-            self.CurveYLabel.doubleValue =  round(y*10)/10
-            self.CurveWidLabel.doubleValue = round(wid*10)/10
-            self.CurveHeiLabel.doubleValue =  round(hei*10)/10
-            self.CurveRotateLabel.doubleValue =  round(angle*100)/100
-            self.CurveOpacityStrokeLabel.doubleValue = round(opacity[0]*100)/100
-            self.CurveOpacityFillLabel.doubleValue =  round(opacity[1]*100)/100
-            self.CurveWidthLabel.doubleValue = round(width*10)/10
-            self.CurveBlurLabel.doubleValue = round(blur*10)/10
-
-            self.CurveStrokeLabel.stringValue = strokeColor.hexString
-            self.CurveFillLabel.stringValue = fillColor.hexString
-            self.CurveShadowLabel.stringValue = shadowColor.hexString
-            self.CurveShadowRadiusLabel.doubleValue = round(rad)
-            self.CurveShadowOpacityLabel.doubleValue = round(opa*100)/100
-
-            self.CurveGradientStartLabel.stringValue = gradient[0].hexString
-            self.CurveGradientMiddleLabel.stringValue = gradient[1].hexString
-            self.CurveGradientFinalLabel.stringValue = gradient[2].hexString
-
-            self.CurveGradientStartOpacityLabel.doubleValue = round(grad0*100)/100
-            self.CurveGradientMiddleOpacityLabel.doubleValue = round(grad1*100)/100
-            self.CurveGradientFinalOpacityLabel.doubleValue = round(grad2*100)/100
-
-            self.CurveCap.selectedSegment = curve.cap
-            self.CurveJoin.selectedSegment = curve.join
-            var index = 0
-            for item in CurveDashGap.subviews {
-                if let slider = item as? NSSlider {
-                    slider.doubleValue = Double(truncating: curve.dash[index])
-                    index += 1
-                }
-            }
-
-        } else {
-            let x = round(Double(self.sketchBorder.bounds.minX)*10)/10
-            let y = round(Double(self.sketchBorder.bounds.minY)*10)/10
-            let wid = round(Double(self.sketchBorder.bounds.width)*10)/10
-            let hei = round(Double(self.sketchBorder.bounds.height)*10)/10
-            self.CurveX!.doubleValue = x
-            self.CurveY!.doubleValue = y
-            self.CurveWid!.doubleValue = wid
-            self.CurveHei!.doubleValue = hei
-            self.CurveXLabel!.doubleValue = x
-            self.CurveYLabel!.doubleValue = y
-            self.CurveWidLabel!.doubleValue = wid
-            self.CurveHeiLabel!.doubleValue = hei
-        }
+        let nc = NotificationCenter.default
+        nc.post(name: Notification.Name("updateSliders"), object: nil)
     }
 
 
