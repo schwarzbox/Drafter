@@ -28,18 +28,18 @@ class ControlPoint {
         self.line2.actions = ["position" : NSNull()]
     }
 
-    func addLine(line: CAShapeLayer, dest: NSPoint) {
+    func addLine(shape: CAShapeLayer, dest: NSPoint) {
         let path = NSBezierPath()
 
-        path.move(to:self.mp.position)
+        path.move(to: self.mp.position)
         path.line(to: dest)
-        line.path = path.cgPath
-        line.lineWidth = 1
-        line.strokeColor = set.fillColor.cgColor
+        shape.path = path.cgPath
+        shape.lineWidth = 1
+        shape.strokeColor = set.fillColor.cgColor
     }
     
     func collideDot(pos: NSPoint, dot: Dot) -> Bool {
-        if dot.collide(origin: pos, radius: dot.bounds.width) {
+        if dot.collide(origin: pos, width: dot.bounds.width) {
             return true
         }
         return false
@@ -77,8 +77,8 @@ class ControlPoint {
     }
 
     func updateLines() {
-        self.addLine(line: self.line1,  dest: self.cp1.position)
-        self.addLine(line: self.line2,  dest: self.cp2.position)
+        self.addLine(shape: self.line1,  dest: self.cp1.position)
+        self.addLine(shape: self.line2,  dest: self.cp2.position)
     }
 
     func updateDots(deltax: CGFloat, deltay: CGFloat, parent: SketchPad) {

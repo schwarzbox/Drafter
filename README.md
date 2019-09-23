@@ -4,14 +4,12 @@ Vector Editor for MacOS.
 
 WIP
 
-v0.45
+v0.46
 
 ![Screenshot](screenshot/screenshot1.png)
 
 
 v0.5
-
-Edit curves
 
 Implement Shift(propotrtional resize) and default cmd-C cmd-V cmd-X events
 

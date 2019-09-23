@@ -6,11 +6,17 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
 //0.5
-//Edit curves
-//Implement Shift button and default cmd-C cmd-V cmd-X events
-//Save blur to .png
+
+// default cmd-C cmd-V cmd-X events
+
 //Open file panel
-//Show filename and select ext in save panel
+//Show filename
+//Select ext in save panel
+
+// shape layer drawing
+
+// text without bar
+//Save blur to .png
 
 //0.6
 //Rulers (Figma style)
@@ -42,9 +48,9 @@ import Cocoa
 class SketchPad: NSView {
     var parent: NSViewController?
     weak var ToolBox: NSStackView?
-    weak var FrameButtons: NSStackView?
+    weak var FrameButtons: NSStackView!
+    weak var TextTool: NSStackView!
 
-    weak var CurveRotate: NSSlider!
     weak var CurveOpacityStroke: NSSlider!
     weak var CurveOpacityFill: NSSlider!
     weak var CurveWidth: NSSlider!
@@ -73,7 +79,6 @@ class SketchPad: NSView {
     weak var CurveCap: NSSegmentedControl!
     weak var CurveJoin: NSSegmentedControl!
     weak var CurveDashGap: NSStackView!
-    weak var CurveTextTool: NSStackView!
 
     var TrackArea: NSTrackingArea!
 
@@ -189,35 +194,6 @@ class SketchPad: NSView {
         self.layerUsesCoreImageFilters = true
     }
 
-
-//    MARK: Zoom func
-    func zoomSketch(value: Double) {
-        let delta = value / 100
-        self.bounds = self.frame
-
-        self.zoomed = CGFloat(delta)
-        let originX = self.zoomOrigin.x
-        let originY = self.zoomOrigin.y
-        self.translateOrigin(to: NSPoint(x: self.frame.midX,
-                                         y: self.frame.midY))
-        self.scaleUnitSquare(to: NSSize(width: delta,
-                                        height: delta))
-        self.translateOrigin(to: NSPoint(x: -originX,
-                                         y:  -originY))
-
-        if let curve = self.selectedCurve {
-            curve.updateButtons()
-        }
-        self.needsDisplay = true
-    }
-
-    func setZoomOrigin(deltaX: CGFloat, deltaY: CGFloat) {
-        self.zoomOrigin = CGPoint(
-            x: (self.zoomOrigin.x - deltaX),
-            y: (self.zoomOrigin.y - deltaY))
-        self.zoomSketch(value: Double(self.zoomed * 100))
-    }
-
 //    MARK: Mouse func
     override func mouseEntered(with event: NSEvent) {
         self.showCurvedPath(event: event)
@@ -238,19 +214,43 @@ class SketchPad: NSView {
     }
 
     override func mouseMoved(with event: NSEvent) {
+        let pos: NSPoint = convert(event.locationInWindow, from:nil)
         if let mp = self.movePoint, let cp1 = self.controlPoint1 {
-            let pos: NSPoint = convert(event.locationInWindow, from:nil)
             self.moveCurvedPath(move: mp.position, to: pos,
                                 cp1: mp.position,
                                 cp2: cp1.position)
             self.updatePathLayer(layer: self.curveLayer, path: self.curvedPath)
-            self.needsDisplay = true
+        }
+        if let curve = self.selectedCurve, curve.edit {
+            self.editedPath.removeAllPoints()
+            self.editLayer.removeFromSuperlayer()
+
+            let collider = NSRect(x:curve.path.bounds.minX-2, y: curve.path.bounds.minY-2,
+                                  width: curve.path.bounds.width+4,
+                                  height: curve.path.bounds.height+4)
+            if collider.contains(pos), let segment = curve.path.findPath(pos: pos) {
+
+                let path = curve.insertCurve(at: pos, index: segment.index,
+                                             points: segment.points)
+                self.editedPath = path
+                self.editedPath.appendRect(NSRect(x: pos.x - self.dotRadius,
+                                                  y:  pos.y - self.dotRadius,
+                                                  width: self.dotSize,
+                                                  height: self.dotSize))
+                self.updatePathLayer(layer: self.editLayer, path: self.editedPath)
+            }
         }
     }
 
     override func mouseDragged(with event: NSEvent) {
+        var cmd: Bool = false
+        if event.modifierFlags.contains(.command) {
+            cmd = true
+        }
         let theEnd = convert(event.locationInWindow, from:nil)
         if let curve = self.selectedCurve, curve.edit {
+            self.editedPath.removeAllPoints()
+            self.editLayer.removeFromSuperlayer()
             self.clearControls(curve: curve, updatePoints: {})
             curve.editPoint(pos: theEnd)
         } else if let curve = self.selectedCurve, let dot = curve.controlDot {
@@ -321,7 +321,7 @@ class SketchPad: NSView {
                     self.editedPath.close()
                 case .line:
                     self.editedPath.removeAllPoints()
-                    self.createDot(topLeft: theStart,  bottomRight: theEnd)
+                    self.createLine(topLeft: theStart,  bottomRight: theEnd)
                     self.editDone = true
                     self.editedPath.close()
                 case .triangle:
@@ -329,19 +329,20 @@ class SketchPad: NSView {
                     let size = self.flipSize(topLeft: theStart, bottomRight: theEnd)
                     self.editedPath.move(to: NSPoint(x: theStart.x + size.wid / 2,
                                                      y: theStart.y))
-                    self.editedPath.line(to: NSPoint(x: theStart.x, y: theStart.y + size.hei ))
+                    self.editedPath.line(to: NSPoint(x: theStart.x,
+                                                     y: theStart.y + size.hei ))
                     self.editedPath.line(to: NSPoint(x: theStart.x + size.wid,
                                                      y: theStart.y + size.hei))
                     self.editDone = true
                     self.editedPath.close()
                 case .oval:
                     self.editedPath.removeAllPoints()
-                    self.createOval(topLeft: theStart, bottomRight: theEnd)
+                    self.createOval(topLeft: theStart, bottomRight: theEnd, cmd: cmd)
                     self.editDone = true
                     self.editedPath.close()
                 case .rectangle:
                     self.editedPath.removeAllPoints()
-                    self.createRectangle(topLeft: theStart, bottomRight: theEnd)
+                    self.createRectangle(topLeft: theStart, bottomRight: theEnd, cmd: cmd)
                     self.editDone = true
                     self.editedPath.close()
                 case .arc:
@@ -368,7 +369,7 @@ class SketchPad: NSView {
                         }
                     }
                 case .text:
-                    self.createText(topLeft: theStart)
+                    self.createText(topLeft: theEnd)
                 default:
                     self.dragCurve(event: event)
                 }
@@ -383,9 +384,11 @@ class SketchPad: NSView {
     override func mouseDown(with event: NSEvent){
         print("down")
         self.startPoint = convert(event.locationInWindow, from: nil)
+
         // unfocus text fields
         let nc = NotificationCenter.default
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
+
         if let theStart = self.startPoint {
             if let curve = self.selectedCurve, curve.edit {
                 curve.selectPoint(pos: theStart)
@@ -395,7 +398,7 @@ class SketchPad: NSView {
                 self.tool = Tools.drag
                 ToolBox?.isOn(title: "drag")
             } else if let mp = self.movePoint,
-                mp.collide(origin: theStart, radius: mp.bounds.width) {
+                mp.collide(origin: theStart, width: mp.bounds.width) {
                 self.filledCurve = false
                 self.finalSegment(fin: {mp,cp1,cp2 in
                     self.editedPath.move(to: mp.position)
@@ -413,13 +416,13 @@ class SketchPad: NSView {
                 let theEnd: NSPoint = convert(event.locationInWindow, from:nil)
                 switch self.tool {
                 case .pen:
-                    self.createDot(topLeft: theStart, bottomRight: theEnd)
+                    self.createLine(topLeft: theStart, bottomRight: theEnd)
                     self.editedPath.removeAllPoints()
                 case .line:
-                    self.createDot(topLeft: theStart, bottomRight: theEnd)
+                    self.createLine(topLeft: theStart, bottomRight: theEnd)
                     self.editedPath.removeAllPoints()
                 case .triangle:
-                    self.createDot(topLeft: theStart, bottomRight: theEnd)
+                    self.createLine(topLeft: theStart, bottomRight: theEnd)
                     self.editedPath.removeAllPoints()
                 case .oval:
                     self.createOval(topLeft: theStart, bottomRight: theEnd)
@@ -460,16 +463,17 @@ class SketchPad: NSView {
                 self.createControls(curve: curve)
             }
         case .curve:
+            if let curve = self.selectedCurve, curve.edit || self.editDone {
+                self.clearControls(curve: curve, updatePoints: {})
+            }
+
             if self.editDone {
-                if let curve = self.selectedCurve {
-                    self.clearControls(curve: curve, updatePoints: {})
-                }
                 self.addCurve()
-                if let curve = self.selectedCurve {
-                    curve.frameAngle = 0
-                    curve.controlDot = nil
-                    self.createControls(curve: curve)
-                }
+            }
+            if let curve = self.selectedCurve, curve.edit || self.editDone {
+                curve.frameAngle = 0
+                curve.controlDot = nil
+                self.createControls(curve: curve)
             }
         case .text:
             fallthrough
@@ -545,18 +549,21 @@ class SketchPad: NSView {
             strokeColor: self.CurveStrokeColor.fillColor,
             fillColor: self.CurveFillColor.fillColor,
             lineWidth: CGFloat(self.CurveWidth.doubleValue),
-            angle: 0, alpha: [CGFloat(self.CurveOpacityStroke.doubleValue),
-                             CGFloat(self.CurveOpacityFill.doubleValue)],
+            angle: 0,
+            alpha: [CGFloat(self.CurveOpacityStroke.doubleValue),
+                    CGFloat(self.CurveOpacityFill.doubleValue)],
             blur: self.CurveBlur.doubleValue,
             shadow: shadowValues,
             shadowColor: self.CurveShadowColor.fillColor,
             gradientDirection: set.gradientDirection,
-            gradientColor: [self.CurveGradientStartColor.fillColor,
-                           self.CurveGradientMiddleColor.fillColor,
-                           self.CurveGradientFinalColor.fillColor],
-            gradientOpacity: [CGFloat(self.CurveGradientStartOpacity.doubleValue),
-                             CGFloat(self.CurveGradientMiddleOpacity.doubleValue),
-                             CGFloat(self.CurveGradientFinalOpacity.doubleValue)],
+            gradientColor: [
+                self.CurveGradientStartColor.fillColor,
+                self.CurveGradientMiddleColor.fillColor,
+                self.CurveGradientFinalColor.fillColor],
+            gradientOpacity: [
+                CGFloat(self.CurveGradientStartOpacity.doubleValue),
+                CGFloat(self.CurveGradientMiddleOpacity.doubleValue),
+                CGFloat(self.CurveGradientFinalOpacity.doubleValue)],
             gradientLocation: set.gradientLocation,
             cap: self.CurveCap.indexOfSelectedItem,
             join: self.CurveJoin.indexOfSelectedItem,
@@ -579,7 +586,7 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve {
             self.clearControls(curve:curve, updatePoints: {})
             // reset edit curve button
-            self.FrameButtons?.isOn(title: "")
+            self.FrameButtons.isOn(title: "")
             curve.edit = false
             self.selectedCurve = nil
         } else {
@@ -606,8 +613,8 @@ class SketchPad: NSView {
         if !curve.edit {
             curve.createControlFrame()
         }
-        curve.updateButtons()
-        curve.showButtons()
+        self.updateFrameButtons()
+        self.showFrameButtons()
         self.needsDisplay = true
     }
 
@@ -617,7 +624,7 @@ class SketchPad: NSView {
         }
         updatePoints()
 
-        curve.hideButtons()
+        self.hideFrameButtons()
         self.needsDisplay = true
     }
 
@@ -625,6 +632,34 @@ class SketchPad: NSView {
     func updateSliders() {
         let nc = NotificationCenter.default
         nc.post(name: Notification.Name("updateSliders"), object: nil)
+    }
+
+
+    //    MARK: Zoom func
+    func zoomSketch(value: Double) {
+        let delta = value / 100
+        self.bounds = self.frame
+
+        self.zoomed = CGFloat(delta)
+        let originX = self.zoomOrigin.x
+        let originY = self.zoomOrigin.y
+        self.translateOrigin(to: NSPoint(x: self.frame.midX,
+                                         y: self.frame.midY))
+        self.scaleUnitSquare(to: NSSize(width: delta,
+                                        height: delta))
+        self.translateOrigin(to: NSPoint(x: -originX,
+                                         y:  -originY))
+        //        self.updateText()
+        self.updateFrameButtons()
+
+        self.needsDisplay = true
+    }
+
+    func setZoomOrigin(deltaX: CGFloat, deltaY: CGFloat) {
+        self.zoomOrigin = CGPoint(
+            x: (self.zoomOrigin.x - deltaX),
+            y: (self.zoomOrigin.y - deltaY))
+        self.zoomSketch(value: Double(self.zoomed * 100))
     }
 
 
@@ -773,30 +808,40 @@ class SketchPad: NSView {
         }
     }
 
-    func editCurve(name: String) {
+    func editCurve(sender: NSButton) {
         if let curve = self.selectedCurve {
-            switch name {
+            if sender.state == .off {
+                sender.alternateTitle = "done"
+            } else {
+                sender.alternateTitle = "edit"
+            }
+            switch sender.alternateTitle {
             case "edit":
                 curve.edit = true
                 curve.clearControlFrame()
                 curve.createPoints()
-                if let buttons = self.FrameButtons {
-                    buttons.isEnable(title: "edit")
-                }
+                self.FrameButtons.isEnable(title: "edit")
             default:
                 curve.edit = false
                 curve.clearPoints()
                 curve.createControlFrame()
-                if let buttons = self.FrameButtons {
-                    buttons.isEnable(all: true)
-                }
+                self.FrameButtons.isEnable(all: true)
             }
         }
     }
 
-    func lockCurve() {
+    func lockCurve(sender: NSButton) {
         if let curve = self.selectedCurve {
-            curve.lock = !curve.lock
+            if sender.state == .off {
+                sender.title = "🔓"
+                self.FrameButtons.isEnable(all: true)
+                curve.lock = false
+            } else {
+                sender.title = "🔒"
+                self.FrameButtons.isEnable(
+                    title: sender.alternateTitle)
+                curve.lock = true
+            }
         }
     }
 
@@ -822,30 +867,64 @@ class SketchPad: NSView {
         self.updateSliders()
     }
 
-    func createDot(topLeft: NSPoint, bottomRight: NSPoint) {
+    func createLine(topLeft: NSPoint, bottomRight: NSPoint) {
         self.editedPath = NSBezierPath()
         self.editedPath.move(to: topLeft)
         self.editedPath.line(to: NSPoint(x: bottomRight.x,
                                          y: bottomRight.y))
     }
 
-    func createOval(topLeft: NSPoint, bottomRight: NSPoint) {
+    func createOval(topLeft: NSPoint, bottomRight: NSPoint,cmd: Bool = false) {
         let size = self.flipSize(topLeft: topLeft, bottomRight: bottomRight)
+        let wid = size.wid
+        var hei = size.hei
+        if cmd {
+            let signHei: CGFloat = hei>0 ? 1 : -1
+            hei = abs(wid) * signHei
+        }
         self.editedPath = NSBezierPath(
             ovalIn: NSRect(x: topLeft.x, y: topLeft.y,
-                   width: size.wid,height: size.hei))
+                   width: wid, height: hei))
     }
 
     func createRectangle(topLeft: NSPoint, bottomRight: NSPoint,
-                         xRad: CGFloat = 0.0001, yRad: CGFloat = 0.0001) {
-        let botLeft = NSPoint(x: topLeft.x, y: bottomRight.y)
-        let topRight = NSPoint(x: bottomRight.x, y: topLeft.y)
+                         xRad: CGFloat = 0.0001, yRad: CGFloat = 0.0001,
+                         cmd: Bool = false) {
 
+        var botLeft: NSPoint
+        var topRight: NSPoint
+
+        if topLeft.x < bottomRight.x &&  topLeft.y > bottomRight.y {
+            botLeft = NSPoint(x: topLeft.x, y: bottomRight.y)
+            topRight = NSPoint(x: bottomRight.x, y: topLeft.y)
+        } else if topLeft.x < bottomRight.x  && topLeft.y < bottomRight.y {
+            botLeft = NSPoint(x: topLeft.x, y: topLeft.y)
+            topRight = NSPoint(x: bottomRight.x, y: bottomRight.y)
+        } else if topLeft.x > bottomRight.x && topLeft.y > bottomRight.y {
+            botLeft = NSPoint(x: bottomRight.x, y: bottomRight.y)
+            topRight = NSPoint(x: topLeft.x, y: topLeft.y)
+        } else {
+            botLeft = NSPoint(x: bottomRight.x,y: topLeft.y)
+            topRight = NSPoint(x: topLeft.x, y: bottomRight.y)
+        }
+        // use cmd for equal width and height
         let size = self.flipSize(topLeft: botLeft, bottomRight: topRight)
+        var wid = size.wid
+        var hei = size.hei
 
+        if cmd && (topLeft.x < bottomRight.x) {
+            wid = hei
+        } else if cmd && (topLeft.x < bottomRight.x) && (topLeft.y > bottomRight.y){
+             hei = wid
+        } else if cmd && (topLeft.x > bottomRight.x) && (topLeft.y > bottomRight.y) {
+
+        }
+
+        print(botLeft)
+        print(wid,hei)
         self.editedPath = NSBezierPath(
             roundedRect: NSRect(x: botLeft.x, y: botLeft.y,
-                                width: size.wid, height: size.hei),
+                                width: wid, height: hei),
             xRadius: xRad, yRadius: yRad)
         self.roundedCurve = CGPoint(x: 0, y: 0)
     }
@@ -911,11 +990,12 @@ class SketchPad: NSView {
 
     func createText(topLeft: NSPoint) {
         self.showText()
-        let height = self.CurveTextTool.frame.height
+        let fieldX = self.TextTool.subviews[1].frame.minX
+        let height = self.TextTool.frame.height
         let deltaX = topLeft.x-self.bounds.minX
         let deltaY = topLeft.y-self.bounds.minY
-        self.CurveTextTool.setFrameOrigin(
-            NSPoint(x: deltaX * self.zoomed,
+        self.TextTool.setFrameOrigin(
+            NSPoint(x: deltaX * self.zoomed - fieldX,
                     y: deltaY * self.zoomed - height))
     }
 
@@ -923,11 +1003,14 @@ class SketchPad: NSView {
         self.editedPath = NSBezierPath()
 
         if let font = NSFont(name: set.fontName, size: set.fontSize) {
-            let x = self.CurveTextTool.frame.minX
-            let y = self.CurveTextTool.frame.minY
-            let topLeft = NSPoint(x: x,
-                                  y: y)
-            self.editedPath.move(to: topLeft)
+            let fieldX = self.TextTool.subviews[1].frame.minX
+            let height = self.TextTool.frame.height
+            let x = (self.TextTool.frame.minX + fieldX) / self.zoomed
+            let y = (self.TextTool.frame.minY + height) / self.zoomed
+
+            let pos = NSPoint(x: x + self.bounds.minX,
+                              y: y + self.bounds.minY - height)
+            self.editedPath.move(to: pos)
             for char in value {
                 let glyph = font.glyph(withName: String(char))
                 self.editedPath.append(withCGGlyph: CGGlyph(glyph), in: font)
@@ -941,15 +1024,63 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve {
             self.createControls(curve: curve)
         }
+        self.updateSliders()
         self.hideText()
     }
 
+//    func updateText() {
+//        let fieldX = self.TextTool.subviews[1].frame.minX
+//        let height = self.TextTool.frame.height
+//        let x = (self.TextTool.frame.minX + fieldX) / self.zoomed
+//        let y = (self.TextTool.frame.minY + height) / self.zoomed
+//        let pos = NSPoint(x: x ,
+//                          y: y )
+//        self.TextTool.setFrameOrigin(pos)
+////        self.createText(topLeft: pos)
+//    }
+
     func hideText() {
-        self.CurveTextTool.isHidden = true
+        self.TextTool.isHidden = true
     }
 
     func showText() {
-        self.CurveTextTool.isHidden = false
+        self.TextTool.isHidden = false
+    }
+
+    //    MARK: FrameButtons func
+    func updateFrameButtons() {
+        if let curve = self.selectedCurve {
+            let deltaX = self.bounds.minX
+            let deltaY = self.bounds.minY
+            let width50 = curve.lineWidth/2
+
+            let x = curve.path.bounds.minX - set.framePad - width50
+            let y = curve.path.bounds.maxY + width50
+            self.FrameButtons.frame = NSRect(
+                x: (x-deltaX) * zoomed - self.FrameButtons.bounds.width,
+                y: (y-deltaY) * zoomed - self.FrameButtons.bounds.height,
+                width: self.FrameButtons.bounds.width,
+                height: self.FrameButtons.bounds.height)
+
+            if let lock = self.FrameButtons.subviews.last as? NSButton {
+                lock.state = curve.lock ? .on : .off
+                if curve.lock {
+                    self.FrameButtons.isEnable(title: "lock")
+                } else if curve.edit {
+                    self.FrameButtons.isEnable(title: "edit")
+                } else {
+                    self.FrameButtons.isEnable(all: true)
+                }
+            }
+        }
+    }
+
+    func hideFrameButtons() {
+        self.FrameButtons.isHidden = true
+    }
+
+    func showFrameButtons() {
+        self.FrameButtons.isHidden = false
     }
 
 
@@ -1040,6 +1171,7 @@ class SketchPad: NSView {
             let def = AffineTransform.init(
                 translationByX: originX,byY: originY)
             self.sketchBorder.transform(using: def)
+            self.needsDisplay = true
         }
         self.updateSliders()
     }
@@ -1236,8 +1368,9 @@ class SketchPad: NSView {
 //    MARK: Support
     func flipSize(topLeft: NSPoint,
                   bottomRight: NSPoint) -> (wid: CGFloat,hei: CGFloat) {
+
         let wid = bottomRight.x - topLeft.x
-        let hei = bottomRight.y - topLeft.y
+        var hei = bottomRight.y - topLeft.y
         return (wid, hei)
     }
 

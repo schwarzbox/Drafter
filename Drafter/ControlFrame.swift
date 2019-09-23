@@ -80,12 +80,14 @@ class ControlFrame: CALayer {
                                   y: self.bounds.minY - ControlFrame.controlPad50))
         }
 
-        self.makeShape(path: path, color: ControlFrame.defaultFillColor)
+        self.makeShape(path: path, color: ControlFrame.defaultFillColor,
+                       width: ControlFrame.defaultWidth)
 
         path.removeAllPoints()
         path.move(to: gradientDirStart)
         path.line(to: gradientDirFinal)
-        self.makeShape(path: path, color: ControlFrame.defaultStrokeColor)
+        self.makeShape(path: path, color: ControlFrame.defaultStrokeColor,
+                       width: ControlFrame.defaultWidth)
 
         var bgColor = ControlFrame.defaultFillColor
         var gradIndex = 0
@@ -120,12 +122,14 @@ class ControlFrame: CALayer {
             path.removeAllPoints()
             path.move(to: CGPoint(x: roundedX.x,y: self.bounds.maxY))
             path.line(to: roundedX)
-            self.makeShape(path: path, color: ControlFrame.defaultFillColor)
+            self.makeShape(path: path, color: ControlFrame.defaultFillColor,
+                           width: ControlFrame.defaultWidth)
 
             path.removeAllPoints()
             path.move(to: CGPoint(x: self.bounds.maxX,y: roundedY.y))
             path.line(to: roundedY)
-            self.makeShape(path: path, color: ControlFrame.defaultFillColor)
+            self.makeShape(path: path, color: ControlFrame.defaultFillColor,
+                           width: ControlFrame.defaultWidth)
 
             self.makeDot(parent: parent, tag: dots.count,
                          x: roundedX.x, y: roundedX.y,
@@ -177,22 +181,13 @@ class ControlFrame: CALayer {
         self.addSublayer(cp)
     }
 
-    func makeShape(path: NSBezierPath, color: NSColor,
-                   width: CGFloat = ControlFrame.defaultWidth) {
-        let line = CAShapeLayer()
-        line.path = path.cgPath
-        line.strokeColor = color.cgColor
-        line.lineWidth = width
-        self.addSublayer(line)
-    }
-
     func collideLabel(pos: NSPoint) -> Dot? {
         let mpos = NSPoint(x: pos.x - self.frame.minX,
                            y: pos.y - self.frame.minY)
         for layer in self.sublayers! {
             if let dot = layer as? Dot {
                 if dot.collide(origin: mpos,
-                               radius: ControlFrame.label50Size) {
+                               width: ControlFrame.label50Size) {
                     return dot
                 }
             }

@@ -13,6 +13,9 @@ class ViewController: NSViewController {
     @IBOutlet weak var ToolBox: NSStackView!
     @IBOutlet weak var SketchView: SketchPad!
     @IBOutlet weak var FrameButtons: NSStackView!
+    @IBOutlet weak var TextTool: NSStackView!
+    @IBOutlet weak var TextToolField: NSTextField!
+
     @IBOutlet weak var ActionBox: NSStackView!
 
     @IBOutlet weak var ZoomSketch: NSSlider!
@@ -77,9 +80,6 @@ class ViewController: NSViewController {
     @IBOutlet weak var CurveJoin: NSSegmentedControl!
     @IBOutlet weak var CurveDashGap: NSStackView!
 
-    @IBOutlet weak var CurveTextTool: NSStackView!
-    @IBOutlet weak var CurveTextField: NSTextField!
-
     var textFields: [NSTextField] = []
 
     var SharedColorPanel: NSColorPanel?
@@ -102,7 +102,7 @@ class ViewController: NSViewController {
         Window = self.view.window!
 
 //      MARK: Set
-        ZoomSketch.minValue = set.minZoom
+        ZoomSketch.minValue = set.minZoom * 2
         ZoomSketch.maxValue = set.maxZoom
         ZoomDefaultSketch.removeAllItems()
         var zoom: [String] = []
@@ -195,14 +195,12 @@ class ViewController: NSViewController {
         SketchView.ToolBox = ToolBox
         SketchView.FrameButtons = FrameButtons
 
-        SketchView.CurveRotate = CurveRotate
         SketchView.CurveOpacityStroke = CurveOpacityStroke
         SketchView.CurveOpacityFill = CurveOpacityFill
         SketchView.CurveWidth = CurveWidth
         SketchView.CurveBlur = CurveBlur
 
         SketchView.CurveColors = CurveColors
-
         SketchView.CurveStrokeColor = CurveStrokeColor
         SketchView.CurveFillColor = CurveFillColor
         SketchView.CurveShadowColor = CurveShadowColor
@@ -224,7 +222,7 @@ class ViewController: NSViewController {
         SketchView.CurveJoin = CurveJoin
         SketchView.CurveDashGap = CurveDashGap
 
-        SketchView.CurveTextTool = CurveTextTool
+        SketchView.TextTool = TextTool
 
         // for precision position create and remove panel
         self.createSharedColorPanel()
@@ -245,7 +243,7 @@ class ViewController: NSViewController {
             CurveGradientStartOpacityLabel,
             CurveGradientMiddleOpacityLabel,
             CurveGradientFinalOpacityLabel,
-            CurveTextField
+            TextToolField
         ]
 
         let nc = NotificationCenter.default
@@ -317,29 +315,29 @@ class ViewController: NSViewController {
             self.CurveGradientMiddleOpacity.doubleValue =  grad1
             self.CurveGradientFinalOpacity.doubleValue =  grad2
 
-            self.CurveXLabel.doubleValue = round(x*10)/10
-            self.CurveYLabel.doubleValue =  round(y*10)/10
-            self.CurveWidLabel.doubleValue = round(wid*10)/10
-            self.CurveHeiLabel.doubleValue =  round(hei*10)/10
-            self.CurveRotateLabel.doubleValue =  round(angle*100)/100
-            self.CurveOpacityStrokeLabel.doubleValue = round(opacity[0]*100)/100
-            self.CurveOpacityFillLabel.doubleValue =  round(opacity[1]*100)/100
-            self.CurveWidthLabel.doubleValue = round(width*10)/10
-            self.CurveBlurLabel.doubleValue = round(blur*10)/10
+            self.CurveXLabel.doubleValue = x
+            self.CurveYLabel.doubleValue = y
+            self.CurveWidLabel.doubleValue = wid
+            self.CurveHeiLabel.doubleValue =  hei
+            self.CurveRotateLabel.doubleValue =  angle
+            self.CurveOpacityStrokeLabel.doubleValue = opacity[0]
+            self.CurveOpacityFillLabel.doubleValue =  opacity[1]
+            self.CurveWidthLabel.doubleValue = width
+            self.CurveBlurLabel.doubleValue = blur
 
             self.CurveStrokeLabel.stringValue = strokeColor.hexString
             self.CurveFillLabel.stringValue = fillColor.hexString
             self.CurveShadowLabel.stringValue = shadowColor.hexString
             self.CurveShadowRadiusLabel.doubleValue = round(rad)
-            self.CurveShadowOpacityLabel.doubleValue = round(opa*100)/100
+            self.CurveShadowOpacityLabel.doubleValue = opa
 
             self.CurveGradientStartLabel.stringValue = gradient[0].hexString
             self.CurveGradientMiddleLabel.stringValue = gradient[1].hexString
             self.CurveGradientFinalLabel.stringValue = gradient[2].hexString
 
-            self.CurveGradientStartOpacityLabel.doubleValue = round(grad0*100)/100
-            self.CurveGradientMiddleOpacityLabel.doubleValue = round(grad1*100)/100
-            self.CurveGradientFinalOpacityLabel.doubleValue = round(grad2*100)/100
+            self.CurveGradientStartOpacityLabel.doubleValue = grad0
+            self.CurveGradientMiddleOpacityLabel.doubleValue = grad1
+            self.CurveGradientFinalOpacityLabel.doubleValue = grad2
 
             self.CurveCap.selectedSegment = curve.cap
             self.CurveJoin.selectedSegment = curve.join
@@ -351,10 +349,10 @@ class ViewController: NSViewController {
                 }
             }
         } else {
-            let x = round(Double(View.sketchBorder.bounds.minX)*10)/10
-            let y = round(Double(View.sketchBorder.bounds.minY)*10)/10
-            let wid = round(Double(View.sketchBorder.bounds.width)*10)/10
-            let hei = round(Double(View.sketchBorder.bounds.height)*10)/10
+            let x = Double(View.sketchBorder.bounds.minX)
+            let y = Double(View.sketchBorder.bounds.minY)
+            let wid = Double(View.sketchBorder.bounds.width)
+            let hei = Double(View.sketchBorder.bounds.height)
             self.CurveX!.doubleValue = x
             self.CurveY!.doubleValue = y
             self.CurveWid!.doubleValue = wid
@@ -365,7 +363,6 @@ class ViewController: NSViewController {
             self.CurveHeiLabel!.doubleValue = hei
         }
     }
-
 
 
 //    MARK: Color panel
@@ -424,8 +421,8 @@ class ViewController: NSViewController {
         SharedFontPanel = NSFontPanel.shared
         let height = SharedFontPanel?.frame.height ?? 0
         SharedFontPanel?.setFrameOrigin(NSPoint(
-            x: CurveTextTool.frame.minX+(Window?.frame.minX)!,
-            y: CurveTextTool.frame.minY+(Window?.frame.minY)!-height))
+            x: TextTool.frame.minX+(Window?.frame.minX)!,
+            y: TextTool.frame.minY+(Window?.frame.minY)!-height))
         SharedFontPanel?.makeKeyAndOrderFront(self)
     }
 
@@ -450,7 +447,7 @@ class ViewController: NSViewController {
         let zoomed = Double(View.zoomed)
         var mag = (zoomed + Double(sender.magnification / set.reduceZoom)) * 100
 
-        if mag < set.minZoom || mag > set.maxZoom {
+        if mag < set.minZoom * 2 || mag > set.maxZoom {
             mag = zoomed * 100
         }
         View.zoomSketch(value: mag)
@@ -496,7 +493,7 @@ class ViewController: NSViewController {
             tag = s.tag
             doubleValue = s.doubleValue
         }
-        if let  s = sender as? NSTextField {
+        if let s = sender as? NSTextField {
             tag = s.tag
             doubleValue = s.doubleValue
         }
@@ -516,11 +513,10 @@ class ViewController: NSViewController {
         let v = self.getTagValue(sender: sender)
         View.moveCurve(tag: v.tag, value: v.value)
 
-        let value = round(v.value * 10) / 10
         if v.tag == 0 {
-            self.CurveXLabel.doubleValue = value
+            self.CurveXLabel.doubleValue = v.value
         } else {
-            self.CurveYLabel.doubleValue = value
+            self.CurveYLabel.doubleValue = v.value
         }
         self.restoreControlFrame(view: View)
     }
@@ -530,11 +526,10 @@ class ViewController: NSViewController {
         let v = self.getTagValue(sender: sender)
         View.resizeCurve(tag: v.tag, value: v.value)
 
-        let value = round(v.value * 10) / 10
         if v.tag == 0 {
-            self.CurveWidLabel.doubleValue = value
+            self.CurveWidLabel.doubleValue = v.value
         } else {
-            self.CurveHeiLabel.doubleValue = value
+            self.CurveHeiLabel.doubleValue = v.value
         }
         self.restoreControlFrame(view: View)
     }
@@ -543,9 +538,8 @@ class ViewController: NSViewController {
         let View = SketchView!
         let v = self.getTagValue(sender: sender)
         View.rotateCurve(angle: v.value)
-        let value = round(v.value * 10) / 10
 
-        self.CurveRotateLabel.doubleValue = value
+        self.CurveRotateLabel.doubleValue = v.value
         self.restoreControlFrame(view: View)
     }
 
@@ -554,11 +548,10 @@ class ViewController: NSViewController {
         let v = self.getTagValue(sender: sender)
         View.opacityCurve(tag: v.tag, value: v.value)
 
-        let value = round(v.value * 100) / 100
         if v.tag==0 {
-            self.CurveOpacityStrokeLabel.doubleValue = value
+            self.CurveOpacityStrokeLabel.doubleValue = v.value
         } else if v.tag==1 {
-            self.CurveOpacityFillLabel.doubleValue = value
+            self.CurveOpacityFillLabel.doubleValue = v.value
         }
         self.restoreControlFrame(view: View)
     }
@@ -568,8 +561,7 @@ class ViewController: NSViewController {
         let v = self.getTagValue(sender: sender)
         View.widthCurve(value:  v.value)
 
-        let value = round(v.value * 10) / 10
-        self.CurveWidthLabel.doubleValue = value
+        self.CurveWidthLabel.doubleValue = v.value
         self.restoreControlFrame(view: View)
     }
 
@@ -578,8 +570,7 @@ class ViewController: NSViewController {
         let v = self.getTagValue(sender: sender)
         View.blurCurve(value: v.value)
 
-        let value = round(v.value * 10) / 10
-        self.CurveBlurLabel.doubleValue = value
+        self.CurveBlurLabel.doubleValue = v.value
         self.restoreControlFrame(view: View)
     }
 
@@ -685,7 +676,7 @@ class ViewController: NSViewController {
         CurveShadowOffsetX.doubleValue = values[2]
         CurveShadowOffsetY.doubleValue = values[3]
         CurveShadowRadiusLabel.doubleValue = round(values[0])
-        CurveShadowOpacityLabel.doubleValue = round(opa * 100) / 100
+        CurveShadowOpacityLabel.doubleValue = opa
 
         let floats = values.map({v in CGFloat(v)})
 
@@ -716,18 +707,15 @@ class ViewController: NSViewController {
         let v = self.getTagValue(sender: sender)
         View.opacityGradientCurve(tag: v.tag, value: v.value)
 
-        let value = round(v.value * 100) / 100
         if v.tag == 0 {
-            self.CurveGradientStartOpacityLabel.doubleValue = value
+            self.CurveGradientStartOpacityLabel.doubleValue = v.value
         } else if v.tag == 1 {
-            self.CurveGradientMiddleOpacityLabel.doubleValue = value
+            self.CurveGradientMiddleOpacityLabel.doubleValue = v.value
         } else if v.tag == 2 {
-            self.CurveGradientFinalOpacityLabel.doubleValue = value
+            self.CurveGradientFinalOpacityLabel.doubleValue = v.value
         }
         self.restoreControlFrame(view: View)
     }
-
-
 
 //    MARK: Buttons actions
     @IBAction func sendCurve(_ sender: NSButton) {
@@ -743,17 +731,11 @@ class ViewController: NSViewController {
     }
 
     @IBAction func editCurve(_ sender: NSButton) {
-        if sender.state == NSControl.StateValue.off {
-            sender.alternateTitle = "done"
-        } else {
-            sender.alternateTitle = "edit"
-        }
-        SketchView!.editCurve(name: sender.alternateTitle)
+        SketchView!.editCurve(sender: sender)
     }
 
     @IBAction func lockCurve(_ sender: NSButton) {
-        sender.title = sender.state == .off ? "🔓" : "🔒"
-        SketchView!.lockCurve()
+        SketchView!.lockCurve(sender: sender)
     }
 
     @IBAction func groupCurve(_ sender: NSButton) {

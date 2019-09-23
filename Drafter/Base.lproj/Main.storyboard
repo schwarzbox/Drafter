@@ -790,8 +790,22 @@ CA
                                 <rect key="frame" x="0.0" y="0.0" width="16" height="142"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
-                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="51t-HD-8xx">
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SXd-b4-ies" userLabel="●">
                                         <rect key="frame" x="0.0" y="125" width="16" height="17"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="16" id="mTs-9R-b1m"/>
+                                            <constraint firstAttribute="width" constant="16" id="ybU-dP-FcD"/>
+                                        </constraints>
+                                        <buttonCell key="cell" type="inline" title="⛓" alternateTitle="chain" bezelStyle="inline" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lj1-mu-piE">
+                                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                            <font key="font" metaFont="systemBold" size="8"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="groupCurve:" target="XfG-lQ-9wD" id="ivn-4C-zKL"/>
+                                        </connections>
+                                    </button>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="51t-HD-8xx">
+                                        <rect key="frame" x="0.0" y="107" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="Lc1-3C-uiA"/>
                                             <constraint firstAttribute="width" constant="16" id="Ooi-xh-dRc"/>
@@ -805,7 +819,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QVL-Hl-NBD">
-                                        <rect key="frame" x="0.0" y="107" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="89" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="B3I-35-KZi"/>
                                             <constraint firstAttribute="width" constant="16" id="D5h-NZ-zI9"/>
@@ -819,7 +833,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="32W-PR-FTM">
-                                        <rect key="frame" x="0.0" y="89" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="71" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="HNe-dM-9X6"/>
                                             <constraint firstAttribute="width" constant="16" id="iTc-YN-8X8"/>
@@ -833,7 +847,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QL4-rK-KOE">
-                                        <rect key="frame" x="0.0" y="71" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="53" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="MgI-dD-GXy"/>
                                             <constraint firstAttribute="height" constant="16" id="QN6-JZ-RU3"/>
@@ -847,7 +861,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CqJ-tp-IXv">
-                                        <rect key="frame" x="0.0" y="53" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="35" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="pqv-n2-qZB"/>
                                             <constraint firstAttribute="height" constant="16" id="zhX-dW-Q1j"/>
@@ -861,7 +875,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uco-gi-Hxu" userLabel="●">
-                                        <rect key="frame" x="0.0" y="35" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="17" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="9FZ-VN-CqY"/>
                                             <constraint firstAttribute="height" constant="16" id="MvS-MG-vxH"/>
@@ -875,7 +889,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XDq-Wk-7cd" userLabel="●">
-                                        <rect key="frame" x="0.0" y="17" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="-1" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="7q7-6Z-PwT"/>
                                             <constraint firstAttribute="height" constant="16" id="9xO-pr-tcG"/>
@@ -886,20 +900,6 @@ CA
                                         </buttonCell>
                                         <connections>
                                             <action selector="lockCurve:" target="XfG-lQ-9wD" id="Rna-Op-ezk"/>
-                                        </connections>
-                                    </button>
-                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SXd-b4-ies" userLabel="●">
-                                        <rect key="frame" x="0.0" y="-1" width="16" height="17"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="16" id="mTs-9R-b1m"/>
-                                            <constraint firstAttribute="width" constant="16" id="ybU-dP-FcD"/>
-                                        </constraints>
-                                        <buttonCell key="cell" type="inline" title="⛓" alternateTitle="chain" bezelStyle="inline" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lj1-mu-piE">
-                                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                            <font key="font" metaFont="systemBold" size="8"/>
-                                        </buttonCell>
-                                        <connections>
-                                            <action selector="groupCurve:" target="XfG-lQ-9wD" id="ivn-4C-zKL"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -2800,8 +2800,6 @@ CA
                         <outlet property="CurveStrokeColor" destination="i7s-ch-2YB" id="dBr-Mt-uXo"/>
                         <outlet property="CurveStrokeColorPanel" destination="GtU-Ln-b9N" id="TUW-a3-0Xf"/>
                         <outlet property="CurveStrokeLabel" destination="qhF-0w-xFU" id="dZO-er-KHN"/>
-                        <outlet property="CurveTextField" destination="iqw-kg-3iC" id="oM6-1C-vzT"/>
-                        <outlet property="CurveTextTool" destination="qgw-A4-6NT" id="Lek-9x-qI7"/>
                         <outlet property="CurveWid" destination="UL1-f8-Me1" id="r3G-U3-Ji4"/>
                         <outlet property="CurveWidLabel" destination="F9w-qK-dyP" id="MNc-OX-Bwl"/>
                         <outlet property="CurveWidth" destination="W12-jJ-JFl" id="pbD-Ed-Kzq"/>
@@ -2812,6 +2810,8 @@ CA
                         <outlet property="CurveYLabel" destination="ujF-Qh-aGD" id="SOh-dn-9OQ"/>
                         <outlet property="FrameButtons" destination="tZ4-A6-VtG" id="4lN-9p-2t2"/>
                         <outlet property="SketchView" destination="O9R-EM-mHj" id="l29-MB-uqb"/>
+                        <outlet property="TextTool" destination="qgw-A4-6NT" id="Fee-8G-zUB"/>
+                        <outlet property="TextToolField" destination="iqw-kg-3iC" id="Cb1-h2-xZf"/>
                         <outlet property="ToolBox" destination="8J2-pI-a7r" id="lno-Ve-Mb7"/>
                         <outlet property="ZoomDefaultSketch" destination="WfQ-tr-m6g" id="ke5-Vz-rgJ"/>
                         <outlet property="ZoomSketch" destination="346-3O-kDM" id="j8L-r6-xge"/>

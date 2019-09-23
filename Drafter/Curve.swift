@@ -20,6 +20,9 @@ class Curve: Equatable {
     var gradient = CAGradientLayer()
     let canvas = CALayer()
 
+    let dotSize: CGFloat =  set.dotSize
+    let dotRadius: CGFloat = set.dotRadius
+
     var strokeColor = set.strokeColor {
         willSet(value) {
             self.shape.strokeColor = value.cgColor.sRGB(alpha: self.alpha[0])
@@ -199,10 +202,33 @@ class Curve: Equatable {
         self.points = points
     }
 
-    func addPoint(mp: Dot, cp1: Dot, cp2: Dot) {
+    func insertPoint(pos: NSPoint, index: Int) -> ControlPoint {
+        let mp = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
+                          offset: CGPoint(x: self.dotRadius,
+                                          y: self.dotRadius),
+                          radius: 0,
+                          bgColor: nil)
+
+        let cp1 = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
+                           offset: CGPoint(x: self.dotRadius,
+                                           y: self.dotRadius),
+                           radius: self.dotRadius)
+
+        let cp2 = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
+                           offset: CGPoint(x: self.dotRadius,
+                                           y: self.dotRadius),
+                           radius: self.dotRadius)
+
         let cp = ControlPoint.init(mp: mp, cp1: cp1, cp2: cp2)
-        self.points.append(cp)
+        if index >= self.points.count {
+            self.points.append(cp)
+        } else {
+            self.points.insert(cp, at: index)
+        }
+        return cp
     }
+
+
 
 //    MARK: Layer func
     func updateLayer() {
@@ -249,18 +275,54 @@ class Curve: Equatable {
         }
     }
 
+    func insertCurve(at pos: NSPoint, index: Int, points: [NSPoint]) -> NSBezierPath {
+        let path = NSBezierPath()
+        self.path.copyPath(to: path, start: 0, final: index)
+        path.curve(to: pos, controlPoint1: points[0],
+                 controlPoint2: pos)
+        path.curve(to: points[2], controlPoint1: pos,
+                 controlPoint2: points[1])
+        self.path.copyPath(to: path, start: index + 1,
+                           final: self.path.elementCount)
+        return path
+    }
+
     func selectPoint(pos: NSPoint) {
         if !self.lock {
             for point in self.points {
                 if point.collideDot(pos: pos, dot: point.mp) {
                     self.controlDot = point.mp
-                } else if point.collideDot(pos: pos, dot: point.cp1) && !point.cp1.isHidden{
+                    return
+                } else if point.collideDot(pos: pos, dot: point.cp1) &&
+                    !point.cp1.isHidden{
                     self.controlDot = point.cp1
-                } else if point.collideDot(pos: pos, dot: point.cp2) && !point.cp1.isHidden{
+                    return
+                } else if point.collideDot(pos: pos, dot: point.cp2) &&
+                    !point.cp1.isHidden{
                     self.controlDot = point.cp2
+                    return
                 } else {
                     point.hideControlDots()
                 }
+            }
+            let collider = NSRect(x:self.path.bounds.minX-2,
+                                  y: self.path.bounds.minY-2,
+                                  width: self.path.bounds.width+4,
+                                  height: self.path.bounds.height+4)
+            if collider.contains(pos), let segment = self.path.findPath(pos: pos) {
+
+                let point = self.insertPoint(pos: pos, index: segment.index)
+                
+                self.controlDot = point.mp
+
+                let path = insertCurve(at: point.mp.position,
+                                       index: segment.index,
+                                       points: segment.points)
+                self.path = path
+
+                self.clearPoints()
+                self.createPoints()
+                self.updateLayer()
             }
         }
     }
@@ -271,9 +333,18 @@ class Curve: Equatable {
             var find: Bool = false
             for (i, point) in self.points.enumerated() {
                 if let dot = self.controlDot {
-                    if dot == point.mp {
-                        let deltaPos = NSPoint(x: pos.x - point.mp.position.x,
-                                               y: pos.y - point.mp.position.y)
+                    // drag after create
+                    if dot == point.mp && point.collideDot(pos: pos, dot: point.cp1)  {
+                        let cp2pos = NSPoint(
+                            x: dot.position.x - (pos.x - dot.position.x),
+                            y: dot.position.y  - (pos.y - dot.position.y))
+                        point.cp1.position = pos
+                        point.cp2.position = cp2pos
+                        find = true
+                    } else if dot == point.mp {
+                        let deltaPos = NSPoint(
+                            x: pos.x - point.mp.position.x,
+                            y: pos.y - point.mp.position.y)
                         point.mp.position = pos
                         point.cp1.position = NSPoint(
                             x: point.cp1.position.x+deltaPos.x,
@@ -298,7 +369,7 @@ class Curve: Equatable {
                             var pointsStart = [point.mp.position]
                             self.path.setAssociatedPoints(&pointsStart, at: 0)
 
-                            self.path.element(at: 1,associatedPoints: &points)
+                            self.path.element(at: 1, associatedPoints: &points)
                             var pointsRight = [point.cp1.position,
                                                points[1], points[2]]
                             self.path.setAssociatedPoints(&pointsRight, at: 1)
@@ -381,41 +452,6 @@ class Curve: Equatable {
             if let control = self.controlFrame {
                 control.hideLabels()
             }
-        }
-    }
-
-//    MARK: FrameButtons func
-    func updateButtons() {
-        if let buttons = self.parent?.FrameButtons {
-            if let deltax = self.parent?.bounds.minX,
-                let deltay = self.parent?.bounds.minY {
-                let zoomed = self.parent?.zoomed ?? 1.0
-                let width50 = self.lineWidth/2
-
-                let x = self.path.bounds.minX - set.framePad - width50
-                let y = self.path.bounds.maxY + width50
-                buttons.frame = NSRect(
-                    x: (x-deltax) * zoomed - buttons.bounds.width,
-                    y: (y-deltay) * zoomed - buttons.bounds.height,
-                    width: buttons.bounds.width,
-                    height: buttons.bounds.height)
-
-                if let lock = buttons.subviews.last as? NSButton {
-                    lock.state = self.lock ? .on : .off
-                }
-            }
-        }
-    }
-
-    func hideButtons() {
-        if let buttons = self.parent?.FrameButtons {
-            buttons.isHidden = true
-        }
-    }
-
-    func showButtons() {
-        if let buttons = self.parent?.FrameButtons {
-            buttons.isHidden = false
         }
     }
 
