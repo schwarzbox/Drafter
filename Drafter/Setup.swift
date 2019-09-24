@@ -36,9 +36,9 @@ struct Set {
                          NSColor.systemPurple]
     let gradientLocation: [NSNumber] = [0.0, 0.50, 1.0]
 
-    let framePad: CGFloat = 8
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
+
     let fontName: String = "Helvetica"
     let fontSize: CGFloat = 22
 

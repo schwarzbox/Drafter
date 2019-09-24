@@ -768,7 +768,7 @@ CA
                                         </constraints>
                                         <buttonCell key="cell" type="inline" title="✗" bezelStyle="inline" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="V9M-oF-f6Z">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                            <font key="font" metaFont="systemBold" size="11"/>
+                                            <font key="font" metaFont="smallSystemBold"/>
                                         </buttonCell>
                                         <connections>
                                             <action selector="hideText:" target="XfG-lQ-9wD" id="heJ-qP-bep"/>
@@ -790,22 +790,8 @@ CA
                                 <rect key="frame" x="0.0" y="0.0" width="16" height="142"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
-                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SXd-b4-ies" userLabel="●">
-                                        <rect key="frame" x="0.0" y="125" width="16" height="17"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="16" id="mTs-9R-b1m"/>
-                                            <constraint firstAttribute="width" constant="16" id="ybU-dP-FcD"/>
-                                        </constraints>
-                                        <buttonCell key="cell" type="inline" title="⛓" alternateTitle="chain" bezelStyle="inline" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lj1-mu-piE">
-                                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                            <font key="font" metaFont="systemBold" size="8"/>
-                                        </buttonCell>
-                                        <connections>
-                                            <action selector="groupCurve:" target="XfG-lQ-9wD" id="ivn-4C-zKL"/>
-                                        </connections>
-                                    </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="51t-HD-8xx">
-                                        <rect key="frame" x="0.0" y="107" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="125" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="Lc1-3C-uiA"/>
                                             <constraint firstAttribute="width" constant="16" id="Ooi-xh-dRc"/>
@@ -819,7 +805,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QVL-Hl-NBD">
-                                        <rect key="frame" x="0.0" y="89" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="107" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="B3I-35-KZi"/>
                                             <constraint firstAttribute="width" constant="16" id="D5h-NZ-zI9"/>
@@ -833,7 +819,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="32W-PR-FTM">
-                                        <rect key="frame" x="0.0" y="71" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="89" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="HNe-dM-9X6"/>
                                             <constraint firstAttribute="width" constant="16" id="iTc-YN-8X8"/>
@@ -847,7 +833,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QL4-rK-KOE">
-                                        <rect key="frame" x="0.0" y="53" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="71" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="MgI-dD-GXy"/>
                                             <constraint firstAttribute="height" constant="16" id="QN6-JZ-RU3"/>
@@ -861,7 +847,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CqJ-tp-IXv">
-                                        <rect key="frame" x="0.0" y="35" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="53" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="pqv-n2-qZB"/>
                                             <constraint firstAttribute="height" constant="16" id="zhX-dW-Q1j"/>
@@ -875,7 +861,7 @@ CA
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="uco-gi-Hxu" userLabel="●">
-                                        <rect key="frame" x="0.0" y="17" width="16" height="17"/>
+                                        <rect key="frame" x="0.0" y="35" width="16" height="17"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="9FZ-VN-CqY"/>
                                             <constraint firstAttribute="height" constant="16" id="MvS-MG-vxH"/>
@@ -886,6 +872,20 @@ CA
                                         </buttonCell>
                                         <connections>
                                             <action selector="editCurve:" target="XfG-lQ-9wD" id="Gsc-oa-kFs"/>
+                                        </connections>
+                                    </button>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SXd-b4-ies">
+                                        <rect key="frame" x="0.0" y="17" width="16" height="17"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="16" id="mTs-9R-b1m"/>
+                                            <constraint firstAttribute="width" constant="16" id="ybU-dP-FcD"/>
+                                        </constraints>
+                                        <buttonCell key="cell" type="inline" title="❖" alternateTitle="chain" bezelStyle="inline" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="lj1-mu-piE">
+                                            <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
+                                            <font key="font" metaFont="systemBold" size="14"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="groupCurve:" target="XfG-lQ-9wD" id="ivn-4C-zKL"/>
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="XDq-Wk-7cd" userLabel="●">
@@ -1609,7 +1609,7 @@ CA
                                                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="32" id="99t-bA-P42"/>
                                                                     </constraints>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" alignment="center" title="◼︎" id="Rhe-wJ-jF1">
-                                                                        <font key="font" metaFont="system" size="9"/>
+                                                                        <font key="font" metaFont="miniSystem"/>
                                                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                                     </textFieldCell>

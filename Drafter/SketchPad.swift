@@ -6,7 +6,9 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
 //0.5
-
+// closable frameButtons
+// custom font menu
+// chage font
 // default cmd-C cmd-V cmd-X events
 
 //Open file panel
@@ -15,10 +17,10 @@
 
 // shape layer drawing
 
-// text without bar
 //Save blur to .png
 
 //0.6
+
 //Rulers (Figma style)
 //Grid (NSDrawTiledRect & snap to grid)
 
@@ -91,7 +93,7 @@ class SketchPad: NSView {
 
     var editedPath: NSBezierPath = NSBezierPath()
     let editLayer = CAShapeLayer()
-    let editColor = set.guiColor
+    let editColor = set.strokeColor
     var editDone: Bool = false
 
     var startPoint: NSPoint?
@@ -165,7 +167,7 @@ class SketchPad: NSView {
         // edited
         self.editLayer.strokeColor = self.editColor.cgColor
         self.editLayer.fillColor = nil
-        self.editLayer.lineWidth = set.lineWidth
+        self.editLayer.lineWidth = set.lineWidth - 0.4
         self.editLayer.path = self.editedPath.cgPath
         self.editLayer.actions = ["position": NSNull(),"bounds": NSNull(),"path": NSNull()]
         // curve
@@ -326,13 +328,7 @@ class SketchPad: NSView {
                     self.editedPath.close()
                 case .triangle:
                     self.editedPath.removeAllPoints()
-                    let size = self.flipSize(topLeft: theStart, bottomRight: theEnd)
-                    self.editedPath.move(to: NSPoint(x: theStart.x + size.wid / 2,
-                                                     y: theStart.y))
-                    self.editedPath.line(to: NSPoint(x: theStart.x,
-                                                     y: theStart.y + size.hei ))
-                    self.editedPath.line(to: NSPoint(x: theStart.x + size.wid,
-                                                     y: theStart.y + size.hei))
+                    self.createTriangle(topLeft: theStart,bottomRight: theEnd, cmd: cmd)
                     self.editDone = true
                     self.editedPath.close()
                 case .oval:
@@ -342,7 +338,8 @@ class SketchPad: NSView {
                     self.editedPath.close()
                 case .rectangle:
                     self.editedPath.removeAllPoints()
-                    self.createRectangle(topLeft: theStart, bottomRight: theEnd, cmd: cmd)
+                    self.createRectangle(topLeft: theStart,
+                                         bottomRight: theEnd, cmd: cmd)
                     self.editDone = true
                     self.editedPath.close()
                 case .arc:
@@ -874,6 +871,22 @@ class SketchPad: NSView {
                                          y: bottomRight.y))
     }
 
+    func createTriangle(topLeft: NSPoint, bottomRight: NSPoint, cmd: Bool = false) {
+        let size = self.flipSize(topLeft: topLeft, bottomRight:  bottomRight)
+        let wid = size.wid
+        var hei = size.hei
+        if cmd {
+            let signHei: CGFloat = hei>0 ? 1 : -1
+            hei = abs(wid) * signHei
+        }
+        self.editedPath.move(to: NSPoint(x: topLeft.x + wid / 2,
+                                         y: topLeft.y))
+        self.editedPath.line(to: NSPoint(x: topLeft.x,
+                                         y: topLeft.y + hei ))
+        self.editedPath.line(to: NSPoint(x: topLeft.x + wid,
+                                         y: topLeft.y + hei))
+    }
+
     func createOval(topLeft: NSPoint, bottomRight: NSPoint,cmd: Bool = false) {
         let size = self.flipSize(topLeft: topLeft, bottomRight: bottomRight)
         let wid = size.wid
@@ -888,7 +901,7 @@ class SketchPad: NSView {
     }
 
     func createRectangle(topLeft: NSPoint, bottomRight: NSPoint,
-                         xRad: CGFloat = 0.0001, yRad: CGFloat = 0.0001,
+                         xRad: CGFloat = 0.00001, yRad: CGFloat = 0.00001,
                          cmd: Bool = false) {
 
         var botLeft: NSPoint
@@ -914,14 +927,14 @@ class SketchPad: NSView {
 
         if cmd && (topLeft.x < bottomRight.x) {
             wid = hei
-        } else if cmd && (topLeft.x < bottomRight.x) && (topLeft.y > bottomRight.y){
+        } else if cmd && (topLeft.x > bottomRight.x) && (topLeft.y < bottomRight.y){
              hei = wid
         } else if cmd && (topLeft.x > bottomRight.x) && (topLeft.y > bottomRight.y) {
-
+            wid = hei
+            botLeft.x = topRight.x - wid
+            botLeft.y = topRight.y - wid
         }
 
-        print(botLeft)
-        print(wid,hei)
         self.editedPath = NSBezierPath(
             roundedRect: NSRect(x: botLeft.x, y: botLeft.y,
                                 width: wid, height: hei),
@@ -1054,7 +1067,7 @@ class SketchPad: NSView {
             let deltaY = self.bounds.minY
             let width50 = curve.lineWidth/2
 
-            let x = curve.path.bounds.minX - set.framePad - width50
+            let x = curve.path.bounds.minX - set.dotSize - width50
             let y = curve.path.bounds.maxY + width50
             self.FrameButtons.frame = NSRect(
                 x: (x-deltaX) * zoomed - self.FrameButtons.bounds.width,
@@ -1368,10 +1381,7 @@ class SketchPad: NSView {
 //    MARK: Support
     func flipSize(topLeft: NSPoint,
                   bottomRight: NSPoint) -> (wid: CGFloat,hei: CGFloat) {
-
-        let wid = bottomRight.x - topLeft.x
-        var hei = bottomRight.y - topLeft.y
-        return (wid, hei)
+        return (bottomRight.x - topLeft.x, bottomRight.y - topLeft.y)
     }
 
     func imageData(fileType: NSBitmapImageRep.FileType = .png,

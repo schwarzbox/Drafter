@@ -97,7 +97,7 @@ class ControlFrame: CALayer {
                 radius = ControlFrame.dot50Size
             } else if i==dots.count-5 || i==dots.count-4 {
                 radius = ControlFrame.dot50Size
-                bgColor = set.strokeColor
+                bgColor = ControlFrame.defaultStrokeColor
             } else if i==dots.count-3 || i==dots.count-2 || i==dots.count-1 {
                 radius = ControlFrame.dot50Size/2
                 bgColor = curve.gradientColor[gradIndex]

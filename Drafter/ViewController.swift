@@ -84,6 +84,7 @@ class ViewController: NSViewController {
 
     var SharedColorPanel: NSColorPanel?
     var SharedFontPanel: NSFontPanel?
+    var FontManager: NSFontManager!
 
     override var representedObject: Any? {
         didSet {
@@ -146,7 +147,7 @@ class ViewController: NSViewController {
         CurveStrokeLabel.stringValue = set.strokeColor.hexString
         CurveFillLabel.stringValue = set.fillColor.hexString
 
-        CurveShadowColor.borderColor = set.guiColor
+        CurveShadowColor.borderColor =  set.guiColor
         CurveShadowColor.fillColor = set.shadowColor
         CurveShadowLabel.stringValue = set.shadowColor.hexString
 
@@ -227,6 +228,10 @@ class ViewController: NSViewController {
         // for precision position create and remove panel
         self.createSharedColorPanel()
         self.closeSharedColorPanel()
+
+        FontManager = NSFontManager.shared
+        FontManager.target = self
+//        TextToolField
 
         // abort text fields
         self.textFields = [
@@ -418,13 +423,20 @@ class ViewController: NSViewController {
     }
 //     MARK: Font panel
     func createSharedFontPanel() {
+//        let view = NSView.init(frame: NSRect(x: 0, y: 0, width: 128, height: 128))
+//        view.layer = CALayer()
+//        view.layer?.backgroundColor = NSColor.systemPink.cgColor
+//        self.view.addSubview(view)
+
         SharedFontPanel = NSFontPanel.shared
         let height = SharedFontPanel?.frame.height ?? 0
         SharedFontPanel?.setFrameOrigin(NSPoint(
             x: TextTool.frame.minX+(Window?.frame.minX)!,
             y: TextTool.frame.minY+(Window?.frame.minY)!-height))
         SharedFontPanel?.makeKeyAndOrderFront(self)
+
     }
+
 
     func closeSharedFontPanel() {
         if let panel = self.SharedFontPanel {

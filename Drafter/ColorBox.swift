@@ -19,7 +19,7 @@ class ColorBox: NSControl {
             }
         } else {
             if let view = self.superview, let box = view as? NSBox {
-                box.borderColor = set.guiColor
+                box.borderColor =  set.guiColor
             }
         }
     }
