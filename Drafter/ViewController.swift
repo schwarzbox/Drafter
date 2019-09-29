@@ -13,8 +13,12 @@ class ViewController: NSViewController {
     @IBOutlet weak var ToolBox: NSStackView!
     @IBOutlet weak var SketchView: SketchPad!
     @IBOutlet weak var FrameButtons: NSStackView!
+
     @IBOutlet weak var TextTool: NSStackView!
     @IBOutlet weak var TextToolField: NSTextField!
+
+    @IBOutlet weak var FontFamily: NSPopUpButton!
+    @IBOutlet weak var FontType: NSPopUpButton!
 
     @IBOutlet weak var ActionBox: NSStackView!
 
@@ -83,8 +87,12 @@ class ViewController: NSViewController {
     var textFields: [NSTextField] = []
 
     var SharedColorPanel: NSColorPanel?
-    var SharedFontPanel: NSFontPanel?
-    var FontManager: NSFontManager!
+
+    var fontFamily: String = set.fontFamily
+    var fontType: String = set.fontType
+    var fontSize: CGFloat = set.fontSize
+    var fontMembers = [[Any]]()
+    var sharedFont: NSFont?
 
     override var representedObject: Any? {
         didSet {
@@ -229,9 +237,15 @@ class ViewController: NSViewController {
         self.createSharedColorPanel()
         self.closeSharedColorPanel()
 
-        FontManager = NSFontManager.shared
-        FontManager.target = self
-//        TextToolField
+
+        self.setupFontFamily()
+        FontFamily.selectItem(withTitle: set.fontFamily)
+        FontFamily.setTitle(FontFamily.titleOfSelectedItem ?? set.fontFamily)
+        self.setupFontMembers()
+        self.setupFontType()
+        FontType.selectItem(withTitle: set.fontType)
+        FontType.setTitle(FontType.titleOfSelectedItem ?? set.fontType)
+        self.setupFont()
 
         // abort text fields
         self.textFields = [
@@ -417,33 +431,44 @@ class ViewController: NSViewController {
     func closeSharedColorPanel() {
         if let panel = self.SharedColorPanel {
             panel.close()
-            self.SharedColorPanel = nil
+            SharedColorPanel = nil
             SketchView!.ColorPanel = nil
         }
     }
-//     MARK: Font panel
-    func createSharedFontPanel() {
-//        let view = NSView.init(frame: NSRect(x: 0, y: 0, width: 128, height: 128))
-//        view.layer = CALayer()
-//        view.layer?.backgroundColor = NSColor.systemPink.cgColor
-//        self.view.addSubview(view)
-
-        SharedFontPanel = NSFontPanel.shared
-        let height = SharedFontPanel?.frame.height ?? 0
-        SharedFontPanel?.setFrameOrigin(NSPoint(
-            x: TextTool.frame.minX+(Window?.frame.minX)!,
-            y: TextTool.frame.minY+(Window?.frame.minY)!-height))
-        SharedFontPanel?.makeKeyAndOrderFront(self)
-
+//     MARK: TextTool
+    func setupFontFamily() {
+        FontFamily.removeAllItems()
+        FontFamily.addItems(withTitles: NSFontManager.shared.availableFontFamilies)
     }
 
-
-    func closeSharedFontPanel() {
-        if let panel = self.SharedFontPanel {
-            panel.close()
-            self.SharedFontPanel = nil
+    func setupFontMembers() {
+        if let members = NSFontManager.shared.availableMembers(ofFontFamily: self.fontFamily) {
+            self.fontMembers.removeAll()
+            self.fontMembers = members
         }
     }
+
+    func setupFontType() {
+        FontType.removeAllItems()
+        for member in self.fontMembers {
+            if let type = member[1] as? String {
+                FontType.addItem(withTitle: type)
+            }
+        }
+        FontType.selectItem(at: 0)
+    }
+
+
+    func setupFont() {
+        let member = self.fontMembers[FontType.indexOfSelectedItem]
+        if let weight = member[2] as? Int, let traits = member[3] as? UInt {
+            self.sharedFont = NSFontManager.shared.font(
+                withFamily: self.fontFamily,
+                traits: NSFontTraitMask(rawValue: traits),
+                weight: weight, size: self.fontSize)
+        }
+    }
+
 
 //    MARK: Zoom Actions
     @IBAction func zoomOrigin(_ sender: NSPanGestureRecognizer) {
@@ -612,20 +637,41 @@ class ViewController: NSViewController {
     }
 
 //    MARK: TextPanel actions
-    @IBAction func glyphsCurve(_ sender: NSTextField) {
-        SketchView!.glyphsCurve(value: sender.stringValue)
-    }
+    @IBAction func selectFont(_ sender: NSPopUpButton) {
+        if let family = sender.titleOfSelectedItem {
+            self.fontFamily = family
+            sender.title = family
 
-    @IBAction func hideText(_ sender: NSButton) {
-        SketchView!.hideText()
-    }
+            self.setupFontMembers()
 
-    @IBAction func openFontPanel(_ sender: NSButton) {
-        if sender.state == .off {
-            self.closeSharedFontPanel()
-        } else {
-            self.createSharedFontPanel()
+            self.setupFontType()
+            self.fontType = FontType.selectedItem?.title ?? set.fontType
+
+            self.setupFont()
+            if let font = self.sharedFont {
+                TextToolField.font = font
+            }
         }
+    }
+
+    @IBAction func selectType(_ sender: NSPopUpButton) {
+        if let type = sender.titleOfSelectedItem {
+            self.fontType = type
+            sender.title = type
+            self.setupFont()
+            if let font = self.sharedFont {
+                TextToolField.font = font
+            }
+        }
+    }
+
+    @IBAction func glyphsCurve(_ sender: NSTextField) {
+        SketchView!.glyphsCurve(value: sender.stringValue,
+                                sharedFont: self.sharedFont)
+    }
+
+    @IBAction func hideTextTool(_ sender: NSButton) {
+        SketchView!.hideTextTool()
     }
 
 //    MARK: ColorPanel actions
@@ -755,6 +801,22 @@ class ViewController: NSViewController {
     }
 
 //    MARK: Menu actions
+    @IBAction func copy(_ sender: NSMenuItem) {
+        SketchView!.copyCurve()
+    }
+
+    @IBAction func paste(_ sender: NSMenuItem) {
+        let pos = NSEvent.mouseLocation
+        SketchView!.pasteCurve(to: CGPoint(
+            x: pos.x - (Window?.frame.minX)!,
+            y: pos.y - (Window?.frame.minY)!))
+    }
+
+    @IBAction func cut(_ sender: NSMenuItem) {
+        SketchView!.copyCurve()
+        SketchView!.deleteCurve()
+    }
+
     @IBAction func delete(_ sender: NSMenuItem) {
         SketchView!.deleteCurve()
     }

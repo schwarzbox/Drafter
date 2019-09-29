@@ -267,9 +267,6 @@ extension NSColor {
 }
 
 
-// if isMousePoint(event.locationInWindow, in: self.frame) {
-// }
-
 //func drawCanvas(curve: Curve) {
 //    let width = Int(curve.path.bounds.width)
 //    let height = Int(curve.path.bounds.height)

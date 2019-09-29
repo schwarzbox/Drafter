@@ -6,16 +6,12 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
 //0.5
-// closable frameButtons
-// custom font menu
-// chage font
-// default cmd-C cmd-V cmd-X events
+// gradient handle update
+// refactor extension shape layer drawing
 
 //Open file panel
-//Show filename
+//Show filename in title
 //Select ext in save panel
-
-// shape layer drawing
 
 //Save blur to .png
 
@@ -36,7 +32,7 @@
 
 // 1.0
 // refactor frame (when zoom same dot size) (animation for labels)
-// gradient handle update
+// closable frameButtons
 // disable unused actions
 
 // 1.5
@@ -98,6 +94,7 @@ class SketchPad: NSView {
 
     var startPoint: NSPoint?
 
+    var copiedCurve: Curve?
     var selectedCurve: Curve?
     var curves: [Curve] = []
     var groups: [[Curve]] = []
@@ -261,32 +258,48 @@ class SketchPad: NSView {
             switch dot.tag! {
             case 0:
                 let resize = Double(curve.path.bounds.height + deltay)
-                self.resizeCurve(tag: 1, value: resize,anchor: CGPoint(x: 0, y: 1))
+                self.resizeCurve(tag: 1,
+                                 value: resize, anchor: CGPoint(x: 0, y: 1),
+                                 ind: dot.tag!, cmd: cmd)
                 fallthrough
             case 1:
                 let resize = Double(curve.path.bounds.width - deltax)
-                self.resizeCurve(tag: 0, value: resize, anchor: CGPoint(x: 1, y: 0))
+                self.resizeCurve(tag: 0,
+                                 value: resize, anchor: CGPoint(x: 1, y: 0),
+                                 ind: dot.tag!, cmd: cmd)
             case 2:
                 let resize = Double(curve.path.bounds.width - deltax)
-                self.resizeCurve(tag: 0, value: resize, anchor: CGPoint(x: 1, y: 0))
+                self.resizeCurve(tag: 0,
+                                 value: resize, anchor: CGPoint(x: 1, y: 0),
+                                 ind: dot.tag!, cmd: cmd)
                 fallthrough
             case 3:
                 let resize = Double(curve.path.bounds.height - deltay)
-                self.resizeCurve(tag: 1, value: resize)
+                self.resizeCurve(tag: 1,
+                                 value: resize,
+                                 ind: dot.tag!, cmd: cmd)
             case 4:
                 let resize = Double(curve.path.bounds.height - deltay)
-                self.resizeCurve(tag: 1, value: resize)
+                self.resizeCurve(tag: 1,
+                                 value: resize,
+                                 ind: dot.tag!, cmd: cmd)
                 fallthrough
             case 5:
                 let resize = Double(curve.path.bounds.width + deltax)
-                self.resizeCurve(tag: 0, value: resize)
+                self.resizeCurve(tag: 0,
+                                 value: resize,
+                                 ind: dot.tag!,cmd: cmd)
             case 6:
                 let resize = Double(curve.path.bounds.width + deltax)
-                self.resizeCurve(tag: 0, value: resize)
+                self.resizeCurve(tag: 0,
+                                 value: resize,
+                                 ind: dot.tag!, cmd: cmd)
                 fallthrough
             case 7:
                 let resize = Double(curve.path.bounds.height + deltay)
-                self.resizeCurve(tag: 1, value: resize,anchor: CGPoint(x: 0, y: 1))
+                self.resizeCurve(tag: 1,
+                                 value: resize,anchor: CGPoint(x: 0, y: 1),
+                                 ind: dot.tag!, cmd: cmd)
             case 8:
                 let rotate = atan2(theEnd.y+deltay-curve.path.bounds.midY,
                             theEnd.x+deltax-curve.path.bounds.midX)
@@ -567,6 +580,7 @@ class SketchPad: NSView {
             dash: dashPattern,
             points: self.controlPoints)
 
+        self.layer?.addSublayer(curve.canvas)
         self.curves.append(curve)
 
         for point in self.controlPoints {
@@ -773,10 +787,10 @@ class SketchPad: NSView {
         }
     }
 
-    func cloneCurve() {
+    func copyCurve() {
         if let curve = self.selectedCurve, let index = self.curves.firstIndex(of: curve) {
             let curve = self.curves[index]
-            let clone = self.initCurve(
+            self.copiedCurve = self.initCurve(
                 path: curve.path.copy() as! NSBezierPath,
                 fill: curve.fill, rounded: curve.rounded,
                 strokeColor: curve.strokeColor,
@@ -793,15 +807,38 @@ class SketchPad: NSView {
                 cap: curve.cap, join: curve.join,
                 dash: curve.dash,
                 points: curve.points)
+        }
+    }
+
+    func pasteCurve(to: CGPoint) {
+
+        if let clone = self.copiedCurve {
+            self.layer?.addSublayer(clone.canvas)
             self.curves.append(clone)
-            self.clearControls(curve: curve, updatePoints: {})
+
+            if let curve = self.selectedCurve {
+                self.clearControls(curve: curve, updatePoints: {})
+            }
+
             self.selectedCurve = clone
-            self.moveCurve(tag: 0,
-                           value: Double(clone.path.bounds.midX+set.dotSize))
-            self.moveCurve(tag: 1,
-                           value: Double(clone.path.bounds.midY-set.dotSize))
+
+            self.moveCurve(
+                tag: 0, value: Double(to.x))
+            self.moveCurve(
+                tag: 1, value: Double(to.y))
+
             self.createControls(curve: clone)
+            self.copyCurve()
             self.needsDisplay = true
+        }
+    }
+
+    func cloneCurve() {
+        self.copyCurve()
+        if let curve = self.selectedCurve {
+            self.pasteCurve(to: CGPoint(
+                x: curve.path.bounds.midX+set.dotSize,
+                y: curve.path.bounds.midY-set.dotSize))
         }
     }
 
@@ -920,7 +957,7 @@ class SketchPad: NSView {
             botLeft = NSPoint(x: bottomRight.x,y: topLeft.y)
             topRight = NSPoint(x: topLeft.x, y: bottomRight.y)
         }
-        // use cmd for equal width and height
+        // use cmd for create equal width and height
         let size = self.flipSize(topLeft: botLeft, bottomRight: topRight)
         var wid = size.wid
         var hei = size.hei
@@ -1003,26 +1040,39 @@ class SketchPad: NSView {
 
     func createText(topLeft: NSPoint) {
         self.showText()
-        let fieldX = self.TextTool.subviews[1].frame.minX
         let height = self.TextTool.frame.height
         let deltaX = topLeft.x-self.bounds.minX
         let deltaY = topLeft.y-self.bounds.minY
         self.TextTool.setFrameOrigin(
-            NSPoint(x: deltaX * self.zoomed - fieldX,
+            NSPoint(x: deltaX * self.zoomed,
                     y: deltaY * self.zoomed - height))
     }
 
-    func glyphsCurve(value: String) {
+    //    MARK: Key func
+    func deleteCurve() {
+        if let curve = self.selectedCurve,
+            let index = self.curves.firstIndex(of: curve) {
+            self.curves.remove(at: index)
+            curve.shape.removeFromSuperlayer()
+            curve.canvas.removeFromSuperlayer()
+            self.clearControls(curve: curve, updatePoints: {})
+
+            self.selectedCurve = nil
+            self.needsDisplay = true
+        }
+    }
+
+//    MARK: TextTool func
+    func glyphsCurve(value: String, sharedFont: NSFont?) {
         self.editedPath = NSBezierPath()
 
-        if let font = NSFont(name: set.fontName, size: set.fontSize) {
-            let fieldX = self.TextTool.subviews[1].frame.minX
-            let height = self.TextTool.frame.height
-            let x = (self.TextTool.frame.minX + fieldX) / self.zoomed
+        if let font = sharedFont {
+            let height = self.TextTool.subviews[1].frame.height + set.dotSize * 2
+            let x = (self.TextTool.frame.minX) / self.zoomed
             let y = (self.TextTool.frame.minY + height) / self.zoomed
 
             let pos = NSPoint(x: x + self.bounds.minX,
-                              y: y + self.bounds.minY - height)
+                              y: y + self.bounds.minY )
             self.editedPath.move(to: pos)
             for char in value {
                 let glyph = font.glyph(withName: String(char))
@@ -1038,7 +1088,7 @@ class SketchPad: NSView {
             self.createControls(curve: curve)
         }
         self.updateSliders()
-        self.hideText()
+        self.hideTextTool()
     }
 
 //    func updateText() {
@@ -1052,7 +1102,7 @@ class SketchPad: NSView {
 ////        self.createText(topLeft: pos)
 //    }
 
-    func hideText() {
+    func hideTextTool() {
         self.TextTool.isHidden = true
     }
 
@@ -1096,21 +1146,6 @@ class SketchPad: NSView {
         self.FrameButtons.isHidden = false
     }
 
-
-//    MARK: Key func
-    func deleteCurve() {
-        if let curve = self.selectedCurve,
-            let index = self.curves.firstIndex(of: curve) {
-            self.curves.remove(at: index)
-            curve.shape.removeFromSuperlayer()
-            curve.canvas.removeFromSuperlayer()
-            self.clearControls(curve: curve, updatePoints: {})
-
-            self.selectedCurve = nil
-            self.needsDisplay = true
-        }
-    }
-
 //    MARK: Action func
     func moveCurve(tag: Int, value: Double) {
         var deltax: CGFloat = 0
@@ -1140,7 +1175,8 @@ class SketchPad: NSView {
     }
 
     func resizeCurve(tag: Int, value: Double,
-                     anchor: CGPoint = CGPoint(x: 0, y: 0)) {
+                     anchor: CGPoint = CGPoint(x: 0, y: 0),
+                     ind: Int? = nil ,cmd: Bool = false) {
         var scalex: CGFloat = 1
         var scaley: CGFloat = 1
         if let curve = selectedCurve, !curve.lock {
@@ -1149,14 +1185,41 @@ class SketchPad: NSView {
                 curve.angle = 0
                 return
             }
+            var anchorX = anchor.x
+            var anchorY = anchor.y
+
             if tag == 0 {
                 scalex = (CGFloat(value) / curve.path.bounds.width)
+                if cmd {
+                    scaley = scalex
+                    if ind == 0 {
+                        anchorX = 1
+                        anchorY = 1
+                    } else if ind == 2 {
+                        anchorX = 1
+                        anchorY = 0
+                    } else if ind == 6 {
+                        anchorY = 1
+                    }
+                }
             } else {
                 scaley = (CGFloat(value) / curve.path.bounds.height)
+                if cmd {
+                    scalex = scaley
+                    if ind == 0 {
+                        anchorX = 1
+                        anchorY = 1
+                    } else if ind == 2 {
+                        anchorX = 1
+                        anchorY = 0
+                    } else if ind == 4  {
+                        anchorX = 0
+                    }
+                }
             }
             let scale = AffineTransform(scaleByX: scalex,byY: scaley)
-            let originX = curve.path.bounds.minX + curve.path.bounds.width * anchor.x
-            let originY = curve.path.bounds.minY + curve.path.bounds.height * anchor.y
+            let originX = curve.path.bounds.minX + curve.path.bounds.width * anchorX
+            let originY = curve.path.bounds.minY + curve.path.bounds.height * anchorY
             
             curve.applyTransform(oX: originX, oY: originY,
                            transform: {curve.path.transform(using: scale)})

@@ -4,14 +4,12 @@ Vector Editor for MacOS.
 
 WIP
 
-v0.47
+v0.48
 
 ![Screenshot](screenshot/screenshot1.png)
 
 
 v0.5
-
-Implement default cmd-C cmd-V cmd-X events
 
 Save blur to .png
 

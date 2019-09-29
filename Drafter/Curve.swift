@@ -167,7 +167,7 @@ class Curve: Equatable {
 
         self.canvas.addSublayer(self.shape)
         self.canvas.addSublayer(self.gradient)
-        self.parent!.layer?.addSublayer(self.canvas)
+
         self.updateLayer()
     }
 

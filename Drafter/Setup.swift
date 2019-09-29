@@ -39,8 +39,9 @@ struct Set {
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 
-    let fontName: String = "Helvetica"
-    let fontSize: CGFloat = 22
+    let fontFamily: String = "Helvetica"
+    let fontType: String = "Regular"
+    let fontSize: CGFloat = 14
 
     let fontButtonSize = CGSize(width: 16, height: 16)
     let filename: String = "untitled.png"
