@@ -16,9 +16,10 @@ class Curve: Equatable {
     var parent: SketchPad?
     var path: NSBezierPath
     var shape = CAShapeLayer()
-    var mask = CAShapeLayer()
-    var gradient = CAGradientLayer()
+    let mask = CAShapeLayer()
+    let gradient = CAGradientLayer()
     let canvas = CALayer()
+    let image = CALayer()
 
     let dotSize: CGFloat =  set.dotSize
     let dotRadius: CGFloat = set.dotRadius
@@ -155,6 +156,9 @@ class Curve: Equatable {
                                "strokeColor" : NSNull(),
                                "fillColor" : NSNull(),
                                "lineWidth" : NSNull()]
+        self.image.actions = ["position" : NSNull(),
+                              "bounds" : NSNull(),
+                              "transform": NSNull()]
         self.gradient.actions = ["position" : NSNull(),
                                  "bounds": NSNull()]
         self.canvas.actions = ["position" : NSNull(),
@@ -166,6 +170,7 @@ class Curve: Equatable {
                                "shadowColor": NSNull()]
 
         self.canvas.addSublayer(self.shape)
+        self.canvas.addSublayer(self.image)
         self.canvas.addSublayer(self.gradient)
 
         self.updateLayer()
@@ -207,7 +212,7 @@ class Curve: Equatable {
                           offset: CGPoint(x: self.dotRadius,
                                           y: self.dotRadius),
                           radius: 0,
-                          bgColor: nil)
+                          fillColor: nil)
 
         let cp1 = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
                            offset: CGPoint(x: self.dotRadius,
@@ -228,10 +233,17 @@ class Curve: Equatable {
         return cp
     }
 
+    func delete() {
+        self.shape.removeFromSuperlayer()
+        self.image.removeFromSuperlayer()
+        self.gradient.removeFromSuperlayer()
+        self.canvas.removeFromSuperlayer()
+    }
 
 
 //    MARK: Layer func
     func updateLayer() {
+        
         self.shape.path = self.path.cgPath
         self.mask.path = self.path.cgPath
         self.gradient.mask = self.mask
@@ -242,6 +254,7 @@ class Curve: Equatable {
         self.canvas.position = CGPoint(
             x: self.path.bounds.midX,
             y: self.path.bounds.midY)
+        self.image.position = self.canvas.position
         self.gradient.position = self.canvas.position
     }
 

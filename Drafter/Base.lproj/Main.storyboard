@@ -148,12 +148,6 @@
                                                 <action selector="paste:" target="Ady-hI-5gd" id="UvS-8e-Qdg"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Paste and Match Style" keyEquivalent="V" id="WeT-3V-zwk">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="pasteAsPlainText:" target="Ady-hI-5gd" id="cEh-KX-wJQ"/>
-                                            </connections>
-                                        </menuItem>
                                         <menuItem title="Delete" id="pa3-QI-u2k">
                                             <string key="keyEquivalent" base64-UTF8="YES">
 CA
@@ -729,11 +723,11 @@ CA
                                 </gestureRecognizers>
                             </customView>
                             <stackView hidden="YES" distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xPr-66-BwF" userLabel="TextTool">
-                                <rect key="frame" x="0.0" y="540" width="152" height="63"/>
+                                <rect key="frame" x="0.0" y="540" width="128" height="63"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="horizontal" alignment="top" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KbM-uB-pFM" userLabel="Text">
-                                        <rect key="frame" x="0.0" y="39" width="152" height="24"/>
+                                        <rect key="frame" x="0.0" y="39" width="128" height="24"/>
                                         <subviews>
                                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iqw-kg-3iC" userLabel="CurveTextField">
                                                 <rect key="frame" x="0.0" y="0.0" width="128" height="24"/>
@@ -750,27 +744,11 @@ CA
                                                     <action selector="glyphsCurve:" target="XfG-lQ-9wD" id="unq-GL-awm"/>
                                                 </connections>
                                             </textField>
-                                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="3G5-CH-ihL" userLabel="CurveCloseButton">
-                                                <rect key="frame" x="136" y="7" width="16" height="17"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="height" constant="16" id="jKs-6k-wnl"/>
-                                                    <constraint firstAttribute="width" constant="16" id="lKH-nJ-uTZ"/>
-                                                </constraints>
-                                                <buttonCell key="cell" type="inline" title="✗" bezelStyle="inline" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="V9M-oF-f6Z">
-                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                    <font key="font" metaFont="smallSystemBold"/>
-                                                </buttonCell>
-                                                <connections>
-                                                    <action selector="hideTextTool:" target="XfG-lQ-9wD" id="xGg-Tv-8hV"/>
-                                                </connections>
-                                            </button>
                                         </subviews>
                                         <visibilityPriorities>
                                             <integer value="1000"/>
-                                            <integer value="1000"/>
                                         </visibilityPriorities>
                                         <customSpacing>
-                                            <real value="3.4028234663852886e+38"/>
                                             <real value="3.4028234663852886e+38"/>
                                         </customSpacing>
                                     </stackView>
@@ -1171,7 +1149,7 @@ CA
                                                             <constraints>
                                                                 <constraint firstAttribute="width" constant="50" id="P4g-mR-lfh"/>
                                                             </constraints>
-                                                            <popUpButtonCell key="cell" type="push" title="100" bezelStyle="rounded" alignment="center" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="K4m-Np-TAF" id="bQ9-oP-ET9">
+                                                            <popUpButtonCell key="cell" type="push" title="100" bezelStyle="rounded" alignment="center" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" arrowPosition="arrowAtCenter" selectedItem="K4m-Np-TAF" id="bQ9-oP-ET9">
                                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                 <font key="font" metaFont="miniSystem"/>
                                                                 <menu key="menu" id="HYV-Po-7fi">

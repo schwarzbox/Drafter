@@ -182,21 +182,20 @@ extension CALayer {
         return false
     }
 
-    func ciImage() -> CIImage? {
-
-        let width = Int(self.bounds.width * 2)
-        let height = Int(self.bounds.height * 2)
-        let imageRepresentation = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: NSColorSpaceName.deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
-        imageRepresentation.size = bounds.size
-
-        let context = NSGraphicsContext(bitmapImageRep: imageRepresentation)!
-        self.render(in: context.cgContext)
-
-        if let image =  CIImage(bitmapImageRep: imageRepresentation) {
-            return image
-        }
-        return nil
-    }
+//    func ciImage() -> CIImage? {
+//        let width = Int(self.bounds.width * 2)
+//        let height = Int(self.bounds.height * 2)
+//        let imageRepresentation = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: NSColorSpaceName.deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+//        imageRepresentation.size = bounds.size
+//
+//        let context = NSGraphicsContext(bitmapImageRep: imageRepresentation)!
+//        self.render(in: context.cgContext)
+//
+//        if let image =  CIImage(bitmapImageRep: imageRepresentation) {
+//            return image
+//        }
+//        return nil
+//    }
 
     func makeShape(path: NSBezierPath, color: NSColor, width: CGFloat) {
         let line = CAShapeLayer()
@@ -207,16 +206,6 @@ extension CALayer {
     }
 }
 
-
-extension NSSavePanel {
-    func setup() {
-        self.directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
-        self.canCreateDirectories = true
-        self.showsTagField = false
-        self.nameFieldStringValue = set.filename
-        self.makeKeyAndOrderFront(self)
-    }
-}
 
 extension CGColor {
     func sRGB(alpha: CGFloat = 1.0) -> CGColor {
@@ -266,6 +255,68 @@ extension NSColor {
     }
 }
 
+extension NSSavePanel {
+
+    func setupPanel(fileName: String) -> NSPopUpButton {
+        self.directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
+
+        self.allowedFileTypes = set.fileTypes
+    
+        self.allowsOtherFileTypes = false
+        self.isExtensionHidden = false
+        self.canSelectHiddenExtension = true
+        self.canCreateDirectories = true
+        self.showsTagField = false
+
+        self.nameFieldStringValue = fileName
+
+        let view = NSStackView()
+        view.orientation = .vertical
+
+        let stack = NSStackView()
+        stack.orientation = .horizontal
+
+        let popup = NSPopUpButton()
+        popup.autoenablesItems = false
+
+        for item in set.fileTypes {
+            popup.addItem(withTitle: "\(item.uppercased())")
+        }
+
+        popup.selectItem(at: 0)
+
+        let label = NSTextField()
+        label.backgroundColor = NSColor.clear
+        label.isBordered = false
+        label.isEditable = false
+        label.isSelectable = false
+        label.stringValue = "Format"
+
+        stack.addArrangedSubview(label)
+        stack.addArrangedSubview(popup)
+
+        view.addArrangedSubview(stack)
+
+        if let sview = view.superview {
+            NSLayoutConstraint.activate([
+                view.widthAnchor.constraint(equalTo: sview.widthAnchor),
+                stack.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+                ])
+        }
+        self.accessoryView = view
+        return popup
+    }
+}
+
+extension NSOpenPanel {
+    func setupPanel() {
+        self.allowedFileTypes = ["png","svg"]
+        self.allowsMultipleSelection = false
+        self.canChooseDirectories = false
+        self.canCreateDirectories = false
+        self.canChooseFiles = true
+    }
+}
 
 //func drawCanvas(curve: Curve) {
 //    let width = Int(curve.path.bounds.width)

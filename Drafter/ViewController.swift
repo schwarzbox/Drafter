@@ -136,9 +136,9 @@ class ViewController: NSViewController {
         CurveWidth.doubleValue = Double(set.lineWidth)
         CurveWidth.maxValue = Double(set.maxLineWidth)
         CurveOpacityStroke.maxValue = 1
-        CurveOpacityStroke.doubleValue =  CurveOpacityStroke.maxValue
+        CurveOpacityStroke.doubleValue = CurveOpacityStroke.maxValue
         CurveOpacityFill.maxValue = 1
-        CurveOpacityFill.doubleValue =  CurveOpacityFill.maxValue
+        CurveOpacityFill.doubleValue = CurveOpacityFill.maxValue
         CurveBlur.maxValue = set.maxBlur
 
         CurveWidLabel.doubleValue = set.screenWidth
@@ -185,13 +185,13 @@ class ViewController: NSViewController {
         CurveGradientMiddleColor.fillColor = set.gradientColor[1]
         CurveGradientFinalColor.borderColor = set.guiColor
         CurveGradientFinalColor.fillColor = set.gradientColor[2]
-        CurveGradientStartOpacity.doubleValue = 0
+        CurveGradientStartOpacity.doubleValue = Double(set.gradientOpacity[0])
         CurveGradientStartOpacity.maxValue = 1
         CurveGradientStartOpacityLabel.doubleValue =  CurveGradientStartOpacity.doubleValue
-        CurveGradientMiddleOpacity.doubleValue = 0
+        CurveGradientMiddleOpacity.doubleValue = Double(set.gradientOpacity[1])
         CurveGradientMiddleOpacity.maxValue = 1
         CurveGradientMiddleOpacityLabel.doubleValue =  CurveGradientMiddleOpacity.doubleValue
-        CurveGradientFinalOpacity.doubleValue = 0
+        CurveGradientFinalOpacity.doubleValue = Double(set.gradientOpacity[2])
         CurveGradientFinalOpacity.maxValue = 1
         CurveGradientFinalOpacityLabel.doubleValue =  CurveGradientFinalOpacity.doubleValue
 
@@ -268,8 +268,11 @@ class ViewController: NSViewController {
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(abortTextFields), name: Notification.Name("abortTextFields"), object: nil)
         nc.addObserver(self, selector: #selector(updateSliders), name: Notification.Name("updateSliders"), object: nil)
+        nc.addObserver(self, selector: #selector(closeSharedColorPanel), name: Notification.Name("closeSharedColorPanel"), object: nil)
 
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
+
+        self.showFileName()
     }
 
 //    MARK: Obserevrs actions
@@ -428,11 +431,11 @@ class ViewController: NSViewController {
         SketchView!.ColorPanel = SharedColorPanel
     }
 
-    func closeSharedColorPanel() {
+    @objc func closeSharedColorPanel() {
         if let panel = self.SharedColorPanel {
             panel.close()
             SharedColorPanel = nil
-            SketchView!.ColorPanel = nil
+            self.CurveColors.isOn(title: "")
         }
     }
 //     MARK: TextTool
@@ -469,14 +472,13 @@ class ViewController: NSViewController {
         }
     }
 
-
 //    MARK: Zoom Actions
     @IBAction func zoomOrigin(_ sender: NSPanGestureRecognizer) {
         let View = SketchView!
         let vel = sender.velocity(in: SketchView)
-        let deltax = vel.x / set.reduceZoom
-        let deltay = vel.y / set.reduceZoom
-        View.setZoomOrigin(deltaX: deltax, deltaY: deltay)
+        let deltaX = vel.x / set.reduceZoom
+        let deltaY = vel.y / set.reduceZoom
+        View.setZoomOrigin(deltaX: deltaX, deltaY: deltaY)
     }
 
     @IBAction func zoomGesture(_ sender: NSMagnificationGestureRecognizer) {
@@ -493,24 +495,15 @@ class ViewController: NSViewController {
     }
 
     @IBAction func zoomSketch(_ sender: NSSlider) {
-        let View = SketchView!
-        if let event = NSApplication.shared.currentEvent {
-            if event.type == NSEvent.EventType.leftMouseDown {
-                let wid = View.self.bounds.width
-                let hei = View.self.bounds.height
-                View.zoomOrigin = CGPoint(x: View.self.bounds.minX+wid/2,
-                                          y: View.self.bounds.minY+hei/2)
-            }
-        }
-        View.zoomSketch(value: sender.doubleValue)
+        SketchView!.zoomSketch(value: sender.doubleValue)
         ZoomDefaultSketch.title = String(sender.intValue)
     }
 
     @IBAction func zoomDefaultSketch(_ sender: NSPopUpButton) {
         let View = SketchView!
         if let value = Double(sender.itemTitle(at: sender.indexOfSelectedItem)) {
-            View.zoomOrigin = CGPoint(x: View.bounds.midX,
-                                      y: View.bounds.midY)
+            View.zoomOrigin = CGPoint(x: View.frame.midX,
+                                      y: View.frame.midY)
             sender.title = sender.itemTitle(at: sender.indexOfSelectedItem)
             ZoomSketch.doubleValue = value
             View.zoomSketch(value: value)
@@ -670,14 +663,10 @@ class ViewController: NSViewController {
                                 sharedFont: self.sharedFont)
     }
 
-    @IBAction func hideTextTool(_ sender: NSButton) {
-        SketchView!.hideTextTool()
-    }
 
 //    MARK: ColorPanel actions
     @IBAction func openColorPanel(_ sender: ColorBox) {
         if sender.state == .off {
-            self.CurveColors.isOn(title: "")
             self.closeSharedColorPanel()
         } else {
             self.CurveColors.isOn(title: sender.alternateTitle)
@@ -766,11 +755,11 @@ class ViewController: NSViewController {
         View.opacityGradientCurve(tag: v.tag, value: v.value)
 
         if v.tag == 0 {
-            self.CurveGradientStartOpacityLabel.doubleValue = v.value
+            CurveGradientStartOpacityLabel.doubleValue = v.value
         } else if v.tag == 1 {
-            self.CurveGradientMiddleOpacityLabel.doubleValue = v.value
+            CurveGradientMiddleOpacityLabel.doubleValue = v.value
         } else if v.tag == 2 {
-            self.CurveGradientFinalOpacityLabel.doubleValue = v.value
+            CurveGradientFinalOpacityLabel.doubleValue = v.value
         }
         self.restoreControlFrame(view: View)
     }
@@ -806,10 +795,13 @@ class ViewController: NSViewController {
     }
 
     @IBAction func paste(_ sender: NSMenuItem) {
+        let View = SketchView!
         let pos = NSEvent.mouseLocation
+        let deltaX = (pos.x - (Window?.frame.minX)!)/View.zoomed
+        let deltaY =  (pos.y - (Window?.frame.minY)!)/View.zoomed
         SketchView!.pasteCurve(to: CGPoint(
-            x: pos.x - (Window?.frame.minX)!,
-            y: pos.y - (Window?.frame.minY)!))
+            x: deltaX + View.bounds.minX ,
+            y: deltaY + View.bounds.minY))
     }
 
     @IBAction func cut(_ sender: NSMenuItem) {
@@ -817,11 +809,102 @@ class ViewController: NSViewController {
         SketchView!.deleteCurve()
     }
 
+    @IBAction func undo(_ sender: NSMenuItem) {
+        print("undo")
+//        SketchView!.undoCurve()
+    }
+
+    @IBAction func redo(_ sender: NSMenuItem) {
+        print("redo")
+        //        SketchView!.undoCurve()
+    }
+
     @IBAction func delete(_ sender: NSMenuItem) {
         SketchView!.deleteCurve()
     }
 
-    func saveSketch(url: URL, name: String) {
+    func showFileName() {
+        let fileName = SketchView!.sketchName ?? set.filename
+        self.Window!.title = fileName
+    }
+
+    func openPng(filePath: URL) {
+        let View = SketchView!
+        let image = NSImage(contentsOf: filePath)
+        if let wid = image?.size.width, let hei = image?.size.height {
+
+            let topLeft = NSPoint(x: View.frame.midX - wid/2,
+                                  y: View.frame.midY - hei/2)
+            let bottomRight = NSPoint(x: View.frame.midX + wid/2,
+                                      y: View.frame.midY + hei/2)
+            View.createRectangle(topLeft: topLeft,
+                                 bottomRight: bottomRight)
+            if let curve = View.selectedCurve {
+                View.clearControls(curve: curve, updatePoints: {})
+            }
+            View.addCurve()
+            if let curve = View.selectedCurve {
+                curve.alpha = [CGFloat](repeating: 0, count: 2)
+
+                curve.image.contents = image
+                curve.image.bounds = curve.path.bounds
+                curve.image.position = CGPoint(
+                    x: curve.path.bounds.midX,
+                    y: curve.path.bounds.midY)
+                View.createControls(curve: curve)
+                self.updateSliders()
+            }
+        }
+
+    }
+
+    func openSvg(filePath: URL) {
+        print("open svg")
+    }
+
+    @IBAction func newDocument(_ sender: NSMenuItem) {
+        print("new")
+        let View = SketchView!
+        self.saveDocument(sender)
+        View.zoomOrigin = NSPoint(x: View.frame.midX,
+                                  y: View.frame.midY)
+        View.zoomSketch(value: 100)
+
+        if let curve = View.selectedCurve {
+            View.clearControls(curve: curve, updatePoints: {})
+        }
+        View.selectedCurve = nil
+
+        self.closeSharedColorPanel()
+        View.hideTextTool()
+
+    }
+
+    @IBAction func openDocument(_ sender: NSMenuItem) {
+        let openPanel = NSOpenPanel()
+        openPanel.setupPanel()
+        openPanel.beginSheetModal(
+            for: self.Window!,
+            completionHandler: {(result) -> Void in
+                if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
+
+                    if openPanel.urls.count>0 {
+                        let filePath = openPanel.urls[0]
+                        let ext = filePath.pathExtension
+                        if ext == "png" {
+                            self.openPng(filePath: filePath)
+                        } else if ext == "svg" {
+                            self.openSvg(filePath: filePath)
+                        }
+                    }
+                } else {
+                    openPanel.close()
+                }
+        })
+        
+    }
+
+    func saveSketch(url: URL, name: String, ext: String) {
         let View = SketchView!
         if let curve = View.selectedCurve {
             View.clearControls(curve: curve, updatePoints: {})
@@ -829,15 +912,24 @@ class ViewController: NSViewController {
         View.sketchWidth = 0
         View.sketchColor = NSColor.clear
         let zoomed = View.zoomed
+        let zoomOrigin = View.zoomOrigin
+        View.zoomOrigin = NSPoint(x: View.frame.midX,
+                                  y: View.frame.midY)
         View.zoomSketch(value: 100)
-        let  filePath = url.appendingPathComponent(name)
-        if  let image = View.imageData() {
-            do {
-                try image.write(to: filePath, options: .atomic)
 
-            } catch {
-                print("error save image")
+        let filePath = url.appendingPathComponent(name + "." + ext)
+
+        if ext == "png" {
+            if let image = View.imageData() {
+                do {
+                    try image.write(to: filePath, options: .atomic)
+
+                } catch {
+                    print("error save \(ext)")
+                }
             }
+        } else if ext == "svg" {
+            print("save svg")
         }
 
         if let curve = View.selectedCurve {
@@ -845,38 +937,101 @@ class ViewController: NSViewController {
         }
         View.sketchWidth = set.lineWidth
         View.sketchColor = set.guiColor
+        View.zoomOrigin = zoomOrigin
         View.zoomSketch(value: Double(zoomed * 100))
     }
+
+
+    @objc func setFileType(_ sender: NSPopUpButton) {
+        let index = sender.indexOfSelectedItem
+        sender.setTitle(sender.itemTitle(at: index))
+        if let savePanel = SavePanel {
+            var types = savePanel.allowedFileTypes ?? []
+            let typeIndex = types.firstIndex(of: sender.title.lowercased())
+            if let ind = typeIndex {
+                if ind>0 {
+                    types.swapAt(0, ind)
+                } else {
+                    savePanel.allowedFileTypes = []
+                }
+                savePanel.allowedFileTypes = types
+            }
+        }
+    }
+
+
     @IBAction func saveDocument(_ sender: NSMenuItem) {
         let View = SketchView!
-        if let name = View.sketchName, let dir = View.sketchDir {
-            saveSketch(url: dir, name: name)
+        if let name = View.sketchName,
+            let dir = View.sketchDir,
+            let ext = View.sketchExt {
+            self.saveSketch(url: dir, name: name, ext: ext)
         } else {
             self.saveDocumentAs(sender)
         }
     }
+
+    var SavePanel: NSSavePanel?
+
     @IBAction func saveDocumentAs(_ sender: NSMenuItem) {
         let View = SketchView!
-        let savePanel = NSSavePanel()
-        savePanel.setup()
+        SavePanel = NSSavePanel()
+        if let savePanel = SavePanel {
 
-        savePanel.beginSheetModal(for: self.Window!,
-                                  completionHandler: {(result) in
-            if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
-                let name = savePanel.nameFieldStringValue
+            let popup = savePanel.setupPanel(fileName: set.filename)
+            popup.target = self
+            popup.action = #selector(self.setFileType)
 
-                if name != set.filename {
-                    View.sketchName = savePanel.nameFieldStringValue
-                }
-                if let url = savePanel.directoryURL {
-                    View.sketchDir = url
-                    self.saveSketch(url: url, name: name)
-                }
-            } else {
-                savePanel.close()
-            }
-        })
+            savePanel.beginSheetModal(
+                for: self.Window!,
+                completionHandler: {(result) in
+                    if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
+                        let name = savePanel.nameFieldStringValue
+                        let indexDot = name.firstIndex(of: ".")
+                        var trimName = name
+                        if let dot = indexDot {
+                            trimName  = String(trimName.prefix(upTo: dot))
+                        }
+                        if trimName != set.filename {
+                            View.sketchName = trimName
+                        } else {
+                            View.sketchName = nil
+                        }
+                        if let url = savePanel.directoryURL {
+                            View.sketchDir = url
+                            let index = popup.indexOfSelectedItem
+                            let ext = popup.itemTitle(at: index).lowercased()
+                            View.sketchExt = ext
+                            self.saveSketch(url: url, name: trimName, ext: ext)
+                        }
+                    } else {
+                        savePanel.close()
+                    }
+                    if sender.title == "New" {
+                        View.sketchName = nil
+                        View.sketchExt = nil
+                        for curve in View.curves {
+                            curve.delete()
+                        }
+                        View.curves.removeAll()
+                    }
+                    self.showFileName()
+            })
+        }
+    }
 
+    @IBAction func performClose(_ sender: NSMenuItem) {
+        print("close")
+        let View = SketchView!
+        if let name = View.sketchName,
+            let dir = View.sketchDir,
+            let ext = View.sketchExt {
+            saveSketch(url: dir, name: name, ext: ext)
+        }
+    }
+
+    @IBAction func terminate(_ sender: NSMenuItem) {
+        print("quit")
     }
 }
 

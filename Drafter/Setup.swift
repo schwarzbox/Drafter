@@ -26,6 +26,7 @@ struct Set {
     let strokeColor = NSColor.white.sRGB()
     let fillColor = NSColor.systemBlue.sRGB()
     let guiColor = NSColor.systemGray.sRGB()
+
     let shadow: [CGFloat] = [2.0,0.5,8.0,8.0]
     let shadowColor =  NSColor.black
     let maxShadowRadius: Double = 32
@@ -35,6 +36,7 @@ struct Set {
                          NSColor.systemBlue,
                          NSColor.systemPurple]
     let gradientLocation: [NSNumber] = [0.0, 0.50, 1.0]
+    let gradientOpacity: [CGFloat] = [0.0, 0.0, 0.0]
 
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
@@ -44,7 +46,8 @@ struct Set {
     let fontSize: CGFloat = 14
 
     let fontButtonSize = CGSize(width: 16, height: 16)
-    let filename: String = "untitled.png"
+    let filename: String = "untitled"
+    let fileTypes: [String] = ["png","svg"]
 }
 
 var set = Set()

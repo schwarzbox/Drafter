@@ -89,7 +89,8 @@ class ControlFrame: CALayer {
         self.makeShape(path: path, color: ControlFrame.defaultStrokeColor,
                        width: ControlFrame.defaultWidth)
 
-        var bgColor = ControlFrame.defaultFillColor
+        var fillColor = ControlFrame.defaultFillColor
+        var strokeColor = ControlFrame.defaultStrokeColor
         var gradIndex = 0
         for i in 0..<dots.count {
             var radius: CGFloat = 0
@@ -97,18 +98,22 @@ class ControlFrame: CALayer {
                 radius = ControlFrame.dot50Size
             } else if i==dots.count-5 || i==dots.count-4 {
                 radius = ControlFrame.dot50Size
-                bgColor = ControlFrame.defaultStrokeColor
+                fillColor = ControlFrame.defaultStrokeColor
+                strokeColor = ControlFrame.defaultFillColor
             } else if i==dots.count-3 || i==dots.count-2 || i==dots.count-1 {
                 radius = ControlFrame.dot50Size/2
-                bgColor = curve.gradientColor[gradIndex]
+                fillColor = curve.gradientColor[gradIndex]
+                strokeColor = ControlFrame.defaultStrokeColor
                 gradIndex += 1
             }
-            self.makeDot(parent: parent, tag: i, x: dots[i].x, y: dots[i].y,
-                         radius: radius,bgColor: bgColor)
+            self.makeDot(parent: parent, tag: i,
+                         x: dots[i].x, y: dots[i].y, radius: radius,
+                         strokeColor: strokeColor, fillColor: fillColor)
         }
-
+        // rounded rectangle controls
         if let rounded = curve.rounded {
-            let bgColor = NSColor.green
+            let fillColor = NSColor.green
+            let strokeColor = ControlFrame.defaultStrokeColor
 
             let wid = self.bounds.width/2
             let hei = self.bounds.height/2
@@ -134,12 +139,14 @@ class ControlFrame: CALayer {
             self.makeDot(parent: parent, tag: dots.count,
                          x: roundedX.x, y: roundedX.y,
                          radius: ControlFrame.dot50Size,
-                         bgColor: bgColor)
+                         strokeColor: strokeColor,
+                         fillColor: fillColor)
 
             self.makeDot(parent: parent, tag: dots.count+1,
                          x: roundedY.x, y: roundedY.y,
                          radius: ControlFrame.dot50Size,
-                         bgColor: bgColor)
+                         strokeColor: strokeColor,
+                         fillColor: fillColor)
         }
     }
 
@@ -148,17 +155,19 @@ class ControlFrame: CALayer {
     }
 
     func makeDot(parent: SketchPad, tag: Int, x: CGFloat, y: CGFloat,
-                 radius: CGFloat, bgColor: NSColor) {
+                 radius: CGFloat,
+                 strokeColor: NSColor, fillColor: NSColor) {
         let cp = Dot.init(x: x, y: y,
                           size: ControlFrame.dotSize,
                           offset: CGPoint(
                             x: ControlFrame.dot50Size,
                             y: ControlFrame.dot50Size),
                           radius: radius,
-                          bgColor: bgColor)
+                          strokeColor: strokeColor,
+                          fillColor: fillColor)
         // mouse track dots
-        let options: NSTrackingArea.Options = [.mouseEnteredAndExited,
-                                               .activeInActiveApp]
+        let options: NSTrackingArea.Options = [
+            .mouseEnteredAndExited,.activeInActiveApp]
         let area = NSTrackingArea(
             rect: NSRect(
                 x: self.frame.minX + cp.frame.minX,
@@ -175,7 +184,7 @@ class ControlFrame: CALayer {
                                 x: ControlFrame.label50Size,
                                 y: ControlFrame.label50Size),
                              radius: ControlFrame.label50Size,
-                             bgColor: nil,
+                             fillColor: nil,
                              hidden: true)
         cp.addSublayer(label)
         self.addSublayer(cp)

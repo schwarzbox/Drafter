@@ -12,7 +12,7 @@ class Dot: CALayer {
     init(x: CGFloat, y: CGFloat, size: CGFloat, offset: CGPoint,
          radius: CGFloat, lineWidth: CGFloat = set.lineWidth,
          strokeColor: NSColor? = set.strokeColor,
-         bgColor: NSColor? = set.fillColor,
+         fillColor: NSColor? = set.fillColor,
          hidden: Bool = false) {
 
         super.init()
@@ -24,7 +24,7 @@ class Dot: CALayer {
         self.cornerRadius = radius
         self.borderWidth = lineWidth
         self.borderColor = strokeColor?.cgColor
-        self.backgroundColor = bgColor?.cgColor
+        self.backgroundColor = fillColor?.cgColor
 
         self.isHidden = hidden
     }
