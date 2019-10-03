@@ -124,6 +124,7 @@ class Curve: Equatable {
     var join: Int = 1
     var dash: [NSNumber] = []
 
+    var borderPosition: CGFloat = 1
     var rounded: CGPoint?
     var lock: Bool = false
     var points: [ControlPoint] = []
@@ -172,7 +173,7 @@ class Curve: Equatable {
         self.canvas.addSublayer(self.shape)
         self.canvas.addSublayer(self.image)
         self.canvas.addSublayer(self.gradient)
-
+        self.canvas.shouldRasterize = true
         self.updateLayer()
     }
 
@@ -243,7 +244,6 @@ class Curve: Equatable {
 
 //    MARK: Layer func
     func updateLayer() {
-        
         self.shape.path = self.path.cgPath
         self.mask.path = self.path.cgPath
         self.gradient.mask = self.mask

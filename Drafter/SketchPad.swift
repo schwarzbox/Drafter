@@ -5,18 +5,12 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
-//0.5
-
-// closable frameButtons
-// TextTool add open font and close button
-// refactor extension shape layer drawing lines
-
-// Save blur to .png
-
 //0.6
-// edit curves with control dots?
 // Rulers (Figma style)
 // Grid (NSDrawTiledRect & snap to grid)
+// edit curves with control dots?
+// CapJoin UI
+// DashPattern UI
 
 //0.7
 // undo redo history
@@ -27,25 +21,27 @@
 //0.8
 // Custom filters (proportional)
 // CA Filters
-// flatneess mitter limits fillRule strokeStart strokeEnd
-// phase (use line dash phase to animate frame)
+// blur?
 
 // 1.0
+
 // refactor CGPoint NSPoint
 // refactor frame (when zoom smaller dot size) (animation for labels)
-// stroke width for more canvas
-
-// disable unused actions
-
-// save before cmd-w cmd-q
-// resize image?
-// TextTool (position)?
+// refactor dash pattern
+// flatneess mitter limits fillRule
+// phase (use line dash phase to animate frame)
 
 // 1.5
 // save svg
-
-//2.0
 // open svg
+
+// 2.0
+// disable unused actions
+
+// save before cmd-w cmd-q AppDelegate
+// resize image?
+// TextTool (position)?
+// move border path?
 
 import Cocoa
 
@@ -198,6 +194,7 @@ class SketchPad: NSView {
         // filters
 //        self.wantsLayer = true
         self.layerUsesCoreImageFilters = true
+
     }
 
 //    MARK: Mouse func
@@ -368,6 +365,9 @@ class SketchPad: NSView {
                     self.editDone = true
                     self.editedPath.close()
                 case .Curve:
+                    if self.editDone {
+                        return
+                    }
                     let theEnd2 = NSPoint(
                         x: theStart.x - (theEnd.x - theStart.x),
                         y: theStart.y - (theEnd.y - theStart.y))
@@ -405,7 +405,7 @@ class SketchPad: NSView {
         // unfocus text fields
         let nc = NotificationCenter.default
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
-
+        
         if let theStart = self.startPoint {
             if let curve = self.selectedCurve, curve.edit {
                 curve.selectPoint(pos: theStart)
@@ -420,10 +420,6 @@ class SketchPad: NSView {
                 self.finalSegment(fin: {mp,cp1,cp2 in
                     self.editedPath.move(to: mp.position)
                     self.controlPoints.append(ControlPoint(mp: mp, cp1: cp1, cp2: cp2))
-                    self.controlPoint1 = nil
-                    cp1.removeFromSuperlayer()
-                    self.controlPoint2 = nil
-                    cp2.removeFromSuperlayer()
                 })
             } else if let _ = self.movePoint, self.closedCurve {
                 self.finalSegment(fin: {
@@ -545,8 +541,6 @@ class SketchPad: NSView {
 
     func addCurve() {
         let path = self.editedPath.copy() as! NSBezierPath
-        self.editedPath.removeAllPoints()
-        self.editLayer.removeFromSuperlayer()
 
         if path.elementCount == 0 {
             return
@@ -594,13 +588,7 @@ class SketchPad: NSView {
         self.layer?.addSublayer(curve.canvas)
         self.curves.append(curve)
 
-        for point in self.controlPoints {
-            point.mp.removeFromSuperlayer()
-            point.cp1.removeFromSuperlayer()
-            point.cp2.removeFromSuperlayer()
-        }
-        self.controlPoints = []
-        self.movePoint = nil
+        self.clearCurvedPath()
         self.selectedCurve = curve
     }
 
@@ -623,15 +611,6 @@ class SketchPad: NSView {
             if bounds.contains(pos) {
                 self.selectedCurve = curve
             }
-        }
-
-        if self.selectedCurve == nil {
-            // close other tools
-            self.hideTextTool()
-            let nc = NotificationCenter.default
-            nc.post(
-                name: Notification.Name("closeSharedColorPanel"),
-                object: nil)
         }
     }
 
@@ -740,15 +719,12 @@ class SketchPad: NSView {
                               controlPoint2: points[1])
 
         self.controlPoints.append(ControlPoint(mp: mp, cp1: cp1, cp2: cp2))
-        self.controlPoint1 = nil
-        cp1.removeFromSuperlayer()
-        self.controlPoint2 = nil
-        cp2.removeFromSuperlayer()
     }
 
     func finalSegment(fin: (_ mp: Dot, _ cp1: Dot, _ cp2: Dot) -> Void ) {
         if let mp = self.movePoint, let cp1 = self.controlPoint1, let cp2 = self.controlPoint2 {
             fin(mp, cp1, cp2)
+            
             self.editedPath.close()
             self.curvedPath.removeAllPoints()
             self.controlPath.removeAllPoints()
@@ -756,6 +732,36 @@ class SketchPad: NSView {
             self.controlLayer.removeFromSuperlayer()
             self.editDone = true
         }
+    }
+
+
+    func clearCurvedPath() {
+        self.editedPath.removeAllPoints()
+        self.editLayer.removeFromSuperlayer()
+
+        self.curvedPath.removeAllPoints()
+        self.controlPath.removeAllPoints()
+        self.curveLayer.removeFromSuperlayer()
+        self.controlLayer.removeFromSuperlayer()
+
+        for point in self.controlPoints {
+            point.mp.removeFromSuperlayer()
+            point.cp1.removeFromSuperlayer()
+            point.cp2.removeFromSuperlayer()
+        }
+        self.controlPoints = []
+
+        if let mp = self.movePoint,
+            let cp1 = self.controlPoint1,
+            let cp2 = self.controlPoint2 {
+            mp.removeFromSuperlayer()
+            self.movePoint = nil
+            self.controlPoint1 = nil
+            cp1.removeFromSuperlayer()
+            self.controlPoint2 = nil
+            cp2.removeFromSuperlayer()
+        }
+
     }
 
 //    MARK: Buttons func
@@ -1067,6 +1073,10 @@ class SketchPad: NSView {
 
 //    MARK: Key func
     func deleteCurve() {
+        if tool == .Curve && self.movePoint != nil {
+            self.clearCurvedPath()
+            return
+        }
         if let curve = self.selectedCurve,
             let index = self.curves.firstIndex(of: curve) {
             self.curves.remove(at: index)
@@ -1294,7 +1304,7 @@ class SketchPad: NSView {
         }
     }
 
-    func widthCurve(value: Double) {
+    func borderWidthCurve(value: Double) {
         if let curve = self.selectedCurve, !curve.lock {
             curve.lineWidth = CGFloat(value)
             self.clearControls(curve: curve, updatePoints: {})
@@ -1310,20 +1320,15 @@ class SketchPad: NSView {
 
     func colorCurve() {
         if let curve = self.selectedCurve, !curve.lock {
-            let stroke = self.CurveStrokeColor.fillColor
-            let fill = self.CurveFillColor.fillColor
-            
-            curve.strokeColor = stroke
-            curve.fillColor = fill
-
+            curve.strokeColor = self.CurveStrokeColor.fillColor
+            curve.fillColor = self.CurveFillColor.fillColor
             self.needsDisplay = true
         }
     }
 
     func shadowColorCurve() {
         if let curve = self.selectedCurve, !curve.lock {
-            let shadow = self.CurveShadowColor.fillColor
-            curve.shadowColor = shadow
+            curve.shadowColor = self.CurveShadowColor.fillColor
             self.needsDisplay = true
         }
     }
@@ -1344,7 +1349,6 @@ class SketchPad: NSView {
 
             self.clearControls(curve: curve, updatePoints: {})
             self.createControls(curve: curve)
-            
             self.needsDisplay = true
         }
     }
@@ -1369,7 +1373,7 @@ class SketchPad: NSView {
         }
     }
 
-    func gradientLocationCurve(tag: Int,value: CGFloat) {
+    func gradientLocationCurve(tag: Int, value: CGFloat) {
         if let curve = self.selectedCurve, !curve.lock {
             let value =  Double(value / curve.path.bounds.width)
             var location = curve.gradientLocation
@@ -1468,57 +1472,51 @@ class SketchPad: NSView {
         return (bottomRight.x - topLeft.x, bottomRight.y - topLeft.y)
     }
 
+    func cgImageFrom(ciImage: CIImage) -> CGImage? {
+        let context = CIContext(options: nil)
+        if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
+            return cgImage
+        }
+        return nil
+    }
+
     func imageData(fileType: NSBitmapImageRep.FileType = .png,
                        properties: [NSBitmapImageRep.PropertyKey : Any] = [:]) -> Data? {
-
-        if let imageRep = self.bitmapImageRepForCachingDisplay(in: self.sketchBorder.bounds) {
-
+        if let imageRep = bitmapImageRepForCachingDisplay(in: self.sketchBorder.bounds) {
             self.cacheDisplay(in: self.sketchBorder.bounds, to: imageRep)
-            return imageRep.representation(using: fileType, properties: properties)!
-        }
 
-//        if let imageRep = bitmapImageRepForCachingDisplay(in: self.sketchBorder.bounds) {
-//
 //            let context = NSGraphicsContext(bitmapImageRep: imageRep)!
 //            let cgCtx = context.cgContext
+//            cgCtx.clear(self.sketchBorder.bounds)
 //
-////            var index = 0
+//            var index = 0
 //            if let layer = self.layer, let sublayers = layer.sublayers {
-//                 layer.render(in: cgCtx)
 //                for sublayer in sublayers {
-
 //                    let curve = self.curves[index]
-//                    if let ciImg = sublayer.ciImage() {
+//                    if curve.blur > 0, let cgImg = sublayer.cgImage() {
+//
+//                        let ciImg = CIImage(cgImage: cgImg)
 //                        let filter = CIFilter(name: "CIGaussianBlur")
 //                        filter?.setValue(ciImg, forKey: kCIInputImageKey)
 //                        filter?.setValue(curve.blur, forKey: kCIInputRadiusKey)
 //                        if let output = filter?.outputImage {
-//                            let data = NSBitmapImageRep(ciImage: output)
-//                            print(output)
-//                            let x = sublayer.bounds.minX
-//                            let y = sublayer.bounds.minY
-//                            print(x,y)
-//
-//                            let rect = CGRect(x: 0, y: 0,
-//                                              width: x + sublayer.bounds.width,
-//                                              height: y + sublayer.bounds.height)
-//                            print(rect.midX,rect.midY, rect)
-//
-//
-//                            print(sublayer.bounds,sublayer.frame)
-//                            cgCtx.draw(data.cgImage!, in: rect)
+//                            if let cgImage = self.cgImageFrom(ciImage: output) {
+//                                cgCtx.draw(cgImage, in: sublayer.bounds)
+//                            }
+//                            print(sublayer.position,
+//                                  sublayer.frame)
+//                            print(sublayer.position,
+//                                  sublayer.frame)
 //
 //                        }
+//                    } else {
+//                        sublayer.render(in: cgCtx)
 //                    }
 //                    index += 1
 //                }
-
-//                if let img = cgCtx.makeImage() {
-//                    let data = NSBitmapImageRep(cgImage: img)
-//                    return data.representation(using: fileType, properties: properties)!
-//                }
+                return imageRep.representation(using: fileType, properties: properties)!
 //            }
-//        }
+        }
         return nil
     }
 }

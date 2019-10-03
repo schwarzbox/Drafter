@@ -25,7 +25,7 @@ struct Set {
 
     let strokeColor = NSColor.white.sRGB()
     let fillColor = NSColor.systemBlue.sRGB()
-    let guiColor = NSColor.systemGray.sRGB()
+    let guiColor = NSColor.unemphasizedSelectedContentBackgroundColor.sRGB()
 
     let shadow: [CGFloat] = [2.0,0.5,8.0,8.0]
     let shadowColor =  NSColor.black
@@ -41,11 +41,11 @@ struct Set {
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 
+    let fontText: String = "Text"
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"
-    let fontSize: CGFloat = 14
+    let fontSize: CGFloat = 18
 
-    let fontButtonSize = CGSize(width: 16, height: 16)
     let filename: String = "untitled"
     let fileTypes: [String] = ["png","svg"]
 }

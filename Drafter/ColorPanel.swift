@@ -10,32 +10,32 @@ import Cocoa
 
 class ColorPanel: NSStackView {
 
-    func setColor(color: NSColor, panel: inout NSColorPanel?) {
+    func setColor(color: NSColor) -> NSColor  {
         let label = self.subviews.first! as! NSTextField
         let box = self.subviews.last! as! NSBox
         label.stringValue = color.hexString
-        panel?.color = color
         box.fillColor = color
+        return color
     }
 
-    func setHexColor(hex: String, panel: inout NSColorPanel?) {
+    func setHexColor(hex: String) -> NSColor {
         let color = NSColor.init(
             hex: Int(hex, radix: 16) ?? 0xFFFFFF)
         let label = self.subviews.first! as! NSTextField
         let box = self.subviews.last! as! NSBox
         label.stringValue = color.hexString
-        panel?.color = color
+
         box.fillColor = color
+        return color
     }
 
     func updateColor(sender: Any,
-                     sharedPanel: inout NSColorPanel?) {
+                     color: inout NSColor) {
         if let text = sender as? NSTextField {
-            self.setHexColor(hex: text.stringValue,
-                             panel: &sharedPanel)
+            
+            color = self.setHexColor(hex: text.stringValue)
         } else if let panel = sender as? NSColorPanel {
-            self.setColor(color: panel.color,
-                          panel: &sharedPanel)
+           color = self.setColor(color: panel.color)
         }
     }
 }

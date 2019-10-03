@@ -127,10 +127,7 @@ class ControlFrame: CALayer {
             path.removeAllPoints()
             path.move(to: CGPoint(x: roundedX.x,y: self.bounds.maxY))
             path.line(to: roundedX)
-            self.makeShape(path: path, color: ControlFrame.defaultFillColor,
-                           width: ControlFrame.defaultWidth)
-
-            path.removeAllPoints()
+     
             path.move(to: CGPoint(x: self.bounds.maxX,y: roundedY.y))
             path.line(to: roundedY)
             self.makeShape(path: path, color: ControlFrame.defaultFillColor,

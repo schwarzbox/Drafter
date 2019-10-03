@@ -268,14 +268,12 @@ class ViewController: NSViewController {
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(abortTextFields), name: Notification.Name("abortTextFields"), object: nil)
         nc.addObserver(self, selector: #selector(updateSliders), name: Notification.Name("updateSliders"), object: nil)
-        nc.addObserver(self, selector: #selector(closeSharedColorPanel), name: Notification.Name("closeSharedColorPanel"), object: nil)
 
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
 
         self.showFileName()
     }
 
-//    MARK: Obserevrs actions
     @objc func abortTextFields() {
         for field in self.textFields {
             field.abortEditing()
@@ -402,6 +400,7 @@ class ViewController: NSViewController {
         SharedColorPanel = NSColorPanel.shared
         SharedColorPanel?.setFrame(rect, display: true)
         SharedColorPanel?.styleMask = .closable
+
         SharedColorPanel?.backgroundColor = set.guiColor
         SharedColorPanel?.makeKeyAndOrderFront(self)
         SharedColorPanel?.setTarget(self)
@@ -431,7 +430,7 @@ class ViewController: NSViewController {
         SketchView!.ColorPanel = SharedColorPanel
     }
 
-    @objc func closeSharedColorPanel() {
+    func closeSharedColorPanel() {
         if let panel = self.SharedColorPanel {
             panel.close()
             SharedColorPanel = nil
@@ -512,8 +511,11 @@ class ViewController: NSViewController {
 
 //    MARK: Tools Actions
     @IBAction func setTool(_ sender: NSButton) {
+        let View = SketchView!
+        View.hideTextTool()
+        View.clearCurvedPath()
         ToolBox.isOn(title: sender.alternateTitle)
-        SketchView!.tool.set(sender.alternateTitle)
+        View.tool.set(sender.alternateTitle)
     }
 
     func getTagValue(sender: Any) -> (tag: Int, value: Double){
@@ -589,7 +591,7 @@ class ViewController: NSViewController {
     @IBAction func widthCurve(_ sender: Any) {
         let View = SketchView!
         let v = self.getTagValue(sender: sender)
-        View.widthCurve(value:  v.value)
+        View.borderWidthCurve(value:  v.value)
 
         self.CurveWidthLabel.doubleValue = v.value
         self.restoreControlFrame(view: View)
@@ -661,6 +663,7 @@ class ViewController: NSViewController {
     @IBAction func glyphsCurve(_ sender: NSTextField) {
         SketchView!.glyphsCurve(value: sender.stringValue,
                                 sharedFont: self.sharedFont)
+        sender.stringValue = set.fontText
     }
 
 
@@ -675,20 +678,26 @@ class ViewController: NSViewController {
     }
 
     @IBAction func setStrokeColor(sender: Any) {
+        var color = NSColor.black
         CurveStrokeColorPanel.updateColor(sender: sender,
-                                     sharedPanel: &SharedColorPanel)
+                                          color: &color)
+        SharedColorPanel?.color = color
         SketchView!.colorCurve()
     }
 
     @IBAction func setFillColor(sender: Any) {
+        var color = NSColor.black
         CurveFillColorPanel.updateColor(sender: sender,
-                                     sharedPanel: &SharedColorPanel)
+                                        color: &color)
+        SharedColorPanel?.color = color
         SketchView!.colorCurve()
     }
 
     @IBAction func setShadowColor(sender: Any) {
+        var color = NSColor.black
         CurveShadowColorPanel.updateColor(sender: sender,
-                                     sharedPanel: &SharedColorPanel)
+                                          color: &color)
+        SharedColorPanel?.color = color
         SketchView!.shadowColorCurve()
     }
 
@@ -732,20 +741,26 @@ class ViewController: NSViewController {
     }
 
     @IBAction func setGradientStartColor(sender: Any) {
+        var color = NSColor.black
         CurveGradientStartPanel.updateColor(sender: sender,
-                                            sharedPanel: &SharedColorPanel)
+                                            color: &color)
+        SharedColorPanel?.color = color
         SketchView!.gradientCurve()
     }
 
     @IBAction func setGradientMiddleColor(_ sender: Any) {
+        var color = NSColor.black
         CurveGradientMiddlePanel.updateColor(sender: sender,
-                                            sharedPanel: &SharedColorPanel)
+                                             color: &color)
+        SharedColorPanel?.color = color
         SketchView!.gradientCurve()
     }
 
     @IBAction func setGradientFinalColor(_ sender: Any) {
+        var color = NSColor.black
         CurveGradientFinalPanel.updateColor(sender: sender,
-                                            sharedPanel: &SharedColorPanel)
+                                            color: &color)
+        SharedColorPanel?.color = color
         SketchView!.gradientCurve()
     }
 
@@ -863,9 +878,12 @@ class ViewController: NSViewController {
     }
 
     @IBAction func newDocument(_ sender: NSMenuItem) {
-        print("new")
-        let View = SketchView!
         self.saveDocument(sender)
+    }
+
+
+    func newSketch() {
+        let View = SketchView!
         View.zoomOrigin = NSPoint(x: View.frame.midX,
                                   y: View.frame.midY)
         View.zoomSketch(value: 100)
@@ -878,6 +896,20 @@ class ViewController: NSViewController {
         self.closeSharedColorPanel()
         View.hideTextTool()
 
+        View.sketchName = nil
+        View.sketchExt = nil
+
+        for curve in View.curves {
+            curve.delete()
+        }
+        View.curves.removeAll()
+
+        View.moveCurve(tag: 0, value: 0)
+        View.moveCurve(tag: 1, value: 0)
+        View.resizeCurve(tag: 0, value: set.screenWidth)
+        View.resizeCurve(tag: 1, value: set.screenHeight)
+
+        self.updateSliders()
     }
 
     @IBAction func openDocument(_ sender: NSMenuItem) {
@@ -903,6 +935,7 @@ class ViewController: NSViewController {
         })
         
     }
+
 
     func saveSketch(url: URL, name: String, ext: String) {
         let View = SketchView!
@@ -975,6 +1008,7 @@ class ViewController: NSViewController {
 
     @IBAction func saveDocumentAs(_ sender: NSMenuItem) {
         let View = SketchView!
+        self.closeSharedColorPanel()
         SavePanel = NSSavePanel()
         if let savePanel = SavePanel {
 
@@ -1008,12 +1042,7 @@ class ViewController: NSViewController {
                         savePanel.close()
                     }
                     if sender.title == "New" {
-                        View.sketchName = nil
-                        View.sketchExt = nil
-                        for curve in View.curves {
-                            curve.delete()
-                        }
-                        View.curves.removeAll()
+                        self.newSketch()
                     }
                     self.showFileName()
             })
@@ -1022,12 +1051,6 @@ class ViewController: NSViewController {
 
     @IBAction func performClose(_ sender: NSMenuItem) {
         print("close")
-        let View = SketchView!
-        if let name = View.sketchName,
-            let dir = View.sketchDir,
-            let ext = View.sketchExt {
-            saveSketch(url: dir, name: name, ext: ext)
-        }
     }
 
     @IBAction func terminate(_ sender: NSMenuItem) {

@@ -182,27 +182,46 @@ extension CALayer {
         return false
     }
 
-//    func ciImage() -> CIImage? {
-//        let width = Int(self.bounds.width * 2)
-//        let height = Int(self.bounds.height * 2)
-//        let imageRepresentation = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: NSColorSpaceName.deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
-//        imageRepresentation.size = bounds.size
-//
-//        let context = NSGraphicsContext(bitmapImageRep: imageRepresentation)!
-//        self.render(in: context.cgContext)
-//
-//        if let image =  CIImage(bitmapImageRep: imageRepresentation) {
-//            return image
-//        }
-//        return nil
-//    }
+    func ciImage() -> CIImage? {
+        let width = Int(self.bounds.width)
+        let height = Int(self.bounds.height)
+        let imageRepresentation = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: NSColorSpaceName.deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        imageRepresentation.size = bounds.size
+
+        let context = NSGraphicsContext(bitmapImageRep: imageRepresentation)!
+        self.render(in: context.cgContext)
+
+        if let image =  CIImage(bitmapImageRep: imageRepresentation) {
+            return image
+        }
+        return nil
+    }
+
+    func cgImage() -> CGImage? {
+        let width = Int(self.bounds.width)
+        let height = Int(self.bounds.height)
+        let canvas = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+
+        let nsCanvas = NSGraphicsContext(cgContext: canvas,
+                                         flipped: true)
+        NSGraphicsContext.current = nsCanvas
+        self.render(in: canvas)
+        NSGraphicsContext.current = nil
+
+        if let image = canvas.makeImage() {
+            return image
+        }
+        return nil
+    }
+
+ 
 
     func makeShape(path: NSBezierPath, color: NSColor, width: CGFloat) {
-        let line = CAShapeLayer()
-        line.path = path.cgPath
-        line.strokeColor = color.cgColor
-        line.lineWidth = width
-        self.addSublayer(line)
+        let shape = CAShapeLayer()
+        shape.path = path.cgPath
+        shape.strokeColor = color.cgColor
+        shape.lineWidth = width
+        self.addSublayer(shape)
     }
 }
 
@@ -318,28 +337,4 @@ extension NSOpenPanel {
     }
 }
 
-//func drawCanvas(curve: Curve) {
-//    let width = Int(curve.path.bounds.width)
-//    let height = Int(curve.path.bounds.height)
-//    let canvas = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
-//
-//    let nsCanvas = NSGraphicsContext(cgContext: canvas,
-//                                     flipped: true)
-//    NSGraphicsContext.current = nsCanvas
-//
-//    do {
-//
-//        curve.strokeColor.setStroke()
-//        curve.path.stroke()
-//        if curve.isFilled {
-//            curve.fillColor.setFill()
-//            curve.path.fill()
-//        }
-//    }
-//    NSGraphicsContext.current = nil
-//
-//    if let image = canvas.makeImage() {
-//        print(image)
-//    }
-//}
 
