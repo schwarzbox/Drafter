@@ -10,36 +10,41 @@ import Cocoa
 
 class ControlFrame: CALayer {
     var parent: SketchPad?
-    static let dotSize: CGFloat = set.dotSize
+    static let dotSize: CGFloat = setup.dotSize
     static let dot50Size: CGFloat = dotSize / 2
     static let labelSize: CGFloat = dotSize + 4
     static let label50Size: CGFloat = labelSize / 2
-    static let defaultWidth: CGFloat = set.lineWidth
-    static let defaultFillColor: NSColor = set.fillColor
-    static let defaultStrokeColor: NSColor = set.strokeColor
-    static let controlPad: CGFloat = set.dotSize * 4
-    static let controlPad50: CGFloat = set.dotSize * 2
+    static let ctrlPad: CGFloat = setup.dotSize * 4
+    static let ctrlPad50: CGFloat = setup.dotSize * 2
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
 
     init(parent: SketchPad, curve: Curve) {
         self.parent = parent
         super.init()
 
         self.frame = CGRect(x: curve.path.bounds.minX - curve.lineWidth/2,
-                             y:  curve.path.bounds.minY - curve.lineWidth/2,
-                             width: curve.path.bounds.width + curve.lineWidth,
-                             height: curve.path.bounds.height + curve.lineWidth)
+                            y: curve.path.bounds.minY - curve.lineWidth/2,
+                            width: curve.path.bounds.width + curve.lineWidth,
+                            height: curve.path.bounds.height + curve.lineWidth)
 
-        self.borderWidth = ControlFrame.defaultWidth
-        self.borderColor = ControlFrame.defaultFillColor.cgColor
+        self.borderWidth = setup.lineWidth
+        self.borderColor = setup.fillColor.cgColor
 
-        let gradientLoc0 = self.bounds.minX + CGFloat(truncating: curve.gradientLocation[0]) * self.bounds.width
-        let gradientLoc1 = self.bounds.minX + CGFloat(truncating: curve.gradientLocation[1]) * self.bounds.width
-        let gradientLoc2 = self.bounds.minX + CGFloat(truncating: curve.gradientLocation[2]) * self.bounds.width
+        var gradientLoc: [CGPoint] = []
+        for elem in curve.gradientLocation {
+            let locX = self.bounds.minX + CGFloat(
+                truncating: elem) * self.bounds.width
+            let locY = self.bounds.minY - ControlFrame.ctrlPad50
+            gradientLoc.append(CGPoint(x: locX, y: locY))
+        }
 
-        let minX =  self.bounds.minX + ControlFrame.controlPad50
-        let width = self.bounds.width - ControlFrame.controlPad
-        let minY = self.bounds.minY + ControlFrame.controlPad50
-        let height = self.bounds.height - ControlFrame.controlPad
+        let minX =  self.bounds.minX + ControlFrame.ctrlPad50
+        let width = self.bounds.width - ControlFrame.ctrlPad
+        let minY = self.bounds.minY + ControlFrame.ctrlPad50
+        let height = self.bounds.height - ControlFrame.ctrlPad
         let gradientDirStart = CGPoint(
             x: minX + curve.gradientDirection[0].x * width,
             y: minY + curve.gradientDirection[0].y * height)
@@ -56,90 +61,96 @@ class ControlFrame: CALayer {
             CGPoint(x: self.bounds.maxX, y: self.bounds.midY),
             CGPoint(x: self.bounds.maxX, y: self.bounds.minY),
             CGPoint(x: self.bounds.midX, y: self.bounds.minY),
-            CGPoint(x: self.bounds.maxX + ControlFrame.controlPad,
+            CGPoint(x: self.bounds.maxX + ControlFrame.ctrlPad,
                     y: self.bounds.midY),
-            gradientDirStart,
-            gradientDirFinal,
-            CGPoint(x: gradientLoc0,
-                    y: self.bounds.minY - ControlFrame.controlPad50),
-            CGPoint(x: gradientLoc1,
-                    y: self.bounds.minY - ControlFrame.controlPad50),
-            CGPoint(x: gradientLoc2,
-                    y: self.bounds.minY - ControlFrame.controlPad50)
+            gradientDirStart, gradientDirFinal,
+            gradientLoc[0], gradientLoc[1], gradientLoc[2]
         ]
 
-        let path = NSBezierPath()
-        path.move(to: CGPoint(x: self.bounds.maxX,
-                              y: self.bounds.midY))
-        path.line(to: CGPoint(x: self.bounds.maxX+ControlFrame.controlPad,
-                              y: self.bounds.midY))
-        for grad in [gradientLoc0, gradientLoc1, gradientLoc2] {
-            path.move(to: CGPoint(x: grad,
-                                  y: self.bounds.minY))
-            path.line(to: CGPoint(x: grad,
-                                  y: self.bounds.minY - ControlFrame.controlPad50))
-        }
+        self.initShapes(gradientLoc: gradientLoc,
+                        gradientDirStart: gradientDirStart,
+                        gradientDirFinal: gradientDirFinal)
 
-        self.makeShape(path: path, color: ControlFrame.defaultFillColor,
-                       width: ControlFrame.defaultWidth)
-
-        path.removeAllPoints()
-        path.move(to: gradientDirStart)
-        path.line(to: gradientDirFinal)
-        self.makeShape(path: path, color: ControlFrame.defaultStrokeColor,
-                       width: ControlFrame.defaultWidth)
-
-        var fillColor = ControlFrame.defaultFillColor
-        var strokeColor = ControlFrame.defaultStrokeColor
+        var fillColor = setup.fillColor
+        var strokeColor = setup.strokeColor
         var gradIndex = 0
         for i in 0..<dots.count {
             var radius: CGFloat = 0
             if i==dots.count-6 {
                 radius = ControlFrame.dot50Size
             } else if i==dots.count-5 || i==dots.count-4 {
-                radius = ControlFrame.dot50Size
-                fillColor = ControlFrame.defaultStrokeColor
-                strokeColor = ControlFrame.defaultFillColor
+                fillColor = setup.strokeColor
+                strokeColor = setup.fillColor
             } else if i==dots.count-3 || i==dots.count-2 || i==dots.count-1 {
                 radius = ControlFrame.dot50Size/2
                 fillColor = curve.gradientColor[gradIndex]
-                strokeColor = ControlFrame.defaultStrokeColor
+                strokeColor = setup.strokeColor
                 gradIndex += 1
             }
             self.makeDot(parent: parent, tag: i,
                          x: dots[i].x, y: dots[i].y, radius: radius,
                          strokeColor: strokeColor, fillColor: fillColor)
         }
-        // rounded rectangle controls
+
+        self.initRoundedCornerControl(parent: parent, curve: curve,
+                                      numDots: dots.count)
+    }
+
+    func initShapes(gradientLoc: [CGPoint],
+                    gradientDirStart: CGPoint,
+                    gradientDirFinal: CGPoint) {
+        let path = NSBezierPath()
+        path.move(to: CGPoint(x: self.bounds.maxX, y: self.bounds.midY))
+        path.line(to: CGPoint(x: self.bounds.maxX + ControlFrame.ctrlPad,
+                              y: self.bounds.midY))
+        for point in gradientLoc {
+            path.move(to: CGPoint(x: point.x,
+                                  y: point.y + ControlFrame.ctrlPad50))
+            path.line(to: point)
+        }
+
+        self.makeShape(path: path, color: setup.fillColor,
+                       width: setup.lineWidth)
+
+        path.removeAllPoints()
+        path.move(to: gradientDirStart)
+        path.line(to: gradientDirFinal)
+        self.makeShape(path: path, color: setup.strokeColor,
+                       width: setup.lineWidth)
+
+    }
+
+    func initRoundedCornerControl(parent: SketchPad,
+                                  curve: Curve, numDots: Int) {
         if let rounded = curve.rounded {
             let fillColor = NSColor.green
-            let strokeColor = ControlFrame.defaultStrokeColor
+            let strokeColor = setup.strokeColor
 
             let wid = self.bounds.width/2
             let hei = self.bounds.height/2
             let roundedX = CGPoint(
                 x: self.bounds.maxX - rounded.x * wid,
-                y: self.bounds.maxY + ControlFrame.controlPad50)
+                y: self.bounds.maxY + ControlFrame.ctrlPad50)
             let roundedY = CGPoint(
-                x: self.bounds.maxX + ControlFrame.controlPad50,
+                x: self.bounds.maxX + ControlFrame.ctrlPad50,
                 y: self.bounds.maxY - rounded.y * hei)
 
-            path.removeAllPoints()
-            path.move(to: CGPoint(x: roundedX.x,y: self.bounds.maxY))
+            let path = NSBezierPath()
+            path.move(to: CGPoint(x: roundedX.x, y: self.bounds.maxY))
             path.line(to: roundedX)
-     
-            path.move(to: CGPoint(x: self.bounds.maxX,y: roundedY.y))
-            path.line(to: roundedY)
-            self.makeShape(path: path, color: ControlFrame.defaultFillColor,
-                           width: ControlFrame.defaultWidth)
 
-            self.makeDot(parent: parent, tag: dots.count,
+            path.move(to: CGPoint(x: self.bounds.maxX, y: roundedY.y))
+            path.line(to: roundedY)
+            self.makeShape(path: path, color: setup.fillColor,
+                           width: setup.lineWidth)
+
+            self.makeDot(parent: parent, tag: numDots,
                          x: roundedX.x, y: roundedX.y,
                          radius: ControlFrame.dot50Size,
                          strokeColor: strokeColor,
                          fillColor: fillColor)
 
-            self.makeDot(parent: parent, tag: dots.count+1,
+            self.makeDot(parent: parent, tag: numDots+1,
                          x: roundedY.x, y: roundedY.y,
                          radius: ControlFrame.dot50Size,
                          strokeColor: strokeColor,
@@ -147,13 +158,8 @@ class ControlFrame: CALayer {
         }
     }
 
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
-
     func makeDot(parent: SketchPad, tag: Int, x: CGFloat, y: CGFloat,
-                 radius: CGFloat,
-                 strokeColor: NSColor, fillColor: NSColor) {
+                 radius: CGFloat, strokeColor: NSColor, fillColor: NSColor) {
         let cp = Dot.init(x: x, y: y,
                           size: ControlFrame.dotSize,
                           offset: CGPoint(
@@ -164,18 +170,18 @@ class ControlFrame: CALayer {
                           fillColor: fillColor)
         // mouse track dots
         let options: NSTrackingArea.Options = [
-            .mouseEnteredAndExited,.activeInActiveApp]
+            .mouseEnteredAndExited, .activeInActiveApp]
         let area = NSTrackingArea(
             rect: NSRect(
                 x: self.frame.minX + cp.frame.minX,
                 y: self.frame.minY + cp.frame.minY,
-                width: cp.frame.width,height: cp.frame.height),
+                width: cp.frame.width, height: cp.frame.height),
             options: options, owner: parent)
 
         parent.addTrackingArea(area)
 
         cp.tag = tag
-        let label = Dot.init(x: cp.bounds.midX,y: cp.bounds.midY,
+        let label = Dot.init(x: cp.bounds.midX, y: cp.bounds.midY,
                              size: ControlFrame.labelSize,
                              offset: CGPoint(
                                 x: ControlFrame.label50Size,

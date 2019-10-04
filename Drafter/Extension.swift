@@ -21,7 +21,9 @@ extension NSBezierPath {
             case .lineTo:
                 path.addLine(to: points[0])
             case .curveTo:
-                path.addCurve(to: points[2], control1: points[0], control2: points[1])
+                path.addCurve(to: points[2],
+                              control1: points[0],
+                              control2: points[1])
             case .closePath:
                 path.closeSubpath()
             default:
@@ -31,9 +33,9 @@ extension NSBezierPath {
         return path
     }
 
-    func findPath(pos: NSPoint) -> (index: Int,  points: [NSPoint])? {
+    func findPath(pos: NSPoint) -> (index: Int, points: [NSPoint])? {
         var points = [NSPoint](repeating: .zero, count: 3)
-        var oldPoint: NSPoint? = nil
+        var oldPoint: NSPoint?
         let path = NSBezierPath()
         for i in 0 ..< self.elementCount {
             let type = self.element(at: i, associatedPoints: &points)
@@ -43,7 +45,7 @@ extension NSBezierPath {
             case .lineTo:
                 path.removeAllPoints()
                 if let mp = oldPoint {
-                    path.move(to:mp)
+                    path.move(to: mp)
                     path.line(to: points[0])
                     path.close()
                 }
@@ -55,7 +57,7 @@ extension NSBezierPath {
             case .curveTo:
                 path.removeAllPoints()
                 if let mp = oldPoint {
-                    path.move(to:mp)
+                    path.move(to: mp)
                     path.curve(to: points[2],
                                controlPoint1: points[0],
                                controlPoint2: points[1])
@@ -67,7 +69,7 @@ extension NSBezierPath {
                     return (index: i, points: points)
                 }
             case .closePath:
-                fallthrough
+                break
             default:
                 break
             }
@@ -148,11 +150,12 @@ extension NSStackView {
 
     func isEnable(title: String = "", all: Bool = false) {
         for view in self.subviews {
-            let button = view as! NSButton
-            if  button.alternateTitle == title || all {
-                button.isEnabled = true
-            } else {
-                button.isEnabled = false
+            if let button = view as? NSButton {
+                if  button.alternateTitle == title || all {
+                    button.isEnabled = true
+                } else {
+                    button.isEnabled = false
+                }
             }
         }
     }
@@ -161,9 +164,9 @@ extension NSStackView {
 extension NSTextField {
     override open var doubleValue: Double {
         didSet {
-            if doubleValue > 10  {
+            if doubleValue > 10 {
                 self.stringValue = String(round(doubleValue * 10) / 10)
-            } else  {
+            } else {
                 self.stringValue = String(round(doubleValue * 100) / 100)
             }
         }
@@ -185,7 +188,12 @@ extension CALayer {
     func ciImage() -> CIImage? {
         let width = Int(self.bounds.width)
         let height = Int(self.bounds.height)
-        let imageRepresentation = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: NSColorSpaceName.deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        let imageRepresentation = NSBitmapImageRep(
+            bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
+            bitsPerSample: 8, samplesPerPixel: 4,
+            hasAlpha: true, isPlanar: false,
+            colorSpaceName: NSColorSpaceName.deviceRGB,
+            bytesPerRow: 0, bitsPerPixel: 0)!
         imageRepresentation.size = bounds.size
 
         let context = NSGraphicsContext(bitmapImageRep: imageRepresentation)!
@@ -200,7 +208,11 @@ extension CALayer {
     func cgImage() -> CGImage? {
         let width = Int(self.bounds.width)
         let height = Int(self.bounds.height)
-        let canvas = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        let canvas = CGContext(
+            data: nil, width: width, height: height,
+            bitsPerComponent: 8, bytesPerRow: 0,
+            space: CGColorSpace(name: CGColorSpace.sRGB)!,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
 
         let nsCanvas = NSGraphicsContext(cgContext: canvas,
                                          flipped: true)
@@ -214,8 +226,6 @@ extension CALayer {
         return nil
     }
 
- 
-
     func makeShape(path: NSBezierPath, color: NSColor, width: CGFloat) {
         let shape = CAShapeLayer()
         shape.path = path.cgPath
@@ -224,7 +234,6 @@ extension CALayer {
         self.addSublayer(shape)
     }
 }
-
 
 extension CGColor {
     func sRGB(alpha: CGFloat = 1.0) -> CGColor {
@@ -240,18 +249,18 @@ extension CGColor {
     }
 }
 
-
 extension NSColor {
     func sRGB(alpha: CGFloat = 1.0) -> NSColor {
         guard let color = self.usingColorSpace(NSColorSpace.extendedSRGB) else {
-            return NSColor.init(srgbRed: 255.0, green: 255.0, blue: 255.0, alpha: alpha)
+            return NSColor.init(
+                srgbRed: 255.0, green: 255.0,
+                blue: 255.0, alpha: alpha)
         }
         return NSColor.init(srgbRed: color.redComponent,
                             green: color.greenComponent,
                             blue: color.blueComponent,
                             alpha: alpha)
     }
-
 
     var hexString: String {
         guard let color = usingColorSpace(NSColorSpace.extendedSRGB) else {
@@ -270,17 +279,19 @@ extension NSColor {
             G: CGFloat((hex >> 08) & 0xff) / 255,
             B: CGFloat((hex >> 00) & 0xff) / 255
         )
-        self.init(srgbRed: components.R, green: components.G, blue: components.B, alpha: 1)
+        self.init(
+            srgbRed: components.R, green: components.G,
+            blue: components.B, alpha: 1)
     }
 }
 
 extension NSSavePanel {
 
     func setupPanel(fileName: String) -> NSPopUpButton {
-        self.directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
+        self.directoryURL = FileManager.default.urls(
+            for: .desktopDirectory, in: .userDomainMask).first!
 
-        self.allowedFileTypes = set.fileTypes
-    
+        self.allowedFileTypes = setup.fileTypes
         self.allowsOtherFileTypes = false
         self.isExtensionHidden = false
         self.canSelectHiddenExtension = true
@@ -298,7 +309,7 @@ extension NSSavePanel {
         let popup = NSPopUpButton()
         popup.autoenablesItems = false
 
-        for item in set.fileTypes {
+        for item in setup.fileTypes {
             popup.addItem(withTitle: "\(item.uppercased())")
         }
 
@@ -329,12 +340,10 @@ extension NSSavePanel {
 
 extension NSOpenPanel {
     func setupPanel() {
-        self.allowedFileTypes = ["png","svg"]
+        self.allowedFileTypes = setup.fileTypes
         self.allowsMultipleSelection = false
         self.canChooseDirectories = false
         self.canCreateDirectories = false
         self.canChooseFiles = true
     }
 }
-
-

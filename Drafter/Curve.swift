@@ -21,15 +21,15 @@ class Curve: Equatable {
     let canvas = CALayer()
     let image = CALayer()
 
-    let dotSize: CGFloat =  set.dotSize
-    let dotRadius: CGFloat = set.dotRadius
+    let dotSize: CGFloat =  setup.dotSize
+    let dotRadius: CGFloat = setup.dotRadius
 
-    var strokeColor = set.strokeColor {
+    var strokeColor = setup.strokeColor {
         willSet(value) {
             self.shape.strokeColor = value.cgColor.sRGB(alpha: self.alpha[0])
         }
     }
-    var fillColor = set.fillColor {
+    var fillColor = setup.fillColor {
         willSet(value) {
             if self.fill {
                 self.shape.fillColor = value.cgColor.sRGB(alpha: self.alpha[1])
@@ -45,11 +45,13 @@ class Curve: Equatable {
         }
     }
     var angle: CGFloat = 0.0
-    var alpha: [CGFloat] = [1.0,1.0] {
+    var alpha: [CGFloat] = [1.0, 1.0] {
         willSet(value) {
-            self.shape.strokeColor = self.shape.strokeColor?.sRGB(alpha: value[0])
+            self.shape.strokeColor = self.shape.strokeColor?.sRGB(
+                alpha: value[0])
             if self.fill {
-                self.shape.fillColor = self.shape.fillColor?.sRGB(alpha: value[1])
+                self.shape.fillColor = self.shape.fillColor?.sRGB(
+                    alpha: value[1])
             } else {
                 self.shape.fillColor = nil
             }
@@ -63,7 +65,7 @@ class Curve: Equatable {
         }
     }
 
-    var shadow: [CGFloat] = set.shadow {
+    var shadow: [CGFloat] = setup.shadow {
         willSet(value) {
             self.canvas.shadowRadius = value[0]
             self.canvas.shadowOpacity = Float(value[1])
@@ -72,34 +74,31 @@ class Curve: Equatable {
         }
     }
 
-    var shadowColor: NSColor = set.shadowColor {
+    var shadowColor: NSColor = setup.shadowColor {
         willSet(value) {
             self.canvas.shadowColor = value.cgColor
         }
     }
 
-    var gradientColor: [NSColor] = set.gradientColor {
+    var gradientColor: [NSColor] = setup.gradientColor {
         willSet(value) {
             var alphaColors: [NSColor] = []
-            for (i, color) in value.enumerated(){
+            for (i, color) in value.enumerated() {
                 let srgb = color.sRGB(alpha: self.gradientOpacity[i])
                 alphaColors.append(srgb)
-
             }
             self.gradient.colors = [alphaColors[0].cgColor,
                                     alphaColors[1].cgColor,
                                     alphaColors[2].cgColor]
-
         }
     }
 
-    var gradientOpacity: [CGFloat] = [0.0,0.0,0.0] {
+    var gradientOpacity: [CGFloat] = setup.gradientOpacity {
         willSet(value) {
             var alphaColors: [NSColor] = []
-            for (i, color) in self.gradientColor.enumerated(){
+            for (i, color) in self.gradientColor.enumerated() {
                 let srgb = color.sRGB(alpha: value[i])
                 alphaColors.append(srgb)
-
             }
             self.gradient.colors = [alphaColors[0].cgColor,
                                     alphaColors[1].cgColor,
@@ -107,14 +106,14 @@ class Curve: Equatable {
         }
     }
 
-    var gradientDirection: [CGPoint] = set.gradientDirection {
+    var gradientDirection: [CGPoint] = setup.gradientDirection {
         willSet(value) {
             self.gradient.startPoint = value[0]
             self.gradient.endPoint = value[1]
         }
     }
 
-    var gradientLocation: [NSNumber] = set.gradientLocation {
+    var gradientLocation: [NSNumber] = setup.gradientLocation {
         willSet(value) {
             self.gradient.locations = value
         }
@@ -129,42 +128,42 @@ class Curve: Equatable {
     var lock: Bool = false
     var points: [ControlPoint] = []
     var edit: Bool = false
-    var fill: Bool
+    var fill: Bool = false
 
     var controlDot: Dot?
     var controlFrame: ControlFrame?
     var frameAngle: CGFloat = 0
 
-    init(parent: SketchPad, path: NSBezierPath,
-         fill: Bool = true, rounded: CGPoint?) {
+    init(parent: SketchPad,
+         path: NSBezierPath, fill: Bool = true, rounded: CGPoint?) {
         self.parent = parent
         self.path = path
         self.fill = fill
         self.rounded = rounded
         // filters
         self.canvas.filters = []
-    
         self.canvas.backgroundColor = NSColor.clear.cgColor
         // CIPointillize
         for filterName in ["CIGaussianBlur"] {
-            if let filter = CIFilter(name: filterName, parameters: ["inputRadius": 0]) {
+            if let filter = CIFilter(name: filterName,
+                                     parameters: ["inputRadius": 0]) {
                 self.canvas.filters?.append(filter)
             }
         }
 
-        self.shape.actions = ["position" : NSNull(),
-                               "bounds" : NSNull(),
-                               "strokeColor" : NSNull(),
-                               "fillColor" : NSNull(),
-                               "lineWidth" : NSNull()]
-        self.image.actions = ["position" : NSNull(),
-                              "bounds" : NSNull(),
+        self.shape.actions = ["position": NSNull(),
+                               "bounds": NSNull(),
+                               "strokeColor": NSNull(),
+                               "fillColor": NSNull(),
+                               "lineWidth": NSNull()]
+        self.image.actions = ["position": NSNull(),
+                              "bounds": NSNull(),
                               "transform": NSNull()]
-        self.gradient.actions = ["position" : NSNull(),
+        self.gradient.actions = ["position": NSNull(),
                                  "bounds": NSNull()]
-        self.canvas.actions = ["position" : NSNull(),
-                               "bounds" : NSNull(),
-                               "filters" : NSNull(),
+        self.canvas.actions = ["position": NSNull(),
+                               "bounds": NSNull(),
+                               "filters": NSNull(),
                                "shadowRadius": NSNull(),
                                "shadowOpacity": NSNull(),
                                "shadowOffset": NSNull(),
@@ -177,28 +176,28 @@ class Curve: Equatable {
         self.updateLayer()
     }
 
-    let CapStyle: [CAShapeLayerLineCap] = [
+    let capStyle: [CAShapeLayerLineCap] = [
         .square, .butt, .round
     ]
 
     func setCap(value: Int) {
         self.cap = value
-        self.shape.lineCap = CapStyle[value]
+        self.shape.lineCap = capStyle[value]
     }
 
-    let JoinStyle: [CAShapeLayerLineJoin] = [
+    let joinStyle: [CAShapeLayerLineJoin] = [
         .miter, .bevel, .round
     ]
 
     func setJoin(value: Int) {
         self.join = value
-        self.shape.lineJoin = JoinStyle[value]
+        self.shape.lineJoin = joinStyle[value]
     }
 
     func setDash(dash: [NSNumber]) {
         self.dash = dash
-        if dash.first(where: {
-            point in return Int(truncating: point) > 0}) != nil {
+        if dash.first(where: { point in
+            return Int(truncating: point) > 0}) != nil {
             self.shape.lineDashPattern = dash
             self.shape.lineDashPhase = 0
         }
@@ -212,8 +211,7 @@ class Curve: Equatable {
         let mp = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
                           offset: CGPoint(x: self.dotRadius,
                                           y: self.dotRadius),
-                          radius: 0,
-                          fillColor: nil)
+                          radius: 0, fillColor: nil)
 
         let cp1 = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
                            offset: CGPoint(x: self.dotRadius,
@@ -240,7 +238,6 @@ class Curve: Equatable {
         self.gradient.removeFromSuperlayer()
         self.canvas.removeFromSuperlayer()
     }
-
 
 //    MARK: Layer func
     func updateLayer() {
@@ -288,7 +285,8 @@ class Curve: Equatable {
         }
     }
 
-    func insertCurve(at pos: NSPoint, index: Int, points: [NSPoint]) -> NSBezierPath {
+    func insertCurve(at pos: NSPoint, index: Int,
+                     points: [NSPoint]) -> NSBezierPath {
         let path = NSBezierPath()
         self.path.copyPath(to: path, start: 0, final: index)
         path.curve(to: pos, controlPoint1: points[0],
@@ -307,25 +305,24 @@ class Curve: Equatable {
                     self.controlDot = point.mp
                     return
                 } else if point.collideDot(pos: pos, dot: point.cp1) &&
-                    !point.cp1.isHidden{
+                    !point.cp1.isHidden {
                     self.controlDot = point.cp1
                     return
                 } else if point.collideDot(pos: pos, dot: point.cp2) &&
-                    !point.cp1.isHidden{
+                    !point.cp1.isHidden {
                     self.controlDot = point.cp2
                     return
                 } else {
                     point.hideControlDots()
                 }
             }
-            let collider = NSRect(x:self.path.bounds.minX-2,
+            let collider = NSRect(x: self.path.bounds.minX-2,
                                   y: self.path.bounds.minY-2,
                                   width: self.path.bounds.width+4,
                                   height: self.path.bounds.height+4)
-            if collider.contains(pos), let segment = self.path.findPath(pos: pos) {
-
+            if collider.contains(pos),
+                let segment = self.path.findPath(pos: pos) {
                 let point = self.insertPoint(pos: pos, index: segment.index)
-                
                 self.controlDot = point.mp
 
                 let path = insertCurve(at: point.mp.position,
@@ -340,14 +337,41 @@ class Curve: Equatable {
         }
     }
 
+    func movePoint(index: Int, point: ControlPoint) {
+        var points = [NSPoint](repeating: .zero, count: 3)
+        let elements = self.path.elementCount
+        var indexLeft: Int = index
+        if index==0 {
+            indexLeft =  elements - 3
+            var pointsStart = [point.mp.position]
+            self.path.setAssociatedPoints(&pointsStart, at: 0)
+
+            self.path.element(at: 1, associatedPoints: &points)
+            var pointsRight = [point.cp1.position,
+                               points[1], points[2]]
+            self.path.setAssociatedPoints(&pointsRight, at: 1)
+        } else {
+            if index+1<elements-2 {
+                self.path.element(at: index+1, associatedPoints: &points)
+                var pointsRight = [point.cp1.position,
+                                   points[1], points[2]]
+                self.path.setAssociatedPoints(&pointsRight, at: index+1)
+            }
+        }
+        self.path.element(at: indexLeft, associatedPoints: &points)
+        var pointsLeft = [points[0],
+                          point.cp2.position, point.mp.position]
+        self.path.setAssociatedPoints(&pointsLeft, at: indexLeft)
+    }
+
     func editPoint(pos: NSPoint) {
         if !self.lock {
             self.clearTrackArea()
             var find: Bool = false
             for (i, point) in self.points.enumerated() {
                 if let dot = self.controlDot {
-                    // drag after create
-                    if dot == point.mp && point.collideDot(pos: pos, dot: point.cp1)  {
+                    if dot == point.mp && point.collideDot(pos: pos,
+                                                           dot: point.cp1) {
                         let cp2pos = NSPoint(
                             x: dot.position.x - (pos.x - dot.position.x),
                             y: dot.position.y  - (pos.y - dot.position.y))
@@ -374,30 +398,7 @@ class Curve: Equatable {
                         find = true
                     }
                     if find {
-                        var points = [NSPoint](repeating: .zero, count: 3)
-                        let elements = self.path.elementCount
-                        var indexLeft: Int = i
-                        if i==0  {
-                            indexLeft =  elements - 3
-                            var pointsStart = [point.mp.position]
-                            self.path.setAssociatedPoints(&pointsStart, at: 0)
-
-                            self.path.element(at: 1, associatedPoints: &points)
-                            var pointsRight = [point.cp1.position,
-                                               points[1], points[2]]
-                            self.path.setAssociatedPoints(&pointsRight, at: 1)
-                        } else {
-                            if i+1<elements-2 {
-                                self.path.element(at: i+1, associatedPoints: &points)
-                                var pointsRight = [point.cp1.position,
-                                                   points[1], points[2]]
-                                self.path.setAssociatedPoints(&pointsRight, at: i+1)
-                            }
-                        }
-                        self.path.element(at: indexLeft,associatedPoints: &points)
-                        var pointsLeft = [points[0],
-                                          point.cp2.position, point.mp.position]
-                        self.path.setAssociatedPoints(&pointsLeft,at: indexLeft)
+                        self.movePoint(index: i, point: point)
                         point.updateLines()
                     }
                 }
@@ -413,7 +414,6 @@ class Curve: Equatable {
             point.updateDots(deltax: deltax, deltay: deltay,
                              parent: self.parent!)
         }
-        // update shapes and cgPath
         self.updateLayer()
     }
 
@@ -468,25 +468,22 @@ class Curve: Equatable {
         }
     }
 
-
 //    MARK: TrackArea
     func clearTrackArea() {
-        for trackingArea in self.parent!.trackingAreas {
-            if trackingArea != self.parent!.TrackArea {
+        for trackingArea in self.parent!.trackingAreas
+            where trackingArea != self.parent!.trackArea {
                 self.parent!.removeTrackingArea(trackingArea)
-            }
         }
     }
 
 //    MARK: Transform
-    func applyTransform(oX: CGFloat, oY: CGFloat, transform: ()->Void) {
-        let move = AffineTransform(translationByX: -oX,byY:-oY)
+    func applyTransform(oX: CGFloat, oY: CGFloat, transform: () -> Void) {
+        let move = AffineTransform(translationByX: -oX, byY: -oY)
         self.path.transform(using: move)
 
         transform()
 
-        let moveorigin = AffineTransform(translationByX: oX,byY: oY)
+        let moveorigin = AffineTransform(translationByX: oX, byY: oY)
         self.path.transform(using: moveorigin)
     }
 }
-

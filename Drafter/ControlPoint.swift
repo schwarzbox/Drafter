@@ -25,13 +25,13 @@ class ControlPoint {
         self.mp=mp
         self.cp1=cp1
         self.cp2=cp2
-        self.dots = [self.mp,self.cp1,self.cp2]
+        self.dots = [self.mp, self.cp1, self.cp2]
         self.hideControlDots()
-        self.line1.actions = ["position" : NSNull()]
-        self.line2.actions = ["position" : NSNull()]
-        self.lines = [self.line1,self.line2]
+        self.line1.actions = ["position": NSNull()]
+        self.line2.actions = ["position": NSNull()]
+        self.lines = [self.line1, self.line2]
     }
-    
+
     func collideDot(pos: NSPoint, dot: Dot) -> Bool {
         if dot.collide(origin: pos, width: dot.bounds.width) {
             return true
@@ -40,7 +40,8 @@ class ControlPoint {
     }
 
     func trackDot(parent: SketchPad, dot: Dot) {
-        let options: NSTrackingArea.Options = [.mouseEnteredAndExited, .activeInActiveApp]
+        let options: NSTrackingArea.Options = [
+            .mouseEnteredAndExited, .activeInActiveApp]
         let area = NSTrackingArea(rect: NSRect(x: dot.frame.minX,
                                                y: dot.frame.minY,
                                                width: dot.frame.width,
@@ -72,13 +73,13 @@ class ControlPoint {
     }
 
     func updateLines() {
-        for (index,shape) in self.lines.enumerated() {
+        for (index, shape) in self.lines.enumerated() {
             let path = NSBezierPath()
             path.move(to: self.dots[0].position)
             path.line(to: self.dots[index+1].position)
             shape.path = path.cgPath
             shape.lineWidth = 1
-            shape.strokeColor = set.fillColor.cgColor
+            shape.strokeColor = setup.fillColor.cgColor
         }
     }
 
@@ -91,17 +92,19 @@ class ControlPoint {
         self.trackDot(parent: parent, dot: self.mp)
     }
 
-    func multiplyVect(a: CGPoint, b: CGPoint) -> CGFloat {
-        return a.x * b.x + a.y * b.y
+    func multiplyVect(av: CGPoint, bv: CGPoint) -> CGFloat {
+        return av.x * bv.x + av.y * bv.y
     }
 
-    func rotate(pos: CGPoint, ox: CGFloat, oy: CGFloat, matrix: [CGPoint]) -> CGPoint {
-        let v = CGPoint(x: pos.x - ox, y: pos.y - oy)
-        return CGPoint(x: self.multiplyVect(a: matrix[0], b: v) + ox,
-                       y: self.multiplyVect(a: matrix[1], b: v) + oy)
+    func rotate(pos: CGPoint, ox: CGFloat, oy: CGFloat,
+                matrix: [CGPoint]) -> CGPoint {
+        let vec = CGPoint(x: pos.x - ox, y: pos.y - oy)
+        return CGPoint(x: self.multiplyVect(av: matrix[0], bv: vec) + ox,
+                       y: self.multiplyVect(av: matrix[1], bv: vec) + oy)
     }
 
-    func rotateDots(ox: CGFloat, oy: CGFloat, angle: CGFloat, parent: SketchPad) {
+    func rotateDots(ox: CGFloat, oy: CGFloat,
+                    angle: CGFloat, parent: SketchPad) {
         let cs = cos(angle)
         let sn = sin(angle)
         let matrix: [CGPoint] = [CGPoint(x: cs, y: -sn), CGPoint(x: sn, y: cs)]

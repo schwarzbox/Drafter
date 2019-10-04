@@ -8,7 +8,7 @@
 
 import Cocoa
 
-struct Set {
+struct Setup {
     let minZoom: Double = 20
     let maxZoom: Double = 400
     let reduceZoom: CGFloat = 40
@@ -22,12 +22,12 @@ struct Set {
     let lineWidth: CGFloat = 1.0
     let maxLineWidth: CGFloat = 256
     let maxBlur: Double = 128
-
+    let maxDash: Double = 64
     let strokeColor = NSColor.white.sRGB()
     let fillColor = NSColor.systemBlue.sRGB()
     let guiColor = NSColor.unemphasizedSelectedContentBackgroundColor.sRGB()
 
-    let shadow: [CGFloat] = [2.0,0.5,8.0,8.0]
+    let shadow: [CGFloat] = [2.0, 0.5, 8.0, 8.0]
     let shadowColor =  NSColor.black
     let maxShadowRadius: Double = 32
     let gradientDirection = [CGPoint(x: 0.0, y: 0.0),
@@ -47,8 +47,7 @@ struct Set {
     let fontSize: CGFloat = 18
 
     let filename: String = "untitled"
-    let fileTypes: [String] = ["png","svg"]
+    let fileTypes: [String] = ["png", "svg"]
 }
 
-var set = Set()
-
+var setup = Setup()

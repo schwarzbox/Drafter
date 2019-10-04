@@ -10,14 +10,14 @@ import Cocoa
 class Dot: CALayer {
     var tag: Int?
     init(x: CGFloat, y: CGFloat, size: CGFloat, offset: CGPoint,
-         radius: CGFloat, lineWidth: CGFloat = set.lineWidth,
-         strokeColor: NSColor? = set.strokeColor,
-         fillColor: NSColor? = set.fillColor,
+         radius: CGFloat, lineWidth: CGFloat = setup.lineWidth,
+         strokeColor: NSColor? = setup.strokeColor,
+         fillColor: NSColor? = setup.fillColor,
          hidden: Bool = false) {
 
         super.init()
         // disable animation
-        self.actions = ["position" : NSNull()]
+        self.actions = ["position": NSNull()]
         self.frame = CGRect(x: x-offset.y, y: y-offset.x,
                             width: size, height: size)
 
@@ -36,5 +36,3 @@ class Dot: CALayer {
         super.init(coder: aDecoder)
     }
 }
-
-

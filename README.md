@@ -4,23 +4,30 @@ Vector Editor for MacOS.
 
 WIP
 
-v0.49
+v0.5
 
 ![Screenshot](screenshot/screenshot1.png)
 
+0.6
 
-v0.5
+Add text fields for Dash
 
-Save blur to .png
+Add text field for ShadowOffset
 
-v0.6
+Drag & Clone hot keys
 
-Rulers (Figma style)
+0.65
 
-Grid (NSDrawTiledRect & snap to grid)
+Edit basic shapes with control dots
+
+Undo Redo
 
 v0.7
+
+Rulers (Figma style)
 
 Selection frame (new tool)
 
 Group curves
+
+Save blur to .png

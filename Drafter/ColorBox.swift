@@ -15,11 +15,11 @@ class ColorBox: NSControl {
     func restore() {
         if self.state == .on {
             if let view = self.superview, let box = view as? NSBox {
-                box.borderColor = set.strokeColor
+                box.borderColor = setup.strokeColor
             }
         } else {
             if let view = self.superview, let box = view as? NSBox {
-                box.borderColor =  set.guiColor
+                box.borderColor =  setup.guiColor
             }
         }
     }
@@ -30,10 +30,8 @@ class ColorBox: NSControl {
         } else {
             self.state = .off
         }
-        
         if let action = self.action {
             NSApp.sendAction(action, to: self.target, from: self)
         }
     }
-    
 }

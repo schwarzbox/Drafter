@@ -14,6 +14,7 @@
 		1E056DE3231337210078A488 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E056DE2231337210078A488 /* Extension.swift */; };
 		1E056DE523135D500078A488 /* ControlFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E056DE423135D500078A488 /* ControlFrame.swift */; };
 		1E157C5A2332299200B191DF /* ColorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E157C592332299200B191DF /* ColorPanel.swift */; };
+		1E244AB52346A17F0037214C /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 1E244AB42346A17F0037214C /* .swiftlint.yml */; };
 		1E4A3F2623011B790038D924 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A3F2523011B790038D924 /* AppDelegate.swift */; };
 		1E4A3F2823011B790038D924 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A3F2723011B790038D924 /* ViewController.swift */; };
 		1E4A3F2A23011B7A0038D924 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E4A3F2923011B7A0038D924 /* Assets.xcassets */; };
@@ -31,6 +32,7 @@
 		1E056DE2231337210078A488 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		1E056DE423135D500078A488 /* ControlFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlFrame.swift; sourceTree = "<group>"; };
 		1E157C592332299200B191DF /* ColorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPanel.swift; sourceTree = "<group>"; };
+		1E244AB42346A17F0037214C /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftlint.yml; sourceTree = "<group>"; };
 		1E4A3F2223011B790038D924 /* Drafter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drafter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E4A3F2523011B790038D924 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1E4A3F2723011B790038D924 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -57,6 +59,7 @@
 		1E4A3F1923011B790038D924 = {
 			isa = PBXGroup;
 			children = (
+				1E244AB42346A17F0037214C /* .swiftlint.yml */,
 				1E4A3F2423011B790038D924 /* Drafter */,
 				1E4A3F2323011B790038D924 /* Products */,
 			);
@@ -103,6 +106,7 @@
 				1E4A3F1E23011B790038D924 /* Sources */,
 				1E4A3F1F23011B790038D924 /* Frameworks */,
 				1E4A3F2023011B790038D924 /* Resources */,
+				1E244AB323469DFE0037214C /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -156,12 +160,33 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E244AB52346A17F0037214C /* .swiftlint.yml in Resources */,
 				1E4A3F2A23011B7A0038D924 /* Assets.xcassets in Resources */,
 				1E4A3F2D23011B7A0038D924 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1E244AB323469DFE0037214C /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\nswiftlint autocorrect\nswiftlint\nelse\necho \"error: SwiftLint does not exist, download it from https://github.com/realm/SwiftLint\"\nexit 1\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1E4A3F1E23011B790038D924 /* Sources */ = {
