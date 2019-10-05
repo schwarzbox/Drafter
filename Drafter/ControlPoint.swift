@@ -99,8 +99,9 @@ class ControlPoint {
     func rotate(pos: CGPoint, ox: CGFloat, oy: CGFloat,
                 matrix: [CGPoint]) -> CGPoint {
         let vec = CGPoint(x: pos.x - ox, y: pos.y - oy)
-        return CGPoint(x: self.multiplyVect(av: matrix[0], bv: vec) + ox,
-                       y: self.multiplyVect(av: matrix[1], bv: vec) + oy)
+        return CGPoint(
+            x: self.multiplyVect(av: matrix[0], bv: vec) + ox,
+            y: self.multiplyVect(av: matrix[1], bv: vec) + oy)
     }
 
     func rotateDots(ox: CGFloat, oy: CGFloat,

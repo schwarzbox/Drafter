@@ -199,7 +199,8 @@ class Curve: Equatable {
         if dash.first(where: { point in
             return Int(truncating: point) > 0}) != nil {
             self.shape.lineDashPattern = dash
-            self.shape.lineDashPhase = 0
+//            self.shape.lineDashPhase = 0
+//            self.shape.miterLimit = CGFloat(10)
         }
     }
 

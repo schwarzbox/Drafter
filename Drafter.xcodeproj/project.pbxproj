@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		1E038A4E2315837B006D6C2A /* Dot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E038A4D2315837B006D6C2A /* Dot.swift */; };
 		1E038A5023159BA9006D6C2A /* ControlPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E038A4F23159BA9006D6C2A /* ControlPoint.swift */; };
-		1E038A54231DAB4E006D6C2A /* ActionSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E038A53231DAB4E006D6C2A /* ActionSlider.swift */; };
 		1E056DE12313344A0078A488 /* Curve.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E056DE02313344A0078A488 /* Curve.swift */; };
 		1E056DE3231337210078A488 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E056DE2231337210078A488 /* Extension.swift */; };
 		1E056DE523135D500078A488 /* ControlFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E056DE423135D500078A488 /* ControlFrame.swift */; };
@@ -27,7 +26,6 @@
 /* Begin PBXFileReference section */
 		1E038A4D2315837B006D6C2A /* Dot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dot.swift; sourceTree = "<group>"; };
 		1E038A4F23159BA9006D6C2A /* ControlPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlPoint.swift; sourceTree = "<group>"; };
-		1E038A53231DAB4E006D6C2A /* ActionSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSlider.swift; sourceTree = "<group>"; };
 		1E056DE02313344A0078A488 /* Curve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Curve.swift; sourceTree = "<group>"; };
 		1E056DE2231337210078A488 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		1E056DE423135D500078A488 /* ControlFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlFrame.swift; sourceTree = "<group>"; };
@@ -87,7 +85,6 @@
 				1E056DE2231337210078A488 /* Extension.swift */,
 				1EA051982327E2BC004F693F /* Setup.swift */,
 				1E4A3F2523011B790038D924 /* AppDelegate.swift */,
-				1E038A53231DAB4E006D6C2A /* ActionSlider.swift */,
 				1E4A3F2923011B7A0038D924 /* Assets.xcassets */,
 				1E4A3F2B23011B7A0038D924 /* Main.storyboard */,
 				1E4A3F2E23011B7A0038D924 /* Info.plist */,
@@ -184,7 +181,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\nswiftlint autocorrect\nswiftlint\nelse\necho \"error: SwiftLint does not exist, download it from https://github.com/realm/SwiftLint\"\nexit 1\nfi\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\nswiftlint\nelse\necho \"error: SwiftLint does not exist, download it from https://github.com/realm/SwiftLint\"\nexit 1\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -199,7 +196,6 @@
 				1EA051992327E2BC004F693F /* Setup.swift in Sources */,
 				1E4A3F3623011BC40038D924 /* SketchPad.swift in Sources */,
 				1E157C5A2332299200B191DF /* ColorPanel.swift in Sources */,
-				1E038A54231DAB4E006D6C2A /* ActionSlider.swift in Sources */,
 				1E056DE3231337210078A488 /* Extension.swift in Sources */,
 				1E4A3F2823011B790038D924 /* ViewController.swift in Sources */,
 				1EA0519D232DB449004F693F /* ColorBox.swift in Sources */,

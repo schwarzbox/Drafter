@@ -4,17 +4,13 @@ Vector Editor for MacOS.
 
 WIP
 
-v0.5
+v0.55
 
 ![Screenshot](screenshot/screenshot1.png)
 
 0.6
 
-Add text fields for Dash
-
-Add text field for ShadowOffset
-
-Drag & Clone hot keys
+Refactor
 
 0.65
 

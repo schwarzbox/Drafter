@@ -122,10 +122,10 @@ extension NSBezierPath {
 }
 
 extension NSStackView {
-    func isOn(title: String) {
-        func restore(alttitle: String,
+    func isOn(on: Int) {
+        func restore(tag: Int,
                      state: inout NSControl.StateValue) {
-            if alttitle == title {
+            if tag == on {
                 state = NSControl.StateValue.on
             } else {
                 state = NSControl.StateValue.off
@@ -134,13 +134,13 @@ extension NSStackView {
 
         for view in self.subviews {
             if let button = view as? NSButton {
-                restore(alttitle: button.alternateTitle,
+                restore(tag: button.tag,
                         state: &button.state)
             } else if let panel = view as? ColorPanel {
                 if let box = panel.subviews.last as? NSBox,
                     let colorbox = box.subviews.last as? ColorBox {
 
-                    restore(alttitle: colorbox.alternateTitle,
+                    restore(tag: colorbox.tag,
                             state: &colorbox.state)
                     colorbox.restore()
                 }

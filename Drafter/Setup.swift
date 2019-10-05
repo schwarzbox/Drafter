@@ -17,6 +17,7 @@ struct Setup {
     let screenHeight: Double = 600
     let maxScreenWidth: Double = 1600
     let maxScreenHeight: Double = 1200
+    let minResize: Double = 0.1
     let minRotate = -Double.pi
     let maxRotate = Double.pi
     let lineWidth: CGFloat = 1.0
@@ -30,6 +31,8 @@ struct Setup {
     let shadow: [CGFloat] = [2.0, 0.5, 8.0, 8.0]
     let shadowColor =  NSColor.black
     let maxShadowRadius: Double = 32
+    let maxShadowOffsetX: Double = 512
+    let maxShadowOffsetY: Double = 512
     let gradientDirection = [CGPoint(x: 0.0, y: 0.0),
                              CGPoint(x: 1.0, y: 0.0)]
     let gradientColor = [NSColor.systemPink,
@@ -41,7 +44,6 @@ struct Setup {
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 
-    let fontText: String = "Text"
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"
     let fontSize: CGFloat = 18

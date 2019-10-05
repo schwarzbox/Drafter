@@ -12,6 +12,11 @@ class ColorBox: NSControl {
     var state: StateValue = .off
     @IBInspectable var alternateTitle: String = ""
 
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        self.tag = 0
+    }
+
     func restore() {
         if self.state == .on {
             if let view = self.superview, let box = view as? NSBox {

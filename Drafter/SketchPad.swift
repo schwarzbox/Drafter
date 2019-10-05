@@ -6,19 +6,18 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
 //0.6
-
-// Add text fields for Dash
-// Add text field for ShadowOffset
-// Drag & Clone hot keys
-// prop rounded when rotated?
 // refactor CGPoint NSPoint
+// refactor linter messages
+
 
 // 0.65
-// Edit basic shapes with control dots
+// Edit basic shapes with control dots(change rounded rect)
 // Undo Redo
 
 //0.7
 // Rulers (Figma style)
+
+// 0.75
 // Crop tool
 // Selection frame (new tool)
 // Group curves
@@ -26,11 +25,11 @@
 //0.8
 // Custom filters (proportional)
 // CA Filters
+// 0.9
 // blur?
 
 // 1.0
 // refactor frame (when zoom smaller dot size) (animation for labels)
-
 // flatneess mitter limits fillRule
 // phase (use line dash phase to animate frame)
 
@@ -42,6 +41,7 @@
 // disable unused actions
 
 // save before cmd-w cmd-q AppDelegate
+// maybe colorwell?
 // resize image?
 // TextTool (position)?
 // move border path?
@@ -127,31 +127,8 @@ class SketchPad: NSView {
     var zoomed: CGFloat = 1.0
     var zoomOrigin = CGPoint(x: 0, y: 0)
 
-    enum Tools {
-        case pen, line, triangle, oval, rectangle, arc,
-        curve, text, drag
-        mutating func set(_ tool: String) {
-            switch tool {
-            case "pen":
-                self = .pen
-            case "line":
-                self = .line
-            case "triangle":
-                self = .triangle
-            case "oval":
-                self = .oval
-            case "rectangle":
-                self = .rectangle
-            case "arc":
-                self = .arc
-            case "curve":
-                self = .curve
-            case "text":
-                self = .text
-            default:
-                self = .drag
-            }
-        }
+    enum Tools: Int {
+        case drag, pen, line, oval, triangle, rectangle, arc, curve, text
     }
     var tool = Tools.drag
 
@@ -339,7 +316,7 @@ class SketchPad: NSView {
                     pos: theStart), !curve.lock {
                 curve.controlDot = dot
                 self.tool = Tools.drag
-                toolBox?.isOn(title: "drag")
+                self.toolBox?.isOn(on: self.tool.rawValue)
             } else if let mp = self.movePoint,
                 mp.collide(origin: theStart, width: mp.bounds.width) {
                 self.filledCurve = false
@@ -478,14 +455,15 @@ class SketchPad: NSView {
         shadowValues[3] = CGFloat(self.curveShadowOffsetY.doubleValue)
 
         var dashPattern: [NSNumber] = []
-        for slider in self.curveDashGap?.subviews ?? [] {
-            if let sl = slider as? NSSlider {
-                dashPattern.append(NSNumber(value: sl.doubleValue))
+        for view in self.curveDashGap?.subviews ?? [] {
+            if let slider = view as? NSSlider {
+                dashPattern.append(NSNumber(value: slider.doubleValue))
             }
         }
 
         let curve = self.initCurve(
-            path: path, fill: self.filledCurve, rounded: self.roundedCurve,
+            path: path, fill: self.filledCurve,
+            rounded: self.roundedCurve,
             strokeColor: self.curveStrokeColor.fillColor,
             fillColor: self.curveFillColor.fillColor,
             lineWidth: CGFloat(self.curveWidth.doubleValue),
@@ -520,8 +498,7 @@ class SketchPad: NSView {
     func selectCurve(pos: NSPoint) {
         if let curve = self.selectedCurve {
             self.clearControls(curve: curve, updatePoints: {})
-            // reset edit curve button
-            self.frameButtons.isOn(title: "")
+            self.frameButtons.isOn(on: -1)
             curve.edit = false
             self.selectedCurve = nil
         }
@@ -856,6 +833,15 @@ class SketchPad: NSView {
     }
 
 //    MARK: Tools func
+    func setTool(tag: Int) {
+        self.hideTextTool()
+        self.clearCurvedPath()
+        if let tool = Tools(rawValue: tag) {
+            self.tool = tool
+            self.toolBox?.isOn(on: self.tool.rawValue)
+        }
+    }
+
     func dragCurve(event: NSEvent) {
         if let curve = self.selectedCurve, !curve.lock {
             let deltax = event.deltaX / self.zoomed
@@ -1052,10 +1038,9 @@ class SketchPad: NSView {
         self.editedPath = NSBezierPath()
 
         if let font = sharedFont {
-            let subv = self.textTool.subviews
-            let height = subv[1].frame.height + setup.dotSize * 2
+            let hei = self.textTool.bounds.height / 2
             let x = (self.textTool.frame.minX) / self.zoomed
-            let y = (self.textTool.frame.minY + height) / self.zoomed
+            let y = (self.textTool.frame.minY + hei) / self.zoomed
 
             let pos = NSPoint(x: x + self.bounds.minX,
                               y: y + self.bounds.minY )
@@ -1191,6 +1176,32 @@ class SketchPad: NSView {
     }
 
 //    MARK: Action func
+    func alignLeftRightCurve(value: Int) {
+        if let curve = self.selectedCurve, !curve.lock {
+            let wid50 = curve.path.bounds.width/2
+            let lineWidth = curve.lineWidth/2
+            let alignLeftRight: [CGFloat] = [
+                self.sketchBorder.bounds.minX + wid50 + lineWidth,
+                self.sketchBorder.bounds.midX,
+                self.sketchBorder.bounds.maxX - wid50 - lineWidth
+            ]
+            self.moveCurve(tag: 0, value: Double(alignLeftRight[value]))
+        }
+    }
+
+    func alignUpDownCurve(value: Int) {
+        if let curve = self.selectedCurve, !curve.lock {
+            let hei50 = curve.path.bounds.height/2
+            let lineWidth = curve.lineWidth/2
+            let alignLeftRight: [CGFloat] = [
+                self.sketchBorder.bounds.maxY - hei50 - lineWidth,
+                self.sketchBorder.bounds.midY,
+                self.sketchBorder.bounds.minY + hei50 + lineWidth
+            ]
+            self.moveCurve(tag: 1, value: Double(alignLeftRight[value]))
+        }
+    }
+
     func moveCurve(tag: Int, value: Double) {
         var deltax: CGFloat = 0
         var deltay: CGFloat = 0
@@ -1332,6 +1343,7 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve, !curve.lock {
             curve.alpha[tag] = CGFloat(value)
             self.clearControls(curve: curve, updatePoints: {})
+            self.updateSliders()
         }
     }
 
@@ -1339,6 +1351,31 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve, !curve.lock {
             curve.lineWidth = CGFloat(value)
             self.clearControls(curve: curve, updatePoints: {})
+            self.updateSliders()
+        }
+    }
+
+    func capCurve(value: Int) {
+        if let curve = self.selectedCurve, !curve.lock {
+            curve.setCap(value: value)
+            self.needsDisplay = true
+        }
+    }
+
+    func joinCurve(value: Int) {
+        if let curve = self.selectedCurve, !curve.lock {
+            curve.setJoin(value: value)
+            self.needsDisplay = true
+        }
+    }
+
+    func dashCurve(tag: Int, value: Double) {
+        if let curve = self.selectedCurve, !curve.lock {
+            var pattern = curve.dash
+            pattern[tag] = NSNumber(value: value)
+            curve.setDash(dash: pattern)
+            self.clearControls(curve: curve, updatePoints: {})
+            self.updateSliders()
         }
     }
 
@@ -1346,6 +1383,7 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve, !curve.lock {
             curve.blur = value
             self.clearControls(curve: curve, updatePoints: {})
+            self.updateSliders()
         }
     }
 
@@ -1364,10 +1402,13 @@ class SketchPad: NSView {
         }
     }
 
-    func shadowCurve(value: [CGFloat]) {
+    func shadowCurve(tag: Int, value: Double) {
         if let curve = self.selectedCurve, !curve.lock {
-            curve.shadow = value
+            var shadow = curve.shadow
+            shadow[tag] = CGFloat(value)
+            curve.shadow = shadow
             self.clearControls(curve: curve, updatePoints: {})
+            self.updateSliders()
         }
     }
 
@@ -1388,6 +1429,7 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve, !curve.lock {
             curve.gradientOpacity[tag] = CGFloat(value)
             self.clearControls(curve: curve, updatePoints: {})
+            self.updateSliders()
         }
     }
 
@@ -1433,59 +1475,14 @@ class SketchPad: NSView {
                 curve.rounded = CGPoint(x: rounded.x, y: y)
             }
             let angle = curve.angle
+
             self.rotateCurve(angle: 0)
+            let rect = curve.path.bounds
             let path = NSBezierPath.init(
-                roundedRect: curve.path.bounds,
+                roundedRect: rect,
                 xRadius: rounded.x * wid, yRadius: rounded.y * hei)
             curve.path = path
             self.rotateCurve(angle: Double(angle))
-        }
-    }
-
-    func capCurve(value: Int) {
-        if let curve = self.selectedCurve, !curve.lock {
-            curve.setCap(value: value)
-            self.needsDisplay = true
-        }
-    }
-
-    func joinCurve(value: Int) {
-        if let curve = self.selectedCurve, !curve.lock {
-            curve.setJoin(value: value)
-            self.needsDisplay = true
-        }
-    }
-
-    func dashCurve(value: [NSNumber]) {
-        if let curve = self.selectedCurve, !curve.lock {
-            curve.setDash(dash: value)
-            self.needsDisplay = true
-        }
-    }
-
-    func alignLeftRightCurve(value: Int) {
-        if let curve = self.selectedCurve, !curve.lock {
-            let wid50 = curve.path.bounds.width/2
-            let lineWidth = curve.lineWidth/2
-            let alignLeftRight: [CGFloat] = [
-                self.sketchBorder.bounds.minX + wid50 + lineWidth,
-                self.sketchBorder.bounds.midX,
-                self.sketchBorder.bounds.maxX - wid50 - lineWidth
-            ]
-            self.moveCurve(tag: 0, value: Double(alignLeftRight[value]))
-        }
-    }
-
-    func alignUpDownCurve(value: Int) {
-        if let curve = self.selectedCurve, !curve.lock {
-            let hei50 = curve.path.bounds.height/2
-            let lineWidth = curve.lineWidth/2
-            let alignLeftRight: [CGFloat] = [
-                self.sketchBorder.bounds.maxY - hei50 - lineWidth,
-                self.sketchBorder.bounds.midY,
-                self.sketchBorder.bounds.minY + hei50 + lineWidth
-            ]
-            self.moveCurve(tag: 1, value: Double(alignLeftRight[value]))
         }
     }
 
