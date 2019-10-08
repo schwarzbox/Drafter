@@ -9,8 +9,8 @@
 import Cocoa
 
 class ColorBox: NSControl {
-    var state: StateValue = .off
     @IBInspectable var alternateTitle: String = ""
+    var state: StateValue = .off
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -24,7 +24,7 @@ class ColorBox: NSControl {
             }
         } else {
             if let view = self.superview, let box = view as? NSBox {
-                box.borderColor =  setup.guiColor
+                box.borderColor = setup.guiColor
             }
         }
     }
@@ -39,4 +39,5 @@ class ColorBox: NSControl {
             NSApp.sendAction(action, to: self.target, from: self)
         }
     }
+
 }

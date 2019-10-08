@@ -11,19 +11,19 @@ import Cocoa
 extension NSBezierPath {
     var cgPath: CGPath {
         let path = CGMutablePath()
-        var points = [CGPoint](repeating: .zero, count: 3)
+        var cPnt = [CGPoint](repeating: .zero, count: 3)
 
         for i in 0 ..< self.elementCount {
-            let type = self.element(at: i, associatedPoints: &points)
+            let type = self.element(at: i, associatedPoints: &cPnt)
             switch type {
             case .moveTo:
-                path.move(to: points[0])
+                path.move(to: cPnt[0])
             case .lineTo:
-                path.addLine(to: points[0])
+                path.addLine(to: cPnt[0])
             case .curveTo:
-                path.addCurve(to: points[2],
-                              control1: points[0],
-                              control2: points[1])
+                path.addCurve(to: cPnt[2],
+                              control1: cPnt[0],
+                              control2: cPnt[1])
             case .closePath:
                 path.closeSubpath()
             default:
@@ -33,40 +33,63 @@ extension NSBezierPath {
         return path
     }
 
-    func findPath(pos: NSPoint) -> (index: Int, points: [NSPoint])? {
-        var points = [NSPoint](repeating: .zero, count: 3)
-        var oldPoint: NSPoint?
-        let path = NSBezierPath()
-        for i in 0 ..< self.elementCount {
-            let type = self.element(at: i, associatedPoints: &points)
+    func copyPath(to path: NSBezierPath, start: Int, final: Int) {
+        var cPnt = [CGPoint](repeating: .zero, count: 3)
+        let st = start < 0 ? 0 : start
+        let fn = final > self.elementCount ? self.elementCount : final
+        for i in st..<fn {
+            let type = self.element(at: i, associatedPoints: &cPnt)
             switch type {
             case .moveTo:
-                oldPoint = points[0]
+                path.move(to: cPnt[0])
+            case .lineTo:
+                path.line(to: cPnt[0])
+            case .curveTo:
+                path.curve(to: cPnt[2],
+                           controlPoint1: cPnt[0],
+                           controlPoint2: cPnt[1])
+            case .closePath:
+                path.close()
+            default:
+                break
+            }
+        }
+    }
+
+    func findPath(pos: CGPoint) -> (index: Int, points: [CGPoint])? {
+        var cPnt = [CGPoint](repeating: .zero, count: 3)
+        var oldPoint: CGPoint?
+        let path = NSBezierPath()
+        for i in 0 ..< self.elementCount {
+            let type = self.element(at: i, associatedPoints: &cPnt)
+            switch type {
+            case .moveTo:
+                oldPoint = cPnt[0]
             case .lineTo:
                 path.removeAllPoints()
                 if let mp = oldPoint {
                     path.move(to: mp)
-                    path.line(to: points[0])
+                    path.line(to: cPnt[0])
                     path.close()
                 }
-                oldPoint = points[0]
+                oldPoint = cPnt[0]
                 if path.contains(pos) {
-                    return (index: i, points: points)
+                    return (index: i, points: cPnt)
                 }
 
             case .curveTo:
                 path.removeAllPoints()
                 if let mp = oldPoint {
                     path.move(to: mp)
-                    path.curve(to: points[2],
-                               controlPoint1: points[0],
-                               controlPoint2: points[1])
+                    path.curve(to: cPnt[2],
+                               controlPoint1: cPnt[0],
+                               controlPoint2: cPnt[1])
                     path.line(to: mp)
                     path.close()
                 }
-                oldPoint = points[2]
+                oldPoint = cPnt[2]
                 if path.contains(pos) {
-                    return (index: i, points: points)
+                    return (index: i, points: cPnt)
                 }
             case .closePath:
                 break
@@ -77,33 +100,32 @@ extension NSBezierPath {
         return nil
     }
 
-    func copyPath(to path: NSBezierPath, start: Int, final: Int) {
-        var points = [CGPoint](repeating: .zero, count: 3)
-        let st = start < 0 ? 0 : start
-        let fn = final > self.elementCount ? self.elementCount : final
-        for i in st..<fn {
-            let type = self.element(at: i, associatedPoints: &points)
-            switch type {
-            case .moveTo:
-                path.move(to: points[0])
-            case .lineTo:
-                path.line(to: points[0])
-            case .curveTo:
-                path.curve(to: points[2],
-                           controlPoint1: points[0],
-                           controlPoint2: points[1])
-            case .closePath:
-                path.close()
-            default:
-                break
+    func findPoints(_ elementType: NSBezierPath.ElementType) -> [[CGPoint]] {
+        var points: [[CGPoint]] = []
+        for i in 0 ..< self.elementCount {
+            var cPnt = [CGPoint](repeating: .zero, count: 3)
+            let type = self.element(at: i, associatedPoints: &cPnt)
+            if type == elementType {
+                points.append(cPnt)
             }
         }
+        return points
+    }
+
+    func placeCurve(at: Int, with points: [CGPoint],
+                    to path: NSBezierPath,
+                    replace: Bool = true) {
+        self.copyPath(to: path, start: 0, final: at)
+        path.curve(to: points[2], controlPoint1: points[0],
+                   controlPoint2: points[1])
+        let place = replace ? at + 1 : at
+        self.copyPath(to: path, start: place, final: self.elementCount)
     }
 
     func printPath() {
-        var points = [NSPoint](repeating: .zero, count: 3)
+        var cPnt = [CGPoint](repeating: .zero, count: 3)
         for i in 0 ..< self.elementCount {
-            let type = self.element(at: i, associatedPoints: &points)
+            let type = self.element(at: i, associatedPoints: &cPnt)
             switch type {
             case .moveTo:
                 print("move")
@@ -118,7 +140,6 @@ extension NSBezierPath {
             }
         }
     }
-
 }
 
 extension NSStackView {
@@ -139,7 +160,7 @@ extension NSStackView {
             } else if let panel = view as? ColorPanel {
                 if let box = panel.subviews.last as? NSBox,
                     let colorbox = box.subviews.last as? ColorBox {
-
+                    
                     restore(tag: colorbox.tag,
                             state: &colorbox.state)
                     colorbox.restore()
@@ -262,7 +283,7 @@ extension NSColor {
                             alpha: alpha)
     }
 
-    var hexString: String {
+    var hexStr: String {
         guard let color = usingColorSpace(NSColorSpace.extendedSRGB) else {
             return "FFFFFF"
         }
@@ -286,7 +307,6 @@ extension NSColor {
 }
 
 extension NSSavePanel {
-
     func setupPanel(fileName: String) -> NSPopUpButton {
         self.directoryURL = FileManager.default.urls(
             for: .desktopDirectory, in: .userDomainMask).first!

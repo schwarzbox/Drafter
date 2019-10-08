@@ -27,6 +27,7 @@ struct Setup {
     let strokeColor = NSColor.white.sRGB()
     let fillColor = NSColor.systemBlue.sRGB()
     let guiColor = NSColor.unemphasizedSelectedContentBackgroundColor.sRGB()
+    let controlColor = NSColor.green.sRGB()
 
     let shadow: [CGFloat] = [2.0, 0.5, 8.0, 8.0]
     let shadowColor =  NSColor.black

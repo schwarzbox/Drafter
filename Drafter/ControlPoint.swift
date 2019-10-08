@@ -32,7 +32,16 @@ class ControlPoint {
         self.lines = [self.line1, self.line2]
     }
 
-    func collideDot(pos: NSPoint, dot: Dot) -> Bool {
+    func copy() -> ControlPoint? {
+        if let mp = self.mp.copy() as? Dot,
+            let cp1 = self.cp1.copy() as? Dot,
+            let cp2 = self.cp2.copy() as? Dot {
+            return ControlPoint.init(mp: mp, cp1: cp1, cp2: cp2)
+        }
+        return nil
+    }
+
+    func collideDot(pos: CGPoint, dot: Dot) -> Bool {
         if dot.collide(origin: pos, width: dot.bounds.width) {
             return true
         }

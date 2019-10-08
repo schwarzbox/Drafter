@@ -4,18 +4,12 @@ Vector Editor for MacOS.
 
 WIP
 
-v0.55
+v0.65
 
 ![Screenshot](screenshot/screenshot1.png)
 
-0.6
-
-Refactor
-
-0.65
-
-Edit basic shapes with control dots
-
+0.67
+Fast rotate (bug)
 Undo Redo
 
 v0.7

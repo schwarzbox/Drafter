@@ -34,9 +34,9 @@ class ControlFrame: CALayer {
         self.borderColor = setup.fillColor.cgColor
 
         var gradientLoc: [CGPoint] = []
-        for elem in curve.gradientLocation {
+        for i in curve.gradientLocation {
             let locX = self.bounds.minX + CGFloat(
-                truncating: elem) * self.bounds.width
+                truncating: i) * self.bounds.width
             let locY = self.bounds.minY - ControlFrame.ctrlPad50
             gradientLoc.append(CGPoint(x: locX, y: locY))
         }
@@ -123,17 +123,17 @@ class ControlFrame: CALayer {
     func initRoundedCornerControl(parent: SketchPad,
                                   curve: Curve, numDots: Int) {
         if let rounded = curve.rounded {
-            let fillColor = NSColor.green
+            let fillColor = setup.controlColor
             let strokeColor = setup.strokeColor
 
-            let wid = self.bounds.width/2
-            let hei = self.bounds.height/2
+            let wid50 = self.bounds.width/2
+            let hei50 = self.bounds.height/2
             let roundedX = CGPoint(
-                x: self.bounds.maxX - rounded.x * wid,
+                x: self.bounds.maxX - rounded.x * wid50,
                 y: self.bounds.maxY + ControlFrame.ctrlPad50)
             let roundedY = CGPoint(
                 x: self.bounds.maxX + ControlFrame.ctrlPad50,
-                y: self.bounds.maxY - rounded.y * hei)
+                y: self.bounds.maxY - rounded.y * hei50)
 
             let path = NSBezierPath()
             path.move(to: CGPoint(x: roundedX.x, y: self.bounds.maxY))
@@ -193,8 +193,8 @@ class ControlFrame: CALayer {
         self.addSublayer(cp)
     }
 
-    func collideLabel(pos: NSPoint) -> Dot? {
-        let mpos = NSPoint(x: pos.x - self.frame.minX,
+    func collideLabel(pos: CGPoint) -> Dot? {
+        let mpos = CGPoint(x: pos.x - self.frame.minX,
                            y: pos.y - self.frame.minY)
         for layer in self.sublayers! {
             if let dot = layer as? Dot {

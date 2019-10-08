@@ -9,6 +9,12 @@
 import Cocoa
 class Dot: CALayer {
     var tag: Int?
+
+    var size: CGFloat?
+    var offset: CGPoint?
+    var strokeColor: NSColor?
+    var fillColor: NSColor?
+
     init(x: CGFloat, y: CGFloat, size: CGFloat, offset: CGPoint,
          radius: CGFloat, lineWidth: CGFloat = setup.lineWidth,
          strokeColor: NSColor? = setup.strokeColor,
@@ -21,6 +27,10 @@ class Dot: CALayer {
         self.frame = CGRect(x: x-offset.y, y: y-offset.x,
                             width: size, height: size)
 
+        self.size = size
+        self.offset = offset
+        self.strokeColor = strokeColor
+        self.fillColor = fillColor
         self.cornerRadius = radius
         self.borderWidth = lineWidth
         self.borderColor = strokeColor?.cgColor
@@ -34,5 +44,17 @@ class Dot: CALayer {
     }
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+
+    override func copy() -> Any {
+        return Dot.init(x: self.frame.midX,
+                        y: self.frame.midY,
+                        size: self.size ?? 0,
+                        offset: self.offset ?? CGPoint(x: 0, y: 0),
+                        radius: self.cornerRadius,
+                        lineWidth: self.borderWidth,
+                        strokeColor: self.strokeColor,
+                        fillColor: self.fillColor,
+                        hidden: self.isHidden)
     }
 }

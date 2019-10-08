@@ -208,7 +208,7 @@ class Curve: Equatable {
         self.points = points
     }
 
-    func insertPoint(pos: NSPoint, index: Int) -> ControlPoint {
+    func insertPoint(pos: CGPoint, index: Int) -> ControlPoint {
         let mp = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
                           offset: CGPoint(x: self.dotRadius,
                                           y: self.dotRadius),
@@ -286,20 +286,20 @@ class Curve: Equatable {
         }
     }
 
-    func insertCurve(at pos: NSPoint, index: Int,
-                     points: [NSPoint]) -> NSBezierPath {
+    func insertPoint(at pos: CGPoint, index: Int,
+                     points: [CGPoint]) -> NSBezierPath {
         let path = NSBezierPath()
         self.path.copyPath(to: path, start: 0, final: index)
         path.curve(to: pos, controlPoint1: points[0],
-                 controlPoint2: pos)
+                   controlPoint2: pos)
         path.curve(to: points[2], controlPoint1: pos,
-                 controlPoint2: points[1])
+                   controlPoint2: points[1])
         self.path.copyPath(to: path, start: index + 1,
-                           final: self.path.elementCount)
+                      final: self.path.elementCount)
         return path
     }
 
-    func selectPoint(pos: NSPoint) {
+    func selectPoint(pos: CGPoint) {
         if !self.lock {
             for point in self.points {
                 if point.collideDot(pos: pos, dot: point.mp) {
@@ -326,9 +326,9 @@ class Curve: Equatable {
                 let point = self.insertPoint(pos: pos, index: segment.index)
                 self.controlDot = point.mp
 
-                let path = insertCurve(at: point.mp.position,
-                                       index: segment.index,
-                                       points: segment.points)
+                let path = self.insertPoint(at: point.mp.position,
+                                                 index: segment.index,
+                                                 points: segment.points)
                 self.path = path
 
                 self.clearPoints()
@@ -339,11 +339,11 @@ class Curve: Equatable {
     }
 
     func movePoint(index: Int, point: ControlPoint) {
-        var points = [NSPoint](repeating: .zero, count: 3)
-        let elements = self.path.elementCount
+        var points = [CGPoint](repeating: .zero, count: 3)
+        let count = self.path.elementCount
         var indexLeft: Int = index
         if index==0 {
-            indexLeft =  elements - 3
+            indexLeft = count - 3
             var pointsStart = [point.mp.position]
             self.path.setAssociatedPoints(&pointsStart, at: 0)
 
@@ -352,7 +352,7 @@ class Curve: Equatable {
                                points[1], points[2]]
             self.path.setAssociatedPoints(&pointsRight, at: 1)
         } else {
-            if index+1<elements-2 {
+            if index+1 < count-2 {
                 self.path.element(at: index+1, associatedPoints: &points)
                 var pointsRight = [point.cp1.position,
                                    points[1], points[2]]
@@ -365,32 +365,54 @@ class Curve: Equatable {
         self.path.setAssociatedPoints(&pointsLeft, at: indexLeft)
     }
 
-    func editPoint(pos: NSPoint) {
+    func movePoints(index: [Int], types: [String],
+                    offsetX: CGFloat? = nil, offsetY: CGFloat? = nil) {
+        for i in index {
+            let point = self.points[i]
+            let px = offsetX ?? point.mp.position.x
+            let py = offsetY ?? point.mp.position.y
+            for type in types {
+                switch type {
+                case "mp": point.mp.position = CGPoint(x: px, y: py)
+                case "cp1": point.cp1.position = CGPoint(x: px, y: py)
+                case "cp2": point.cp2.position = CGPoint(x: px, y: py)
+                default: break
+                }
+            }
+            self.movePoint(index: i, point: point)
+            point.updateLines()
+            point.trackDot(parent: self.parent!, dot: point.mp)
+        }
+    }
+
+    func editPoint(pos: CGPoint) {
         if !self.lock {
             self.clearTrackArea()
             var find: Bool = false
-            for (i, point) in self.points.enumerated() {
+            for (index, point) in self.points.enumerated() {
                 if let dot = self.controlDot {
-                    if dot == point.mp && point.collideDot(pos: pos,
-                                                           dot: point.cp1) {
-                        let cp2pos = NSPoint(
-                            x: dot.position.x - (pos.x - dot.position.x),
-                            y: dot.position.y  - (pos.y - dot.position.y))
-                        point.cp1.position = pos
-                        point.cp2.position = cp2pos
-                        find = true
-                    } else if dot == point.mp {
-                        let deltaPos = NSPoint(
-                            x: pos.x - point.mp.position.x,
-                            y: pos.y - point.mp.position.y)
-                        point.mp.position = pos
-                        point.cp1.position = NSPoint(
-                            x: point.cp1.position.x+deltaPos.x,
-                            y: point.cp1.position.y+deltaPos.y)
-                        point.cp2.position = NSPoint(
-                            x: point.cp2.position.x+deltaPos.x,
-                            y: point.cp2.position.y+deltaPos.y)
-                        find = true
+                    if dot == point.mp {
+                        let c1 = point.collideDot(pos: pos, dot: point.cp1)
+                        let c2 = point.collideDot(pos: pos, dot: point.cp2)
+                        if c1 {
+                            point.cp1.position = pos
+                            find = true
+                        } else if c2 {
+                            point.cp2.position = pos
+                            find = true
+                        } else {
+                            let deltaPos = CGPoint(
+                                x: pos.x - point.mp.position.x,
+                                y: pos.y - point.mp.position.y)
+                            point.mp.position = pos
+                            point.cp1.position = CGPoint(
+                                x: point.cp1.position.x+deltaPos.x,
+                                y: point.cp1.position.y+deltaPos.y)
+                            point.cp2.position = CGPoint(
+                                x: point.cp2.position.x+deltaPos.x,
+                                y: point.cp2.position.y+deltaPos.y)
+                            find = true
+                        }
                     } else if dot == point.cp1 {
                         point.cp1.position = pos
                         find = true
@@ -399,7 +421,7 @@ class Curve: Equatable {
                         find = true
                     }
                     if find {
-                        self.movePoint(index: i, point: point)
+                        self.movePoint(index: index, point: point)
                         point.updateLines()
                     }
                 }
@@ -441,7 +463,7 @@ class Curve: Equatable {
     }
 
 //    MARK: Global Control
-    func showControl(pos: NSPoint) {
+    func showControl(pos: CGPoint) {
         if !self.lock {
             if self.edit {
                 for point in self.points {

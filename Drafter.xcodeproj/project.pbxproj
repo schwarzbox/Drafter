@@ -21,6 +21,8 @@
 		1E4A3F3623011BC40038D924 /* SketchPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A3F3523011BC40038D924 /* SketchPad.swift */; };
 		1EA051992327E2BC004F693F /* Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA051982327E2BC004F693F /* Setup.swift */; };
 		1EA0519D232DB449004F693F /* ColorBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA0519C232DB449004F693F /* ColorBox.swift */; };
+		1EC146492349EE5800CB4A55 /* TextTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC146482349EE5800CB4A55 /* TextTool.swift */; };
+		1EC1464B234CA76E00CB4A55 /* FrameButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC1464A234CA76E00CB4A55 /* FrameButtons.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +43,8 @@
 		1E4A3F3523011BC40038D924 /* SketchPad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SketchPad.swift; sourceTree = "<group>"; };
 		1EA051982327E2BC004F693F /* Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Setup.swift; sourceTree = "<group>"; };
 		1EA0519C232DB449004F693F /* ColorBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorBox.swift; sourceTree = "<group>"; };
+		1EC146482349EE5800CB4A55 /* TextTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextTool.swift; sourceTree = "<group>"; };
+		1EC1464A234CA76E00CB4A55 /* FrameButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameButtons.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,11 +80,13 @@
 			children = (
 				1E4A3F2723011B790038D924 /* ViewController.swift */,
 				1E4A3F3523011BC40038D924 /* SketchPad.swift */,
-				1E056DE423135D500078A488 /* ControlFrame.swift */,
 				1E056DE02313344A0078A488 /* Curve.swift */,
 				1E038A4F23159BA9006D6C2A /* ControlPoint.swift */,
 				1E038A4D2315837B006D6C2A /* Dot.swift */,
+				1E056DE423135D500078A488 /* ControlFrame.swift */,
 				1E157C592332299200B191DF /* ColorPanel.swift */,
+				1EC146482349EE5800CB4A55 /* TextTool.swift */,
+				1EC1464A234CA76E00CB4A55 /* FrameButtons.swift */,
 				1EA0519C232DB449004F693F /* ColorBox.swift */,
 				1E056DE2231337210078A488 /* Extension.swift */,
 				1EA051982327E2BC004F693F /* Setup.swift */,
@@ -194,10 +200,12 @@
 				1E056DE523135D500078A488 /* ControlFrame.swift in Sources */,
 				1E056DE12313344A0078A488 /* Curve.swift in Sources */,
 				1EA051992327E2BC004F693F /* Setup.swift in Sources */,
+				1EC1464B234CA76E00CB4A55 /* FrameButtons.swift in Sources */,
 				1E4A3F3623011BC40038D924 /* SketchPad.swift in Sources */,
 				1E157C5A2332299200B191DF /* ColorPanel.swift in Sources */,
 				1E056DE3231337210078A488 /* Extension.swift in Sources */,
 				1E4A3F2823011B790038D924 /* ViewController.swift in Sources */,
+				1EC146492349EE5800CB4A55 /* TextTool.swift in Sources */,
 				1EA0519D232DB449004F693F /* ColorBox.swift in Sources */,
 				1E038A4E2315837B006D6C2A /* Dot.swift in Sources */,
 				1E4A3F2623011B790038D924 /* AppDelegate.swift in Sources */,
