@@ -11,7 +11,6 @@ import Cocoa
 class ViewController: NSViewController {
     var window: NSWindow!
     @IBOutlet weak var sketchView: SketchPad!
-    @IBOutlet weak var bup: NSButton!
 
     @IBOutlet weak var toolUI: NSStackView!
     @IBOutlet weak var frameUI: FrameButtons!
@@ -197,7 +196,7 @@ class ViewController: NSViewController {
         curveShadowColor.fillColor = setup.shadowColor
         curveShadowLabel.stringValue = setup.shadowColor.hexStr
 
-        var shadow = setup.shadow.map {(fl) in Double(fl)}
+        let shadow = setup.shadow.map {(fl) in Double(fl)}
         curveShadowRadius.maxValue = setup.maxShadowRadius
         curveShadowOpacity.maxValue = 1
 
@@ -331,7 +330,7 @@ class ViewController: NSViewController {
             self.curveHei.doubleValue = Double(curve.path.bounds.height)
             self.curveRotate.doubleValue = Double(curve.angle)
 
-            var opacity = curve.alpha.map {(fl) in Double(fl)}
+            let opacity = curve.alpha.map {(fl) in Double(fl)}
             self.curveOpacityStroke.doubleValue = opacity[0]
             self.curveOpacityFill.doubleValue = opacity[1]
             self.curveWidth.doubleValue = Double(curve.lineWidth)
@@ -341,7 +340,7 @@ class ViewController: NSViewController {
             self.curveFillColor.fillColor = curve.fillColor
             self.curveShadowColor.fillColor = curve.shadowColor
 
-            var shadow = curve.shadow.map {(fl) in Double(fl)}
+            let shadow = curve.shadow.map {(fl) in Double(fl)}
             self.curveShadowRadius.doubleValue = shadow[0]
             self.curveShadowOpacity.doubleValue = shadow[1]
             self.curveShadowOffsetX.doubleValue = shadow[2]
@@ -351,7 +350,7 @@ class ViewController: NSViewController {
             self.curveGradMiddleColor.fillColor = curve.gradientColor[1]
             self.curveGradFinalColor.fillColor = curve.gradientColor[2]
 
-            var gradOpacity = curve.gradientOpacity.map {(fl) in Double(fl)}
+            let gradOpacity = curve.gradientOpacity.map {(fl) in Double(fl)}
             self.curveGradStOpacity.doubleValue = gradOpacity[0]
             self.curveGradMidOpacity.doubleValue = gradOpacity[1]
             self.curveGradFinOpacity.doubleValue = gradOpacity[2]

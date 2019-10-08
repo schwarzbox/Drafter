@@ -6,6 +6,10 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
 // 0.67
+// Rounded rect
+// add more info to readme
+// Refactor select curves
+
 // Fast rotate (bug)
 // Undo Redo
 
@@ -36,7 +40,6 @@
 // disable unused actions
 
 // save before cmd-w cmd-q AppDelegate
-// maybe colorwell?
 // resize image?
 // TextTool (position)?
 // move border path?
