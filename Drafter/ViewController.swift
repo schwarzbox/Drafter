@@ -119,11 +119,10 @@ class ViewController: NSViewController {
         if !event.modifierFlags.contains(.command),
             let resp = self.window.firstResponder,
             resp.isKind(of: NSWindow.self) {
-            let keys: [String] = ["v", "p", "l", "o",
-                                  "t", "r", "s", "c", "f"]
+
             if let ch = event.charactersIgnoringModifiers {
-                if let tag = keys.firstIndex(of: ch) {
-                    sketchView.setTool(tag: tag)
+                if let tool = toolsKeys[ch] {
+                    sketchView!.setTool(tag: tool.rawValue)
                     return true
                 }
             }
@@ -157,8 +156,10 @@ class ViewController: NSViewController {
 
         curveX.maxValue = setup.maxScreenWidth
         curveY.maxValue = setup.maxScreenHeight
-        curveX.minValue = setup.minResize
-        curveY.minValue = setup.minResize
+        curveX.minValue = 0
+        curveY.minValue = 0
+        curveWid.minValue = setup.minResize
+        curveHei.minValue = setup.minResize
         curveWid.maxValue = setup.maxScreenWidth
         curveHei.maxValue = setup.maxScreenHeight
         curveWid.doubleValue = setup.screenWidth
@@ -390,12 +391,8 @@ class ViewController: NSViewController {
                 }
             }
         } else {
-            self.curveX!.doubleValue = Double(view.sketchBorder.bounds.minX)
-            self.curveY!.doubleValue = Double(view.sketchBorder.bounds.minY)
             self.curveWid!.doubleValue = Double(view.sketchBorder.bounds.width)
             self.curveHei!.doubleValue = Double(view.sketchBorder.bounds.height)
-            self.curveXLabel!.doubleValue = self.curveX!.doubleValue
-            self.curveYLabel!.doubleValue = self.curveY!.doubleValue
             self.curveWidLabel!.doubleValue = self.curveWid!.doubleValue
             self.curveHeiLabel!.doubleValue = self.curveHei!.doubleValue
         }
@@ -664,10 +661,6 @@ class ViewController: NSViewController {
         sketchView!.flipCurve(name: sender.alternateTitle)
     }
 
-    @IBAction func cloneCurve(_ sender: NSButton) {
-        sketchView!.cloneCurve()
-    }
-
     @IBAction func editCurve(_ sender: NSButton) {
         sketchView!.editCurve(sender: sender)
     }
@@ -707,7 +700,7 @@ class ViewController: NSViewController {
 
     @IBAction func redo(_ sender: NSMenuItem) {
         print("redo")
-        //        SketchView!.undoCurve()
+        //        SketchView!.redoCurve()
     }
 
     @IBAction func delete(_ sender: NSMenuItem) {

@@ -24,11 +24,12 @@ class ControlFrame: CALayer {
     init(parent: SketchPad, curve: Curve) {
         self.parent = parent
         super.init()
-
-        self.frame = CGRect(x: curve.path.bounds.minX - curve.lineWidth/2,
-                            y: curve.path.bounds.minY - curve.lineWidth/2,
-                            width: curve.path.bounds.width + curve.lineWidth,
-                            height: curve.path.bounds.height + curve.lineWidth)
+        let line50 = curve.lineWidth/2
+        self.frame = CGRect(
+            x: curve.path.bounds.minX - line50,
+            y: curve.path.bounds.minY - line50,
+            width: curve.path.bounds.width + curve.lineWidth,
+            height: curve.path.bounds.height + curve.lineWidth)
 
         self.borderWidth = setup.lineWidth
         self.borderColor = setup.fillColor.cgColor

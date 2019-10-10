@@ -38,7 +38,7 @@ class ColorPanel: NSStackView {
         let tag = sender?.tag ?? -1
 
         self.sharedColorPanel?.title = title.capitalized
-        
+    
         if let parent = self.superview as? NSStackView {
             parent.isOn(on: tag)
         }

@@ -48,6 +48,15 @@ class ControlPoint {
         return false
     }
 
+    func collidedPoint(pos: CGPoint) -> Dot? {
+        for dot in self.dots {
+            if self.collideDot(pos: pos, dot: dot) && !dot.isHidden {
+                return dot
+            }
+        }
+        return nil
+    }
+
     func trackDot(parent: SketchPad, dot: Dot) {
         let options: NSTrackingArea.Options = [
             .mouseEnteredAndExited, .activeInActiveApp]

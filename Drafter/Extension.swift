@@ -56,10 +56,19 @@ extension NSBezierPath {
         }
     }
 
+    func rectPath(_ path: NSBezierPath,
+                  pad: CGFloat = setup.dotRadius) -> CGRect {
+        let rect = CGRect(
+            x: path.bounds.minX-pad/2, y: path.bounds.minY-pad/2,
+            width: path.bounds.width+pad, height: path.bounds.height+pad)
+        return rect
+    }
+
     func findPath(pos: CGPoint) -> (index: Int, points: [CGPoint])? {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         var oldPoint: CGPoint?
         let path = NSBezierPath()
+
         for i in 0 ..< self.elementCount {
             let type = self.element(at: i, associatedPoints: &cPnt)
             switch type {
@@ -72,11 +81,13 @@ extension NSBezierPath {
                     path.line(to: cPnt[0])
                     path.close()
                 }
+                cPnt[1] = cPnt[0]
+                cPnt[2] = cPnt[0]
+
                 oldPoint = cPnt[0]
-                if path.contains(pos) {
+                if self.rectPath(path).contains(pos) {
                     return (index: i, points: cPnt)
                 }
-
             case .curveTo:
                 path.removeAllPoints()
                 if let mp = oldPoint {
@@ -84,11 +95,10 @@ extension NSBezierPath {
                     path.curve(to: cPnt[2],
                                controlPoint1: cPnt[0],
                                controlPoint2: cPnt[1])
-                    path.line(to: mp)
                     path.close()
                 }
                 oldPoint = cPnt[2]
-                if path.contains(pos) {
+                if self.rectPath(path).contains(pos) {
                     return (index: i, points: cPnt)
                 }
             case .closePath:
@@ -112,14 +122,46 @@ extension NSBezierPath {
         return points
     }
 
+    func insertCurve(to pos: CGPoint, at: Int,
+                     with points: [CGPoint]) -> NSBezierPath {
+        let path = NSBezierPath()
+        self.copyPath(to: path, start: 0, final: at)
+        path.curve(to: pos, controlPoint1: pos,
+                   controlPoint2: pos)
+        path.curve(to: points[2], controlPoint1: points[2],
+                   controlPoint2: points[2])
+        self.copyPath(to: path, start: at + 1,
+                      final: self.elementCount)
+        return path
+    }
+
     func placeCurve(at: Int, with points: [CGPoint],
-                    to path: NSBezierPath,
-                    replace: Bool = true) {
+                    replace: Bool = true) -> NSBezierPath {
+        let path = NSBezierPath()
         self.copyPath(to: path, start: 0, final: at)
         path.curve(to: points[2], controlPoint1: points[0],
                    controlPoint2: points[1])
         let place = replace ? at + 1 : at
         self.copyPath(to: path, start: place, final: self.elementCount)
+        return path
+    }
+
+    func addCross(pos: CGPoint) {
+        self.move(to: pos)
+        let leftMove = CGPoint(x: pos.x - setup.crossSize,
+                               y: pos.y + setup.crossSize)
+        let rightMove = CGPoint(x: pos.x + setup.crossSize,
+                               y: pos.y + setup.crossSize)
+        let leftLine = CGPoint(x: pos.x + setup.crossSize,
+                               y: pos.y - setup.crossSize)
+        let rightLine = CGPoint(x: pos.x - setup.crossSize,
+                               y: pos.y - setup.crossSize)
+        self.move(to: leftMove)
+        self.line(to: leftLine)
+        self.move(to: rightMove)
+        self.line(to: rightLine)
+        self.move(to: pos)
+        self.close()
     }
 
     func printPath() {
@@ -160,7 +202,6 @@ extension NSStackView {
             } else if let panel = view as? ColorPanel {
                 if let box = panel.subviews.last as? NSBox,
                     let colorbox = box.subviews.last as? ColorBox {
-                    
                     restore(tag: colorbox.tag,
                             state: &colorbox.state)
                     colorbox.restore()

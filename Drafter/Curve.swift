@@ -123,7 +123,15 @@ class Curve: Equatable {
     var join: Int = 1
     var dash: [NSNumber] = []
 
-    var borderPosition: CGFloat = 1
+    var borderedPath: [CGFloat] {
+        let line50 = self.lineWidth/2
+        return [self.path.bounds.minX - line50,
+                self.path.bounds.minY - line50,
+                self.path.bounds.midX, self.path.bounds.midY,
+                self.path.bounds.maxX + line50,
+                self.path.bounds.maxY + line50]
+    }
+
     var rounded: CGPoint?
     var lock: Bool = false
     var points: [ControlPoint] = []
@@ -286,51 +294,25 @@ class Curve: Equatable {
         }
     }
 
-    func insertPoint(at pos: CGPoint, index: Int,
-                     points: [CGPoint]) -> NSBezierPath {
-        let path = NSBezierPath()
-        self.path.copyPath(to: path, start: 0, final: index)
-        path.curve(to: pos, controlPoint1: points[0],
-                   controlPoint2: pos)
-        path.curve(to: points[2], controlPoint1: pos,
-                   controlPoint2: points[1])
-        self.path.copyPath(to: path, start: index + 1,
-                      final: self.path.elementCount)
-        return path
-    }
-
     func selectPoint(pos: CGPoint) {
         if !self.lock {
             for point in self.points {
-                if point.collideDot(pos: pos, dot: point.mp) {
-                    self.controlDot = point.mp
-                    return
-                } else if point.collideDot(pos: pos, dot: point.cp1) &&
-                    !point.cp1.isHidden {
-                    self.controlDot = point.cp1
-                    return
-                } else if point.collideDot(pos: pos, dot: point.cp2) &&
-                    !point.cp1.isHidden {
-                    self.controlDot = point.cp2
+                if let dot = point.collidedPoint(pos: pos) {
+                    self.controlDot = dot
                     return
                 } else {
                     point.hideControlDots()
                 }
             }
-            let collider = NSRect(x: self.path.bounds.minX-2,
-                                  y: self.path.bounds.minY-2,
-                                  width: self.path.bounds.width+4,
-                                  height: self.path.bounds.height+4)
-            if collider.contains(pos),
+
+            if self.path.rectPath(self.path).contains(pos),
                 let segment = self.path.findPath(pos: pos) {
-                let point = self.insertPoint(pos: pos, index: segment.index)
+                let point = self.insertPoint(pos: pos,
+                                             index: segment.index)
                 self.controlDot = point.mp
-
-                let path = self.insertPoint(at: point.mp.position,
-                                                 index: segment.index,
-                                                 points: segment.points)
-                self.path = path
-
+                self.path = self.path.insertCurve(to: point.mp.position,
+                                      at: segment.index,
+                                      with: segment.points)
                 self.clearPoints()
                 self.createPoints()
                 self.updateLayer()
@@ -392,13 +374,20 @@ class Curve: Equatable {
             for (index, point) in self.points.enumerated() {
                 if let dot = self.controlDot {
                     if dot == point.mp {
+                        let origin = point.mp.position
                         let c1 = point.collideDot(pos: pos, dot: point.cp1)
                         let c2 = point.collideDot(pos: pos, dot: point.cp2)
-                        if c1 {
+                        if  c1 && c2 {
                             point.cp1.position = pos
+                            point.cp2.position = CGPoint(
+                                x: origin.x - (pos.x - origin.x),
+                                y: origin.y - (pos.y - origin.y))
                             find = true
                         } else if c2 {
                             point.cp2.position = pos
+                            find = true
+                        } else if c1 {
+                            point.cp1.position = pos
                             find = true
                         } else {
                             let deltaPos = CGPoint(

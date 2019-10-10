@@ -44,6 +44,9 @@ struct Setup {
 
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
+    let crossSize: CGFloat = 2
+
+    let snapDelta: CGFloat = 2
 
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"
