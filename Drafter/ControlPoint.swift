@@ -23,8 +23,11 @@ class ControlPoint {
 
     init(mp: Dot, cp1: Dot, cp2: Dot) {
         self.mp=mp
+        self.mp.tag = 0
         self.cp1=cp1
+        self.cp1.tag = 1
         self.cp2=cp2
+        self.cp2.tag = 2
         self.dots = [self.mp, self.cp1, self.cp2]
         self.hideControlDots()
         self.line1.actions = ["position": NSNull()]
@@ -110,7 +113,7 @@ class ControlPoint {
         self.trackDot(parent: parent, dot: self.mp)
     }
 
-    func multiplyVect(av: CGPoint, bv: CGPoint) -> CGFloat {
+    func multiplyVector(av: CGPoint, bv: CGPoint) -> CGFloat {
         return av.x * bv.x + av.y * bv.y
     }
 
@@ -118,8 +121,8 @@ class ControlPoint {
                 matrix: [CGPoint]) -> CGPoint {
         let vec = CGPoint(x: pos.x - ox, y: pos.y - oy)
         return CGPoint(
-            x: self.multiplyVect(av: matrix[0], bv: vec) + ox,
-            y: self.multiplyVect(av: matrix[1], bv: vec) + oy)
+            x: self.multiplyVector(av: matrix[0], bv: vec) + ox,
+            y: self.multiplyVector(av: matrix[1], bv: vec) + oy)
     }
 
     func rotateDots(ox: CGFloat, oy: CGFloat,

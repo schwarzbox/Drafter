@@ -82,6 +82,7 @@ class ControlFrame: CALayer {
             } else if i==dots.count-5 || i==dots.count-4 {
                 fillColor = setup.strokeColor
                 strokeColor = setup.fillColor
+                radius = ControlFrame.dot50Size
             } else if i==dots.count-3 || i==dots.count-2 || i==dots.count-1 {
                 radius = ControlFrame.dot50Size/2
                 fillColor = curve.gradientColor[gradIndex]
@@ -169,7 +170,7 @@ class ControlFrame: CALayer {
                           radius: radius,
                           strokeColor: strokeColor,
                           fillColor: fillColor)
-        // mouse track dots
+
         let options: NSTrackingArea.Options = [
             .mouseEnteredAndExited, .activeInActiveApp]
         let area = NSTrackingArea(

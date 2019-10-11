@@ -1601,7 +1601,7 @@ CA
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tzc-m4-TMu" userLabel="DashLabels">
                                                 <rect key="frame" x="1" y="17" width="128" height="14"/>
                                                 <subviews>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="t65-F5-tCX">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="t65-F5-tCX" userLabel="Dash1">
                                                         <rect key="frame" x="0.0" y="0.0" width="32" height="14"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="32" id="99t-bA-P42"/>
@@ -1615,7 +1615,7 @@ CA
                                                             <action selector="dashCurve:" target="XfG-lQ-9wD" id="g3j-mh-0ZR"/>
                                                         </connections>
                                                     </textField>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="1" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Mb-ZA-jka" userLabel="Gap">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="1" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Mb-ZA-jka" userLabel="Gap1">
                                                         <rect key="frame" x="32" y="0.0" width="32" height="14"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="32" id="j9I-8x-eJG"/>
@@ -1629,7 +1629,7 @@ CA
                                                             <action selector="dashCurve:" target="XfG-lQ-9wD" id="OLp-Qa-tIQ"/>
                                                         </connections>
                                                     </textField>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="2" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dA9-sK-KVT">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="2" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dA9-sK-KVT" userLabel="Dash2">
                                                         <rect key="frame" x="64" y="0.0" width="32" height="14"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="32" id="Nbx-QX-cI4"/>
@@ -1643,7 +1643,7 @@ CA
                                                             <action selector="dashCurve:" target="XfG-lQ-9wD" id="jck-UJ-o4T"/>
                                                         </connections>
                                                     </textField>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="3" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DXM-gw-jK9" userLabel="Gap">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="3" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DXM-gw-jK9" userLabel="Gap2">
                                                         <rect key="frame" x="96" y="0.0" width="32" height="14"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="32" id="IZg-uk-Rbv"/>
@@ -2809,14 +2809,11 @@ CA
                         <outlet property="curveBlur" destination="CiC-ru-YHV" id="YHR-ny-n0H"/>
                         <outlet property="curveBlurLabel" destination="MXP-od-OJl" id="zQn-S1-tk1"/>
                         <outlet property="curveCap" destination="CUY-UM-Qrn" id="C8W-G8-PCA"/>
-                        <outlet property="curveDash1Label" destination="t65-F5-tCX" id="wM8-Ay-gqm"/>
-                        <outlet property="curveDash2Label" destination="dA9-sK-KVT" id="epX-8D-6BL"/>
                         <outlet property="curveDashGap" destination="4et-ub-QrO" id="rCc-Xv-EUO"/>
+                        <outlet property="curveDashGapLabel" destination="Tzc-m4-TMu" id="OfZ-7j-Uxq"/>
                         <outlet property="curveFillColor" destination="fT5-tc-Ym4" id="2cD-uh-4qt"/>
                         <outlet property="curveFillColorPanel" destination="bRj-IO-uih" id="kdp-Gn-0Vj"/>
                         <outlet property="curveFillLabel" destination="UOy-J1-ZA7" id="7Wu-if-sET"/>
-                        <outlet property="curveGap1Label" destination="5Mb-ZA-jka" id="vUL-o9-mq2"/>
-                        <outlet property="curveGap2Label" destination="DXM-gw-jK9" id="Lme-e8-p3d"/>
                         <outlet property="curveGradFinLab" destination="hSF-8Y-Ey6" id="okP-V0-TPE"/>
                         <outlet property="curveGradFinOpacity" destination="1E3-aF-a4L" id="Wsf-SA-WXL"/>
                         <outlet property="curveGradFinOpacityLab" destination="L99-hr-NgA" id="aDt-nK-bTe"/>

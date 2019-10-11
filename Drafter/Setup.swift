@@ -20,10 +20,16 @@ struct Setup {
     let minResize: Double = 0.1
     let minRotate = -Double.pi
     let maxRotate = Double.pi
+    let alpha: [CGFloat] = [1.0, 1.0]
     let lineWidth: CGFloat = 1.0
-    let maxLineWidth: CGFloat = 256
-    let maxBlur: Double = 128
-    let maxDash: Double = 64
+    let lineCap = 0
+    let lineJoin = 0
+    let lineDashPattern: [NSNumber] = [0, 0, 0, 0]
+    let maxLineWidth: CGFloat = 64
+    let minBlur: Double = 0
+    let maxBlur: Double = 64
+    let minDash: Double = 0
+    let maxDash: Double = 32
     let strokeColor = NSColor.white.sRGB()
     let fillColor = NSColor.systemBlue.sRGB()
     let guiColor = NSColor.unemphasizedSelectedContentBackgroundColor.sRGB()
@@ -32,8 +38,8 @@ struct Setup {
     let shadow: [CGFloat] = [2.0, 0.5, 8.0, 8.0]
     let shadowColor =  NSColor.black
     let maxShadowRadius: Double = 32
-    let maxShadowOffsetX: Double = 512
-    let maxShadowOffsetY: Double = 512
+    let maxShadowOffsetX: Double = 256
+    let maxShadowOffsetY: Double = 256
     let gradientDirection = [CGPoint(x: 0.0, y: 0.0),
                              CGPoint(x: 1.0, y: 0.0)]
     let gradientColor = [NSColor.systemPink,
@@ -46,7 +52,8 @@ struct Setup {
     let dotRadius: CGFloat = 4
     let crossSize: CGFloat = 2
 
-    let snapDelta: CGFloat = 2
+    let rulersDelta: CGFloat = 2
+    let rulersDashPattern: [NSNumber] = [2, 2, 0, 0]
 
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"

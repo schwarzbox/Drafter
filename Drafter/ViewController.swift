@@ -80,10 +80,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var curveCap: NSSegmentedControl!
     @IBOutlet weak var curveJoin: NSSegmentedControl!
     @IBOutlet weak var curveDashGap: NSStackView!
-    @IBOutlet weak var curveDash1Label: NSTextField!
-    @IBOutlet weak var curveGap1Label: NSTextField!
-    @IBOutlet weak var curveDash2Label: NSTextField!
-    @IBOutlet weak var curveGap2Label: NSTextField!
+    @IBOutlet weak var curveDashGapLabel: NSStackView!
 
     var textFields: [NSTextField] = []
     var colorPanel: ColorPanel?
@@ -168,13 +165,10 @@ class ViewController: NSViewController {
         curveRotate.maxValue = setup.maxRotate
         curveWidth.doubleValue = Double(setup.lineWidth)
         curveWidth.maxValue = Double(setup.maxLineWidth)
-        curveOpacityStroke.maxValue = 1
-        curveOpacityStroke.doubleValue = curveOpacityStroke.maxValue
-        curveOpacityFill.maxValue = 1
-        curveOpacityFill.doubleValue = curveOpacityFill.maxValue
 
         for view in curveDashGap.subviews {
             if let slider = view as? NSSlider {
+                slider.minValue = setup.minDash
                 slider.maxValue = setup.maxDash
             }
         }
@@ -182,6 +176,12 @@ class ViewController: NSViewController {
         curveWidLabel.doubleValue = setup.screenWidth
         curveHeiLabel.doubleValue = setup.screenHeight
         curveWidthLabel.doubleValue = Double(setup.lineWidth)
+
+        curveOpacityStroke.maxValue = Double(setup.alpha[0])
+        curveOpacityFill.maxValue = Double(setup.alpha[1])
+        curveOpacityStroke.doubleValue = curveOpacityStroke.maxValue
+        curveOpacityFill.doubleValue = curveOpacityFill.maxValue
+
         curveOpacityStrokeLabel.doubleValue =  curveOpacityStroke.doubleValue
         curveOpacityFillLabel.doubleValue =  curveOpacityFill.doubleValue
 
@@ -235,6 +235,7 @@ class ViewController: NSViewController {
         curveGradMidLab.stringValue = setup.gradientColor[1].hexStr
         curveGradFinLab.stringValue = setup.gradientColor[2].hexStr
 
+        curveBlur.minValue = setup.minBlur
         curveBlur.maxValue = setup.maxBlur
 
         self.setupSketchView()
@@ -258,11 +259,6 @@ class ViewController: NSViewController {
 
         sketchView.curveOpacityStroke = curveOpacityStroke
         sketchView.curveOpacityFill = curveOpacityFill
-        sketchView.curveWidth = curveWidth
-
-        sketchView.curveCap = curveCap
-        sketchView.curveJoin = curveJoin
-        sketchView.curveDashGap = curveDashGap
 
         sketchView.curveStrokeColor = curveStrokeColor
         sketchView.curveFillColor = curveFillColor
@@ -279,9 +275,6 @@ class ViewController: NSViewController {
         sketchView.curveGradStOpacity = curveGradStOpacity
         sketchView.curveGradMidOpacity = curveGradMidOpacity
         sketchView.curveGradFinOpacity = curveGradFinOpacity
-
-        sketchView.curveBlur = curveBlur
-
     }
 
 //    MARK Obserevers func
@@ -385,9 +378,13 @@ class ViewController: NSViewController {
             self.curveCap.selectedSegment = curve.cap
             self.curveJoin.selectedSegment = curve.join
 
-            for (index, item) in curveDashGap.subviews.enumerated() {
-                if let slider = item as? NSSlider {
-                    slider.doubleValue = Double(truncating: curve.dash[index])
+            for i in 0..<curve.dash.count {
+                let value = Double(truncating: curve.dash[i])
+                if let slider = curveDashGap.subviews[i] as? NSSlider {
+                    slider.doubleValue = value
+                }
+                if let label = curveDashGapLabel.subviews[i] as? NSTextField {
+                    label.doubleValue = value
                 }
             }
         } else {
@@ -487,7 +484,7 @@ class ViewController: NSViewController {
     @IBAction func resizeCurve(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(sender: sender)
-        let lim = val.value < 0 ? setup.minResize : val.value
+        let lim = val.value <= 0 ? setup.minResize : val.value
         if val.tag == 0 {
             self.curveWidLabel.doubleValue = lim
         } else {
@@ -531,17 +528,9 @@ class ViewController: NSViewController {
         let view = sketchView!
         let val = self.getTagValue(sender: sender)
         let lim = val.value < 0 ? 0 : val.value
-        switch val.tag {
-        case 0:
-            self.curveDash1Label.doubleValue = lim
-        case 1:
-            self.curveGap1Label.doubleValue = lim
-        case 2:
-            self.curveDash2Label.doubleValue = lim
-        case 3:
-            self.curveGap2Label.doubleValue = lim
-        default:
-            break
+
+        if let label = curveDashGapLabel.subviews[val.tag] as? NSTextField {
+            label.doubleValue = lim
         }
         view.dashCurve(tag: val.tag, value: lim)
         self.restoreControlFrame(view: view)

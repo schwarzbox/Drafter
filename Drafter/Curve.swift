@@ -39,13 +39,13 @@ class Curve: Equatable {
         }
     }
 
-    var lineWidth: CGFloat = 0.0 {
+    var lineWidth = setup.lineWidth {
         willSet(value) {
             self.shape.lineWidth = value
         }
     }
     var angle: CGFloat = 0.0
-    var alpha: [CGFloat] = [1.0, 1.0] {
+    var alpha: [CGFloat] = setup.alpha {
         willSet(value) {
             self.shape.strokeColor = self.shape.strokeColor?.sRGB(
                 alpha: value[0])
@@ -58,7 +58,7 @@ class Curve: Equatable {
         }
     }
 
-    var blur: Double = 0.0 {
+    var blur: Double = setup.minBlur {
         willSet(value) {
             self.canvas.setValue(value,
                 forKeyPath: "filters.CIGaussianBlur.inputRadius")
@@ -119,17 +119,16 @@ class Curve: Equatable {
         }
     }
 
-    var cap: Int = 1
-    var join: Int = 1
-    var dash: [NSNumber] = []
+    var cap: Int = setup.lineCap
+    var join: Int = setup.lineJoin
+    var dash: [NSNumber] = setup.lineDashPattern
 
     var borderedPath: [CGFloat] {
-        let line50 = self.lineWidth/2
-        return [self.path.bounds.minX - line50,
-                self.path.bounds.minY - line50,
+        return [self.path.bounds.minX,
+                self.path.bounds.minY,
                 self.path.bounds.midX, self.path.bounds.midY,
-                self.path.bounds.maxX + line50,
-                self.path.bounds.maxY + line50]
+                self.path.bounds.maxX,
+                self.path.bounds.maxY]
     }
 
     var rounded: CGPoint?
@@ -180,35 +179,33 @@ class Curve: Equatable {
         self.canvas.addSublayer(self.shape)
         self.canvas.addSublayer(self.image)
         self.canvas.addSublayer(self.gradient)
-        self.canvas.shouldRasterize = true
+
         self.updateLayer()
     }
 
-    let capStyle: [CAShapeLayerLineCap] = [
+    let lineCapStyles: [CAShapeLayerLineCap] = [
         .square, .butt, .round
     ]
 
-    func setCap(value: Int) {
+    func setLineCap(value: Int) {
         self.cap = value
-        self.shape.lineCap = capStyle[value]
+        self.shape.lineCap = lineCapStyles[value]
     }
 
-    let joinStyle: [CAShapeLayerLineJoin] = [
+    let lineJoinStyles: [CAShapeLayerLineJoin] = [
         .miter, .bevel, .round
     ]
 
-    func setJoin(value: Int) {
+    func setLineJoin(value: Int) {
         self.join = value
-        self.shape.lineJoin = joinStyle[value]
+        self.shape.lineJoin = lineJoinStyles[value]
     }
 
     func setDash(dash: [NSNumber]) {
         self.dash = dash
-        if dash.first(where: { point in
-            return Int(truncating: point) > 0}) != nil {
+        if dash.first(where: { num in
+            return Int(truncating: num) > 0}) != nil {
             self.shape.lineDashPattern = dash
-//            self.shape.lineDashPhase = 0
-//            self.shape.miterLimit = CGFloat(10)
         }
     }
 
@@ -220,7 +217,7 @@ class Curve: Equatable {
         let mp = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
                           offset: CGPoint(x: self.dotRadius,
                                           y: self.dotRadius),
-                          radius: 0, fillColor: nil)
+                          radius: 0)
 
         let cp1 = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
                            offset: CGPoint(x: self.dotRadius,
@@ -384,9 +381,11 @@ class Curve: Equatable {
                                 y: origin.y - (pos.y - origin.y))
                             find = true
                         } else if c2 {
+                            self.controlDot = point.cp2
                             point.cp2.position = pos
                             find = true
                         } else if c1 {
+                            self.controlDot = point.cp1
                             point.cp1.position = pos
                             find = true
                         } else {
@@ -455,11 +454,13 @@ class Curve: Equatable {
     func showControl(pos: CGPoint) {
         if !self.lock {
             if self.edit {
-                for point in self.points {
-                    if point.collideDot(pos: pos, dot: point.mp) {
-                        point.showControlDots()
-                    } else {
-                        point.hideControlDots()
+                if self.controlDot == nil {
+                    for point in self.points {
+                        if point.collideDot(pos: pos, dot: point.mp) {
+                            point.showControlDots()
+                        } else {
+                            point.hideControlDots()
+                        }
                     }
                 }
             } else {
