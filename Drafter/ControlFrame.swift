@@ -10,12 +10,10 @@ import Cocoa
 
 class ControlFrame: CALayer {
     var parent: SketchPad?
-    static let dotSize: CGFloat = setup.dotSize
-    static let dot50Size: CGFloat = dotSize / 2
-    static let labelSize: CGFloat = dotSize + 4
-    static let label50Size: CGFloat = labelSize / 2
-    static let ctrlPad: CGFloat = setup.dotSize * 4
-    static let ctrlPad50: CGFloat = setup.dotSize * 2
+    var ctrlPad: CGFloat = setup.dotSize * 4
+    var ctrlPad50: CGFloat = setup.dotSize * 2
+    var dotSize: CGFloat = setup.dotSize
+    var dot50Size: CGFloat = setup.dotSize / 2
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -34,18 +32,23 @@ class ControlFrame: CALayer {
         self.borderWidth = setup.lineWidth
         self.borderColor = setup.fillColor.cgColor
 
+        self.dotSize = setup.dotSize - (parent.zoomed-1)
+        self.dot50Size = self.dotSize / 2
+        self.ctrlPad = self.dotSize * 4
+        self.ctrlPad50 = self.dotSize * 2
+
         var gradientLoc: [CGPoint] = []
         for i in curve.gradientLocation {
             let locX = self.bounds.minX + CGFloat(
                 truncating: i) * self.bounds.width
-            let locY = self.bounds.minY - ControlFrame.ctrlPad50
+            let locY = self.bounds.minY - self.ctrlPad50
             gradientLoc.append(CGPoint(x: locX, y: locY))
         }
 
-        let minX =  self.bounds.minX + ControlFrame.ctrlPad50
-        let width = self.bounds.width - ControlFrame.ctrlPad
-        let minY = self.bounds.minY + ControlFrame.ctrlPad50
-        let height = self.bounds.height - ControlFrame.ctrlPad
+        let minX =  self.bounds.minX + self.ctrlPad50
+        let width = self.bounds.width - self.ctrlPad
+        let minY = self.bounds.minY + self.ctrlPad50
+        let height = self.bounds.height - self.ctrlPad
         let gradientDirStart = CGPoint(
             x: minX + curve.gradientDirection[0].x * width,
             y: minY + curve.gradientDirection[0].y * height)
@@ -62,7 +65,7 @@ class ControlFrame: CALayer {
             CGPoint(x: self.bounds.maxX, y: self.bounds.midY),
             CGPoint(x: self.bounds.maxX, y: self.bounds.minY),
             CGPoint(x: self.bounds.midX, y: self.bounds.minY),
-            CGPoint(x: self.bounds.maxX + ControlFrame.ctrlPad,
+            CGPoint(x: self.bounds.maxX + self.ctrlPad,
                     y: self.bounds.midY),
             gradientDirStart, gradientDirFinal,
             gradientLoc[0], gradientLoc[1], gradientLoc[2]
@@ -78,13 +81,13 @@ class ControlFrame: CALayer {
         for i in 0..<dots.count {
             var radius: CGFloat = 0
             if i==dots.count-6 {
-                radius = ControlFrame.dot50Size
+                radius = self.dot50Size
             } else if i==dots.count-5 || i==dots.count-4 {
                 fillColor = setup.strokeColor
                 strokeColor = setup.fillColor
-                radius = ControlFrame.dot50Size
+                radius = self.dot50Size
             } else if i==dots.count-3 || i==dots.count-2 || i==dots.count-1 {
-                radius = ControlFrame.dot50Size/2
+                radius = self.dot50Size/2
                 fillColor = curve.gradientColor[gradIndex]
                 strokeColor = setup.strokeColor
                 gradIndex += 1
@@ -103,11 +106,11 @@ class ControlFrame: CALayer {
                     gradientDirFinal: CGPoint) {
         let path = NSBezierPath()
         path.move(to: CGPoint(x: self.bounds.maxX, y: self.bounds.midY))
-        path.line(to: CGPoint(x: self.bounds.maxX + ControlFrame.ctrlPad,
+        path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad,
                               y: self.bounds.midY))
         for point in gradientLoc {
             path.move(to: CGPoint(x: point.x,
-                                  y: point.y + ControlFrame.ctrlPad50))
+                                  y: point.y + self.ctrlPad50))
             path.line(to: point)
         }
 
@@ -132,9 +135,9 @@ class ControlFrame: CALayer {
             let hei50 = self.bounds.height/2
             let roundedX = CGPoint(
                 x: self.bounds.maxX - rounded.x * wid50,
-                y: self.bounds.maxY + ControlFrame.ctrlPad50)
+                y: self.bounds.maxY + self.ctrlPad50)
             let roundedY = CGPoint(
-                x: self.bounds.maxX + ControlFrame.ctrlPad50,
+                x: self.bounds.maxX + self.ctrlPad50,
                 y: self.bounds.maxY - rounded.y * hei50)
 
             let path = NSBezierPath()
@@ -148,13 +151,13 @@ class ControlFrame: CALayer {
 
             self.makeDot(parent: parent, tag: numDots,
                          x: roundedX.x, y: roundedX.y,
-                         radius: ControlFrame.dot50Size,
+                         radius: self.dot50Size,
                          strokeColor: strokeColor,
                          fillColor: fillColor)
 
             self.makeDot(parent: parent, tag: numDots+1,
                          x: roundedY.x, y: roundedY.y,
-                         radius: ControlFrame.dot50Size,
+                         radius: self.dot50Size,
                          strokeColor: strokeColor,
                          fillColor: fillColor)
         }
@@ -163,10 +166,10 @@ class ControlFrame: CALayer {
     func makeDot(parent: SketchPad, tag: Int, x: CGFloat, y: CGFloat,
                  radius: CGFloat, strokeColor: NSColor, fillColor: NSColor) {
         let cp = Dot.init(x: x, y: y,
-                          size: ControlFrame.dotSize,
+                          size: self.dotSize,
                           offset: CGPoint(
-                            x: ControlFrame.dot50Size,
-                            y: ControlFrame.dot50Size),
+                            x: self.dot50Size,
+                            y: self.dot50Size),
                           radius: radius,
                           strokeColor: strokeColor,
                           fillColor: fillColor)
@@ -183,15 +186,6 @@ class ControlFrame: CALayer {
         parent.addTrackingArea(area)
 
         cp.tag = tag
-        let label = Dot.init(x: cp.bounds.midX, y: cp.bounds.midY,
-                             size: ControlFrame.labelSize,
-                             offset: CGPoint(
-                                x: ControlFrame.label50Size,
-                                y: ControlFrame.label50Size),
-                             radius: ControlFrame.label50Size,
-                             fillColor: nil,
-                             hidden: true)
-        cp.addSublayer(label)
         self.addSublayer(cp)
     }
 
@@ -201,7 +195,7 @@ class ControlFrame: CALayer {
         for layer in self.sublayers! {
             if let dot = layer as? Dot {
                 if dot.collide(origin: mpos,
-                               width: ControlFrame.label50Size) {
+                               width: self.dotSize) {
                     return dot
                 }
             }
@@ -209,13 +203,15 @@ class ControlFrame: CALayer {
         return nil
     }
 
-    func showLabel(layer: CALayer) {
-        layer.sublayers?.forEach({$0.isHidden=false})
+    func showLabel(layer: Dot) {
+        layer.updateSize(size: self.dotSize + 2)
     }
 
     func hideLabels() {
-        for layer in self.sublayers! {
-            layer.sublayers?.forEach({$0.isHidden=true})
+        for layer in self.sublayers ?? [] {
+            if let dot = layer as? Dot {
+                dot.updateSize(size: self.dotSize)
+            }
         }
     }
 }

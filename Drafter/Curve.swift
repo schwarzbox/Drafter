@@ -70,7 +70,7 @@ class Curve: Equatable {
             self.canvas.shadowRadius = value[0]
             self.canvas.shadowOpacity = Float(value[1])
             self.canvas.shadowOffset = CGSize(width: value[2],
-                                                   height: value[3])
+                                              height: value[3])
         }
     }
 
@@ -136,7 +136,7 @@ class Curve: Equatable {
     var points: [ControlPoint] = []
     var edit: Bool = false
     var fill: Bool = false
-
+    var group: Int?
     var controlDot: Dot?
     var controlFrame: ControlFrame?
     var frameAngle: CGFloat = 0
@@ -211,6 +211,9 @@ class Curve: Equatable {
 
     func setPoints(points: [ControlPoint]) {
         self.points = points
+        // fix points position
+        let range = [Int](0..<self.points.count)
+        self.moveControlPoints(index: range, tags: [2])
     }
 
     func insertPoint(pos: CGPoint, index: Int) -> ControlPoint {
@@ -261,26 +264,16 @@ class Curve: Equatable {
         self.gradient.position = self.canvas.position
     }
 
-//    MARK: ControlFrame func
-    func createControlFrame() {
-        let control = ControlFrame.init(parent: self.parent!,
-                                        curve: self)
-        self.parent!.layer!.addSublayer(control)
-        self.controlFrame = control
-    }
-
-    func clearControlFrame() {
-        self.clearTrackArea()
-        if let control = self.controlFrame {
-            control.removeFromSuperlayer()
-            self.controlFrame = nil
-        }
-    }
-
 //    MARK: ControlPoints func
     func createPoints() {
-        for point in self.points {
-            point.createDots(parent: self.parent!)
+        for (index, point) in self.points.enumerated() {
+            var ex: Int?
+            if !self.fill {
+                ex = index == 0 ? 1
+                    : index == self.points.count-1 ? 0
+                    : nil
+            }
+            point.createDots(parent: self.parent!, exclude: ex)
         }
     }
 
@@ -302,27 +295,41 @@ class Curve: Equatable {
                 }
             }
 
-            if self.path.rectPath(self.path).contains(pos),
+            if self.path.rectPath(self.path,
+                                  pad: setup.dotRadius).contains(pos),
                 let segment = self.path.findPath(pos: pos) {
-                let point = self.insertPoint(pos: pos,
-                                             index: segment.index)
-                self.controlDot = point.mp
-                self.path = self.path.insertCurve(to: point.mp.position,
+                let pnt = self.insertPoint(pos: pos,
+                                           index: segment.index)
+                self.path = self.path.insertCurve(to: pnt.mp.position,
                                       at: segment.index,
                                       with: segment.points)
-                self.clearPoints()
-                self.createPoints()
-                self.updateLayer()
+
+                self.resetPoints()
+                self.controlDot = pnt.mp
+                pnt.showControlDots()
+
             }
         }
+    }
+
+    func resetPoints() {
+        let range = [Int](0..<self.points.count)
+        self.moveControlPoints(index: range, tags: [2])
+        self.clearPoints()
+        self.createPoints()
+        self.updateLayer()
     }
 
     func movePoint(index: Int, point: ControlPoint) {
         var points = [CGPoint](repeating: .zero, count: 3)
         let count = self.path.elementCount
         var indexLeft: Int = index
+        var openShift = 1
+        if self.fill {
+            openShift = 0
+        }
         if index==0 {
-            indexLeft = count - 3
+            indexLeft = count - 3 + openShift
             var pointsStart = [point.mp.position]
             self.path.setAssociatedPoints(&pointsStart, at: 0)
 
@@ -331,7 +338,7 @@ class Curve: Equatable {
                                points[1], points[2]]
             self.path.setAssociatedPoints(&pointsRight, at: 1)
         } else {
-            if index+1 < count-2 {
+            if index+1 < count - 2 + openShift {
                 self.path.element(at: index+1, associatedPoints: &points)
                 var pointsRight = [point.cp1.position,
                                    points[1], points[2]]
@@ -344,27 +351,21 @@ class Curve: Equatable {
         self.path.setAssociatedPoints(&pointsLeft, at: indexLeft)
     }
 
-    func movePoints(index: [Int], types: [String],
-                    offsetX: CGFloat? = nil, offsetY: CGFloat? = nil) {
+    func moveControlPoints(index: [Int], tags: [Int],
+                           offsetX: CGFloat? = nil,
+                           offsetY: CGFloat? = nil) {
         for i in index {
             let point = self.points[i]
             let px = offsetX ?? point.mp.position.x
             let py = offsetY ?? point.mp.position.y
-            for type in types {
-                switch type {
-                case "mp": point.mp.position = CGPoint(x: px, y: py)
-                case "cp1": point.cp1.position = CGPoint(x: px, y: py)
-                case "cp2": point.cp2.position = CGPoint(x: px, y: py)
-                default: break
-                }
+            for tag in tags {
+                point.dots[tag].position = CGPoint(x: px, y: py)
             }
             self.movePoint(index: i, point: point)
-            point.updateLines()
-            point.trackDot(parent: self.parent!, dot: point.mp)
         }
     }
 
-    func editPoint(pos: CGPoint) {
+    func editPoint(pos: CGPoint, cmd: Bool = false) {
         if !self.lock {
             self.clearTrackArea()
             var find: Bool = false
@@ -372,22 +373,11 @@ class Curve: Equatable {
                 if let dot = self.controlDot {
                     if dot == point.mp {
                         let origin = point.mp.position
-                        let c1 = point.collideDot(pos: pos, dot: point.cp1)
-                        let c2 = point.collideDot(pos: pos, dot: point.cp2)
-                        if  c1 && c2 {
+                        if  cmd {
                             point.cp1.position = pos
                             point.cp2.position = CGPoint(
                                 x: origin.x - (pos.x - origin.x),
                                 y: origin.y - (pos.y - origin.y))
-                            find = true
-                        } else if c2 {
-                            self.controlDot = point.cp2
-                            point.cp2.position = pos
-                            find = true
-                        } else if c1 {
-                            self.controlDot = point.cp1
-                            point.cp1.position = pos
-                            find = true
                         } else {
                             let deltaPos = CGPoint(
                                 x: pos.x - point.mp.position.x,
@@ -399,8 +389,8 @@ class Curve: Equatable {
                             point.cp2.position = CGPoint(
                                 x: point.cp2.position.x+deltaPos.x,
                                 y: point.cp2.position.y+deltaPos.y)
-                            find = true
                         }
+                        find = true
                     } else if dot == point.cp1 {
                         point.cp1.position = pos
                         find = true
@@ -418,7 +408,7 @@ class Curve: Equatable {
             }
         }
     }
-
+//    MARK: Update points
     func updatePoints(deltax: CGFloat, deltay: CGFloat) {
         self.clearTrackArea()
         for point in self.points {
@@ -448,6 +438,24 @@ class Curve: Equatable {
                             parent: self.parent!)
         }
         self.updateLayer()
+    }
+
+//    MARK: ControlFrame func
+    func createControlFrame() {
+        let control = ControlFrame.init(parent: self.parent!,
+                                        curve: self)
+        if let layer = self.parent!.layer {
+            layer.addSublayer(control)
+            self.controlFrame = control
+        }
+    }
+
+    func clearControlFrame() {
+        self.clearTrackArea()
+        if let control = self.controlFrame {
+            control.removeFromSuperlayer()
+            self.controlFrame = nil
+        }
     }
 
 //    MARK: Global Control

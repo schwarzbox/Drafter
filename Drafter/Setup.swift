@@ -8,6 +8,16 @@
 
 import Cocoa
 
+enum Tools: Int {
+    case drag, pen, line, oval, triangle, rectangle, arc, curve, text
+}
+
+let toolsKeys: [String: Tools] =
+    ["d": .drag, "p": .pen, "l": .line, "o": .oval,
+     "t": .triangle, "r": .rectangle, "s": .arc,
+     "c": .curve, "f": .text]
+
+
 struct Setup {
     let minZoom: Double = 20
     let maxZoom: Double = 400
@@ -34,6 +44,7 @@ struct Setup {
     let fillColor = NSColor.systemBlue.sRGB()
     let guiColor = NSColor.unemphasizedSelectedContentBackgroundColor.sRGB()
     let controlColor = NSColor.green.sRGB()
+    let controlDashPattern: [NSNumber] = [4, 2, 0, 0]
 
     let shadow: [CGFloat] = [2.0, 0.5, 8.0, 8.0]
     let shadowColor =  NSColor.black
@@ -50,10 +61,9 @@ struct Setup {
 
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
-    let crossSize: CGFloat = 2
+    let pinSize: CGFloat = 2
 
     let rulersDelta: CGFloat = 2
-    let rulersDashPattern: [NSNumber] = [2, 2, 0, 0]
 
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"

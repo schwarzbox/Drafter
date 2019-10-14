@@ -4,15 +4,14 @@ Vector Editor for MacOS.
 
 WIP
 
-v0.68
+v0.69
 
 ![Screenshot](screenshot/screenshot1.png)
 
-0.69
+v0.7
+
 Fast rotate (bug)
 Undo Redo
-
-v0.7
 
 Selection frame (new tool)
 

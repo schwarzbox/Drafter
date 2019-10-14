@@ -33,6 +33,14 @@ extension NSBezierPath {
         return path
     }
 
+    func rectPath(_ path: NSBezierPath,
+                  pad: CGFloat = 0) -> CGRect {
+        let rect = CGRect(
+            x: path.bounds.minX-pad/2, y: path.bounds.minY-pad/2,
+            width: path.bounds.width+pad, height: path.bounds.height+pad)
+        return rect
+    }
+
     func copyPath(to path: NSBezierPath, start: Int, final: Int) {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         let st = start < 0 ? 0 : start
@@ -56,12 +64,24 @@ extension NSBezierPath {
         }
     }
 
-    func rectPath(_ path: NSBezierPath,
-                  pad: CGFloat = setup.dotRadius) -> CGRect {
-        let rect = CGRect(
-            x: path.bounds.minX-pad/2, y: path.bounds.minY-pad/2,
-            width: path.bounds.width+pad, height: path.bounds.height+pad)
-        return rect
+    func removePath(at: Int) -> NSBezierPath {
+        let path = NSBezierPath()
+        self.copyPath(to: path, start: 0, final: at)
+        self.copyPath(to: path, start: at+1,
+                      final: self.elementCount)
+        return path
+    }
+
+
+    func moveMovePath() -> NSBezierPath {
+        var cPnt = [CGPoint](repeating: .zero, count: 3)
+        self.element(at: 1, associatedPoints: &cPnt)
+
+        let path = NSBezierPath()
+        path.move(to: cPnt[2])
+        self.copyPath(to: path, start: 1, final: self.elementCount-1)
+        path.move(to: cPnt[2])
+        return path
     }
 
     func findPath(pos: CGPoint) -> (index: Int, points: [CGPoint])? {
@@ -85,7 +105,8 @@ extension NSBezierPath {
                 cPnt[2] = cPnt[0]
 
                 oldPoint = cPnt[0]
-                if self.rectPath(path).contains(pos) {
+                if self.rectPath(path,
+                                 pad: setup.dotSize).contains(pos) {
                     return (index: i, points: cPnt)
                 }
             case .curveTo:
@@ -98,7 +119,8 @@ extension NSBezierPath {
                     path.close()
                 }
                 oldPoint = cPnt[2]
-                if self.rectPath(path).contains(pos) {
+                if self.rectPath(path,
+                                 pad: setup.dotSize).contains(pos) {
                     return (index: i, points: cPnt)
                 }
             case .closePath:
@@ -126,9 +148,9 @@ extension NSBezierPath {
                      with points: [CGPoint]) -> NSBezierPath {
         let path = NSBezierPath()
         self.copyPath(to: path, start: 0, final: at)
-        path.curve(to: pos, controlPoint1: pos,
+        path.curve(to: pos, controlPoint1: points[0],
                    controlPoint2: pos)
-        path.curve(to: points[2], controlPoint1: points[2],
+        path.curve(to: points[2], controlPoint1: points[1],
                    controlPoint2: points[2])
         self.copyPath(to: path, start: at + 1,
                       final: self.elementCount)
@@ -141,28 +163,21 @@ extension NSBezierPath {
         self.copyPath(to: path, start: 0, final: at)
         path.curve(to: points[2], controlPoint1: points[0],
                    controlPoint2: points[1])
-        let place = replace ? at + 1 : at
+        let place = replace ? at : at + 1
         self.copyPath(to: path, start: place, final: self.elementCount)
         return path
     }
 
-    func addCross(pos: CGPoint) {
+    func addPin(pos: CGPoint, size: CGFloat) {
         self.move(to: pos)
-        let leftMove = CGPoint(x: pos.x - setup.crossSize,
-                               y: pos.y + setup.crossSize)
-        let rightMove = CGPoint(x: pos.x + setup.crossSize,
-                               y: pos.y + setup.crossSize)
-        let leftLine = CGPoint(x: pos.x + setup.crossSize,
-                               y: pos.y - setup.crossSize)
-        let rightLine = CGPoint(x: pos.x - setup.crossSize,
-                               y: pos.y - setup.crossSize)
-        self.move(to: leftMove)
-        self.line(to: leftLine)
-        self.move(to: rightMove)
-        self.line(to: rightLine)
+        let size50 = size/2
+        let moveRect = NSRect(x: pos.x - size50, y: pos.y - size50,
+                              width: size, height: size)
+        self.appendOval(in: moveRect)
         self.move(to: pos)
         self.close()
     }
+
 
     func printPath() {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
@@ -236,7 +251,7 @@ extension NSTextField {
 }
 
 extension CALayer {
-    // use width not radius
+    // width not radius
     func collide(origin: CGPoint, width: CGFloat) -> Bool {
         let dx = origin.x - self.position.x
         let dy = origin.y - self.position.y
@@ -299,13 +314,8 @@ extension CALayer {
 
 extension CGColor {
     func sRGB(alpha: CGFloat = 1.0) -> CGColor {
-        let color  = self.components
-
-        if let rgba = color, rgba.count == 4 {
-            return CGColor.init(red: rgba[0],
-                                green: rgba[1],
-                                blue: rgba[2],
-                                alpha: alpha)
+        if let color = self.copy(alpha: alpha) {
+            return color
         }
         return self
     }
@@ -313,7 +323,8 @@ extension CGColor {
 
 extension NSColor {
     func sRGB(alpha: CGFloat = 1.0) -> NSColor {
-        guard let color = self.usingColorSpace(NSColorSpace.extendedSRGB) else {
+        guard let color = self.usingColorSpace(NSColorSpace.sRGB) else {
+
             return NSColor.init(
                 srgbRed: 255.0, green: 255.0,
                 blue: 255.0, alpha: alpha)
@@ -325,7 +336,7 @@ extension NSColor {
     }
 
     var hexStr: String {
-        guard let color = usingColorSpace(NSColorSpace.extendedSRGB) else {
+        guard let color = usingColorSpace(NSColorSpace.sRGB) else {
             return "FFFFFF"
         }
         let red = Int(round(color.redComponent * 0xFF))

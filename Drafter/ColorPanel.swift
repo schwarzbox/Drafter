@@ -76,11 +76,13 @@ class ColorPanel: NSStackView {
 
     @IBAction func setSharedColor(sender: Any) {
         var color = NSColor.black
+
         if let text = sender as? NSTextField {
             color = self.setHexColor(hex: text.stringValue)
         } else if let panel = sender as? NSColorPanel {
             color = self.setColor(color: panel.color)
         }
+
         self.sharedColorPanel?.color = color
 
         let nc = NotificationCenter.default

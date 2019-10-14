@@ -9,7 +9,7 @@
 import Cocoa
 class Dot: CALayer {
     var tag: Int?
-
+    var excluded: Bool = false
     var size: CGFloat?
     var offset: CGPoint?
     var strokeColor: NSColor?
@@ -44,6 +44,15 @@ class Dot: CALayer {
     }
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+
+    func updateSize(size: CGFloat) {
+        let pos = self.position
+        let size50 = size/2
+        let rect = NSRect(x: pos.x - size50,
+                          y: pos.y - size50,
+                          width: size, height: size)
+        self.frame = rect
     }
 
     override func copy() -> Any {

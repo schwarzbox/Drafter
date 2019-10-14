@@ -151,10 +151,10 @@ class ViewController: NSViewController {
         zoomDefaultSketch.select(zoomDefaultSketch.item(at: index100))
         zoomDefaultSketch.setTitle("100")
 
-        curveX.maxValue = setup.maxScreenWidth
-        curveY.maxValue = setup.maxScreenHeight
-        curveX.minValue = 0
-        curveY.minValue = 0
+        curveX.maxValue = setup.screenWidth
+        curveY.maxValue = setup.screenHeight
+        curveX.minValue = -setup.screenWidth
+        curveY.minValue = -setup.screenHeight
         curveWid.minValue = setup.minResize
         curveHei.minValue = setup.minResize
         curveWid.maxValue = setup.maxScreenWidth
@@ -289,6 +289,7 @@ class ViewController: NSViewController {
         nc.addObserver(self, selector: #selector(updateSliders),
                        name: Notification.Name("updateSliders"),
                        object: nil)
+
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
     }
 
@@ -388,8 +389,8 @@ class ViewController: NSViewController {
                 }
             }
         } else {
-            self.curveWid!.doubleValue = Double(view.sketchBorder.bounds.width)
-            self.curveHei!.doubleValue = Double(view.sketchBorder.bounds.height)
+            self.curveWid!.doubleValue = Double(view.sketchPath.bounds.width)
+            self.curveHei!.doubleValue = Double(view.sketchPath.bounds.height)
             self.curveWidLabel!.doubleValue = self.curveWid!.doubleValue
             self.curveHeiLabel!.doubleValue = self.curveHei!.doubleValue
         }
@@ -540,7 +541,8 @@ class ViewController: NSViewController {
         let view = sketchView!
         let val = self.getTagValue(sender: sender)
         let lim = val.value < 0 ? 0 : val.value
-        self.curveBlurLabel.doubleValue = lim
+        curveBlur.doubleValue = lim
+        curveBlurLabel.doubleValue = lim
         view.blurCurve(value: lim)
         self.restoreControlFrame(view: view)
     }
@@ -596,9 +598,11 @@ class ViewController: NSViewController {
 
         let lim = val.value > 1 ? 1 : val.value < 0 ? 0 : val.value
         if val.tag==0 {
-            self.curveOpacityStrokeLabel.doubleValue = lim
+            curveOpacityStroke.doubleValue = lim
+            curveOpacityStrokeLabel.doubleValue = lim
         } else if val.tag==1 {
-            self.curveOpacityFillLabel.doubleValue = lim
+            curveOpacityFill.doubleValue = lim
+            curveOpacityFillLabel.doubleValue = lim
         }
         view.opacityCurve(tag: val.tag, value: lim)
         self.restoreControlFrame(view: view)
@@ -611,14 +615,18 @@ class ViewController: NSViewController {
         switch val.tag {
         case 0:
             lim = lim < 0 ? 0 : lim
-            self.curveShadowRadiusLabel.doubleValue = lim
+            curveShadowRadius.doubleValue = lim
+            curveShadowRadiusLabel.doubleValue = lim
         case 1:
             lim = lim > 1 ? 1 : lim < 0 ? 0 : lim
-            self.curveShadowOpacityLabel.doubleValue = lim
+            curveShadowOpacity.doubleValue = lim
+            curveShadowOpacityLabel.doubleValue = lim
         case 2:
-            self.curveShadowOffsetXLabel.doubleValue = lim
+            curveShadowOffsetX.doubleValue = lim
+            curveShadowOffsetXLabel.doubleValue = lim
         case 3:
-            self.curveShadowOffsetYLabel.doubleValue = lim
+            curveShadowOffsetY.doubleValue = lim
+            curveShadowOffsetYLabel.doubleValue = lim
         default: break
         }
         view.shadowCurve(tag: val.tag, value: lim)
@@ -631,10 +639,13 @@ class ViewController: NSViewController {
 
         let lim = val.value > 1 ? 1 : val.value < 0 ? 0 : val.value
         if val.tag == 0 {
+            curveGradStOpacity.doubleValue = lim
             curveGradStOpacityLab.doubleValue = lim
         } else if val.tag == 1 {
+            curveGradMidOpacity.doubleValue = lim
             curveGradMidOpacityLab.doubleValue = lim
         } else if val.tag == 2 {
+            curveGradFinOpacity.doubleValue = lim
             curveGradFinOpacityLab.doubleValue = lim
         }
         view.opacityGradientCurve(tag: val.tag, value: lim)
@@ -659,7 +670,7 @@ class ViewController: NSViewController {
     }
 
     @IBAction func groupCurve(_ sender: NSButton) {
-        sketchView!.groupCurve()
+        sketchView!.groupCurve(sender: sender)
     }
 
 //    MARK: Menu actions
@@ -713,7 +724,7 @@ class ViewController: NSViewController {
             view.createRectangle(topLeft: topLeft,
                                  bottomRight: bottomRight)
             if let curve = view.selectedCurve {
-                view.clearControls(curve: curve, updatePoints: {})
+                view.clearControls(curve: curve)
             }
             view.addCurve()
             if let curve = view.selectedCurve {
@@ -739,8 +750,7 @@ class ViewController: NSViewController {
         self.saveDocument(sender)
     }
 
-    func clearSketch() {
-        let view = sketchView!
+    func clearSketch(view: SketchPad) {
         view.zoomOrigin = CGPoint(x: view.frame.midX,
                                   y: view.frame.midY)
         view.zoomSketch(value: 100)
@@ -748,14 +758,13 @@ class ViewController: NSViewController {
             curve.clearControlFrame()
             curve.clearPoints()
         }
-        view.editedPath.removeAllPoints()
-        view.editLayer.removeFromSuperlayer()
+        view.clearPathLayer(layer: view.editLayer, path: view.editedPath)
         frameUI.hide()
     }
 
     func newSketch() {
         let view = sketchView!
-        self.clearSketch()
+        self.clearSketch(view: view)
         view.selectedCurve = nil
         view.sketchName = nil
         view.sketchExt = nil
@@ -800,13 +809,11 @@ class ViewController: NSViewController {
 
     func saveSketch(url: URL, name: String, ext: String) {
         let view = sketchView!
-
-        view.sketchWidth = 0
-        view.sketchColor = NSColor.clear
+        view.sketchLayer.isHidden = true
         let zoomed = view.zoomed
         let zoomOrigin = view.zoomOrigin
 
-        self.clearSketch()
+        self.clearSketch(view: view)
 
         let filePath = url.appendingPathComponent(name + "." + ext)
 
@@ -829,8 +836,7 @@ class ViewController: NSViewController {
                 curve.createPoints()
             }
         }
-        view.sketchWidth = setup.lineWidth
-        view.sketchColor = setup.guiColor
+        view.sketchLayer.isHidden = false
         view.zoomOrigin = zoomOrigin
         view.zoomSketch(value: Double(zoomed * 100))
     }

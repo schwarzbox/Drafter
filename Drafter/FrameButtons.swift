@@ -14,9 +14,9 @@ class FrameButtons: NSStackView {
         if let curve = view.selectedCurve {
             let deltaX = view.bounds.minX
             let deltaY = view.bounds.minY
-            let width50 = curve.lineWidth/2
-
-            let x = curve.path.bounds.minX - setup.dotSize - width50
+            let width50 = (curve.lineWidth/2)
+            let pad = (setup.dotSize - view.zoomed) + width50
+            let x = curve.path.bounds.minX - pad
             let y = curve.path.bounds.maxY + width50
             self.frame = NSRect(
                 x: (x-deltaX) * view.zoomed - self.bounds.width,

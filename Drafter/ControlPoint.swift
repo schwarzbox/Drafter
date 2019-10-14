@@ -23,12 +23,12 @@ class ControlPoint {
 
     init(mp: Dot, cp1: Dot, cp2: Dot) {
         self.mp=mp
-        self.mp.tag = 0
+        self.mp.tag = 2
         self.cp1=cp1
-        self.cp1.tag = 1
+        self.cp1.tag = 0
         self.cp2=cp2
-        self.cp2.tag = 2
-        self.dots = [self.mp, self.cp1, self.cp2]
+        self.cp2.tag = 1
+        self.dots = [self.cp1, self.cp2, self.mp]
         self.hideControlDots()
         self.line1.actions = ["position": NSNull()]
         self.line2.actions = ["position": NSNull()]
@@ -44,15 +44,23 @@ class ControlPoint {
         return nil
     }
 
+    func delete() {
+        self.clearDots()
+        self.dots = []
+        self.lines = []
+    }
+
     func collideDot(pos: CGPoint, dot: Dot) -> Bool {
-        if dot.collide(origin: pos, width: dot.bounds.width) {
+        if dot.collide(origin: pos, width: dot.bounds.width) &&
+            !dot.excluded {
             return true
         }
         return false
     }
 
     func collidedPoint(pos: CGPoint) -> Dot? {
-        for dot in self.dots {
+        for i in stride(from: self.dots.count-1, through: 0, by: -1) {
+            let dot = self.dots[i]
             if self.collideDot(pos: pos, dot: dot) && !dot.isHidden {
                 return dot
             }
@@ -71,13 +79,29 @@ class ControlPoint {
         parent.addTrackingArea(area)
     }
 
-    func createDots(parent: SketchPad) {
+    func createDots(parent: SketchPad, exclude: Int? = nil) {
         self.hideControlDots()
+        let size = setup.dotSize - (parent.zoomed - 1)
         for dot in self.dots {
-            parent.layer!.addSublayer(dot)
+            dot.updateSize(size: size)
+            if let ex = exclude {
+                if ex == dot.tag {
+                    dot.excluded = true
+                } else {
+                    parent.layer!.addSublayer(dot)
+                }
+            } else {
+                parent.layer!.addSublayer(dot)
+            }
         }
-        for line in self.lines {
-            parent.layer!.addSublayer(line)
+        for (index, line) in self.lines.enumerated() {
+            if let ex = exclude {
+                if ex != index {
+                    parent.layer!.addSublayer(line)
+                }
+            } else {
+                parent.layer!.addSublayer(line)
+            }
         }
         self.updateLines()
         self.trackDot(parent: parent, dot: self.mp)
@@ -96,8 +120,8 @@ class ControlPoint {
     func updateLines() {
         for (index, shape) in self.lines.enumerated() {
             let path = NSBezierPath()
-            path.move(to: self.dots[0].position)
-            path.line(to: self.dots[index+1].position)
+            path.move(to: self.dots[2].position)
+            path.line(to: self.dots[index].position)
             shape.path = path.cgPath
             shape.lineWidth = 1
             shape.strokeColor = setup.fillColor.cgColor
@@ -161,19 +185,22 @@ class ControlPoint {
         self.trackDot(parent: parent, dot: self.mp)
     }
 
-    func makeHidden<T: CALayer>(items: [T], index: Int, hide: Bool) {
-        for i in index..<items.count {
+    func makeHidden<T: CALayer>(items: [T], last: Int, hide: Bool) {
+        for i in 0..<items.count - last {
             items[i].isHidden = hide
         }
     }
 
     func showControlDots() {
-        self.makeHidden(items: self.dots, index: 1, hide: false)
-        self.makeHidden(items: self.lines, index: 0, hide: false)
+        let size = setup.dotSize + 2
+        self.mp.updateSize(size: size)
+        self.makeHidden(items: self.dots, last: 1, hide: false)
+        self.makeHidden(items: self.lines, last: 0, hide: false)
     }
 
     func hideControlDots() {
-        self.makeHidden(items: self.dots, index: 1, hide: true)
-        self.makeHidden(items: self.lines, index: 0, hide: true)
+        self.mp.updateSize(size: setup.dotSize)
+        self.makeHidden(items: self.dots, last: 1, hide: true)
+        self.makeHidden(items: self.lines, last: 0, hide: true)
     }
 }
