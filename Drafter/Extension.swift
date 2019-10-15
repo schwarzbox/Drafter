@@ -175,7 +175,6 @@ extension NSBezierPath {
                               width: size, height: size)
         self.appendOval(in: moveRect)
         self.move(to: pos)
-        self.close()
     }
 
 

@@ -123,12 +123,10 @@ class Curve: Equatable {
     var join: Int = setup.lineJoin
     var dash: [NSNumber] = setup.lineDashPattern
 
-    var borderedPath: [CGFloat] {
-        return [self.path.bounds.minX,
-                self.path.bounds.minY,
-                self.path.bounds.midX, self.path.bounds.midY,
-                self.path.bounds.maxX,
-                self.path.bounds.maxY]
+    var boundsPoints: [CGPoint] {
+        return [CGPoint(x: self.path.bounds.minX, y: self.path.bounds.minY),
+                CGPoint(x: self.path.bounds.midX, y: self.path.bounds.midY),
+                CGPoint(x: self.path.bounds.maxX, y: self.path.bounds.maxY)]
     }
 
     var rounded: CGPoint?
@@ -145,6 +143,7 @@ class Curve: Equatable {
          path: NSBezierPath, fill: Bool = true, rounded: CGPoint?) {
         self.parent = parent
         self.path = path
+
         self.fill = fill
         self.rounded = rounded
         // filters
@@ -181,6 +180,7 @@ class Curve: Equatable {
         self.canvas.addSublayer(self.gradient)
 
         self.updateLayer()
+
     }
 
     let lineCapStyles: [CAShapeLayerLineCap] = [
@@ -220,7 +220,7 @@ class Curve: Equatable {
         let mp = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
                           offset: CGPoint(x: self.dotRadius,
                                           y: self.dotRadius),
-                          radius: 0)
+                          radius: self.dotRadius, lineWidth: 2)
 
         let cp1 = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
                            offset: CGPoint(x: self.dotRadius,
@@ -280,6 +280,7 @@ class Curve: Equatable {
     func clearPoints() {
         self.clearTrackArea()
         for point in self.points {
+            point.hideControlDots(parent: self.parent)
             point.clearDots()
         }
     }
@@ -291,7 +292,7 @@ class Curve: Equatable {
                     self.controlDot = dot
                     return
                 } else {
-                    point.hideControlDots()
+                    point.hideControlDots(parent: self.parent)
                 }
             }
 
@@ -306,7 +307,7 @@ class Curve: Equatable {
 
                 self.resetPoints()
                 self.controlDot = pnt.mp
-                pnt.showControlDots()
+                pnt.showControlDots(parent: self.parent!)
 
             }
         }
@@ -365,7 +366,7 @@ class Curve: Equatable {
         }
     }
 
-    func editPoint(pos: CGPoint, cmd: Bool = false) {
+    func editPoint(pos: CGPoint, opt: Bool = false) {
         if !self.lock {
             self.clearTrackArea()
             var find: Bool = false
@@ -373,7 +374,7 @@ class Curve: Equatable {
                 if let dot = self.controlDot {
                     if dot == point.mp {
                         let origin = point.mp.position
-                        if  cmd {
+                        if opt {
                             point.cp1.position = pos
                             point.cp2.position = CGPoint(
                                 x: origin.x - (pos.x - origin.x),
@@ -465,15 +466,15 @@ class Curve: Equatable {
                 if self.controlDot == nil {
                     for point in self.points {
                         if point.collideDot(pos: pos, dot: point.mp) {
-                            point.showControlDots()
+                            point.showControlDots(parent: self.parent!)
                         } else {
-                            point.hideControlDots()
+                            point.hideControlDots(parent: self.parent)
                         }
                     }
                 }
             } else {
                 if let control = self.controlFrame {
-                    if let dot = control.collideLabel(pos: pos) {
+                    if let dot = control.collideControlDot(pos: pos) {
                         control.showLabel(layer: dot)
                     }
                 }

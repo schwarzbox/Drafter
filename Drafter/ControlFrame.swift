@@ -189,7 +189,7 @@ class ControlFrame: CALayer {
         self.addSublayer(cp)
     }
 
-    func collideLabel(pos: CGPoint) -> Dot? {
+    func collideControlDot(pos: CGPoint) -> Dot? {
         let mpos = CGPoint(x: pos.x - self.frame.minX,
                            y: pos.y - self.frame.minY)
         for layer in self.sublayers! {

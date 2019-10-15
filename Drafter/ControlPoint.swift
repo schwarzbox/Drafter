@@ -80,7 +80,7 @@ class ControlPoint {
     }
 
     func createDots(parent: SketchPad, exclude: Int? = nil) {
-        self.hideControlDots()
+        self.hideControlDots(parent: parent)
         let size = setup.dotSize - (parent.zoomed - 1)
         for dot in self.dots {
             dot.updateSize(size: size)
@@ -108,7 +108,6 @@ class ControlPoint {
     }
 
     func clearDots() {
-        self.hideControlDots()
         for dot in self.dots {
             dot.removeFromSuperlayer()
         }
@@ -191,15 +190,19 @@ class ControlPoint {
         }
     }
 
-    func showControlDots() {
-        let size = setup.dotSize + 2
-        self.mp.updateSize(size: size)
+    func showControlDots(parent: SketchPad) {
+        let size = setup.dotSize - (parent.zoomed - 1)
+        self.mp.updateSize(size: size + 2)
         self.makeHidden(items: self.dots, last: 1, hide: false)
         self.makeHidden(items: self.lines, last: 0, hide: false)
     }
 
-    func hideControlDots() {
-        self.mp.updateSize(size: setup.dotSize)
+    func hideControlDots(parent: SketchPad? = nil) {
+        var size = setup.dotSize
+        if let par = parent {
+            size = setup.dotSize - (par.zoomed - 1)
+        }
+        self.mp.updateSize(size: size)
         self.makeHidden(items: self.dots, last: 1, hide: true)
         self.makeHidden(items: self.lines, last: 0, hide: true)
     }

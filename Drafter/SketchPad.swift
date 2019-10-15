@@ -6,38 +6,32 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
 // 0.7
-
-// px sizes
-
-// line stick when not straight
-// curve rules to self dots
-
-
-// Group curves refactor selectedCurve maybe with main frame
-// show selected members with numbers
-
-// nice screenshot
 // add more info to readme
+// nice screenshot
 // update patreon
+
+// Group curves with main Controlframe
+// show selected members with numbers
 
 // refactor init values Outlets
 // refactor update sliders
 // refactor gestures without drag
+// refactor separate rulers
 
+// hidden move dot in open curve (bug)
 // Fast rotate (bug)
 
 // 0.75
 // separate edit and create
 // Undo Redo
-// pen? line?
+
 
 // 0.77
+// refactor text next line
 // add control points to text
 
 //0.8
-// Custom filters (proportional)
-// CA Filters
-// separate blur to filters menu
+// Custom filters (proportional) + CA Filters
 
 // 0.9
 // change backingLayer on canvas caLayer?(save problen)
@@ -56,11 +50,13 @@
 // save before cmd-w cmd-q AppDelegate
 
 // resize inserted image? in seleected frame
-// TextTool (position when zoomed)?
+
 // move lineWidth in out
 
 // drag snap ?
 // snapRulers to sketchBounds?
+// pen? line? star? hexagon? rounded corners?
+// rulers to closest? only
 
 import Cocoa
 
@@ -225,12 +221,20 @@ class SketchPad: NSView {
     }
 
     override func mouseMoved(with event: NSEvent) {
+        let cmd: Bool = event.modifierFlags.contains(.command) ? true : false
         self.startPos = convert(event.locationInWindow, from: nil)
 
-        self.clearRulers()
+        self.clearPathLayer(layer: self.rulersLayer, path: self.rulersPath)
         if self.tool != .drag {
-            let snap = self.snapToRulers(points: [self.startPos.x,
-                                                  self.startPos.y])
+            var mpPoints: [CGPoint] = []
+            for cp in self.controlPoints {
+                mpPoints.append(cp.mp.position)
+            }
+            if let mp = self.movePoint {
+                mpPoints.append(mp.position)
+            }
+            let snap = self.snapToRulers(points: [self.startPos],
+                                         curvePoints: mpPoints, cmd: cmd)
             self.startPos.x -= snap.x
             self.startPos.y -= snap.y
         }
@@ -254,44 +258,58 @@ class SketchPad: NSView {
             if curve.path.rectPath(
                 curve.path, pad: setup.dotRadius).contains(self.startPos),
                 let segment = curve.path.findPath(pos: self.startPos) {
-                let snap = self.snapToRulers(points: [self.startPos.x,
-                                                      self.startPos.y])
+
+                var mpPoints: [CGPoint] = []
+                for cp in curve.points {
+                    mpPoints.append(cp.mp.position)
+                }
+                let snap = self.snapToRulers(points: [self.startPos],
+                                             curvePoints: mpPoints,
+                                             exclude: curve, cmd: cmd)
                 self.startPos.x -= snap.x
                 self.startPos.y -= snap.y
+
                 self.editedPath = curve.path.insertCurve(
                     to: self.startPos, at: segment.index, with: segment.points)
 
                 let size = setup.dotSize - (self.zoomed - 1)
                 let size50 = size/2
 
-                self.editedPath.appendRect(
+                self.editedPath.appendOval(in:
                     NSRect(x: self.startPos.x - size50,
                            y: self.startPos.y - size50,
                            width: size, height: size))
 
                 self.updatePathLayer(layer: self.editLayer,
                                      path: self.editedPath)
-
             }
         }
     }
 
     override func mouseDragged(with event: NSEvent) {
         let cmd: Bool = event.modifierFlags.contains(.command) ? true : false
+        let opt: Bool = event.modifierFlags.contains(.option) ? true : false
 
         var finPos = convert(event.locationInWindow, from: nil)
 
-        self.clearRulers()
+        self.clearPathLayer(layer: self.rulersLayer, path: self.rulersPath)
+
         if let curve = self.selectedCurve, curve.edit {
             self.clearPathLayer(layer: self.editLayer, path: self.editedPath)
             self.clearControls(curve: curve, updatePoints: ())
 
             if let dot = curve.controlDot, dot.tag == 2 {
-                let snap = self.snapToRulers(points: [finPos.x, finPos.y])
+                var mpPoints: [CGPoint] = []
+                for cp in curve.points where cp.mp != dot {
+                    mpPoints.append(cp.mp.position)
+                }
+                let snap = self.snapToRulers(points: [finPos],
+                                             curvePoints: mpPoints,
+                                             exclude: curve, cmd: cmd)
                 finPos.x -= snap.x
                 finPos.y -= snap.y
             }
-            curve.editPoint(pos: finPos, cmd: cmd)
+            curve.editPoint(pos: finPos, opt: opt)
 
         } else if let curve = self.selectedCurve, let dot = curve.controlDot {
             self.dragFrameControlDots(curve: curve, finPos: finPos,
@@ -300,13 +318,15 @@ class SketchPad: NSView {
                                       dot: dot, cmd: cmd)
         } else {
             if self.tool != .curve && self.tool != .drag {
-                let snap = self.snapToRulers(points: [finPos.x, finPos.y])
+                let snap = self.snapToRulers(points: [finPos],
+                                             curvePoints: [startPos],
+                                             cmd: cmd)
                 finPos.x -= snap.x
                 finPos.y -= snap.y
             }
             switch self.tool {
             case .drag:
-                self.dragCurve(event: event)
+                self.dragCurve(event: event, cmd: cmd)
             case .pen:
                 self.editedPath.move(to: self.startPos)
                 self.editedPath.line(to: finPos)
@@ -348,20 +368,22 @@ class SketchPad: NSView {
 
     override func mouseDown(with event: NSEvent) {
         print("down")
+        self.startPos = convert(event.locationInWindow, from: nil)
+
         let cmd: Bool = event.modifierFlags.contains(.command) ? true : false
         let opt: Bool = event.modifierFlags.contains(.option) ? true : false
 
         let nc = NotificationCenter.default
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
 
-        self.clearRulers()
+        self.clearPathLayer(layer: self.rulersLayer, path: self.rulersPath)
+
         if let curve = self.selectedCurve, curve.edit {
             curve.selectPoint(pos: self.startPos)
         } else if let curve = self.selectedCurve,
-            let dot = curve.controlFrame?.collideLabel(
-                pos: self.startPos), !curve.lock {
+            let dot = curve.controlFrame?.collideControlDot(pos: self.startPos),
+            !curve.lock {
             curve.controlDot = dot
-
         } else if let mp = self.movePoint,
             mp.collide(origin: self.startPos, width: mp.bounds.width) {
             self.filledCurve = false
@@ -430,8 +452,7 @@ class SketchPad: NSView {
             break
         }
 
-        self.rulersPath.removeAllPoints()
-        self.rulersLayer.removeFromSuperlayer()
+        self.clearPathLayer(layer: self.rulersLayer, path: self.rulersPath)
 
         self.roundedCurve = nil
         self.closedCurve = false
@@ -479,7 +500,6 @@ class SketchPad: NSView {
     }
 
     func addCurve() {
-        self.editedPath.printPath()
         guard let path = self.editedPath.copy() as? NSBezierPath,
             path.elementCount > 0 else {
                 return
@@ -555,7 +575,13 @@ class SketchPad: NSView {
             }
         }
 
-        self.clearPathLayer(layer: self.controlLayer, path: self.controlPath)
+        if let curve = self.selectedCurve {
+            let rulerPoints = self.findRulersToCurve(points: curve.boundsPoints,
+                                                     exclude: curve)
+            self.showRulers(rulerPoints: rulerPoints)
+        }
+
+//        self.clearPathLayer(layer: self.controlLayer, path: self.controlPath)
 
         if let curve = self.selectedCurve, cmd {
             if self.select.contains(curve) {
@@ -565,7 +591,7 @@ class SketchPad: NSView {
             } else {
                 self.select.append(curve)
             }
-            self.showSelected()
+//            self.showSelected()
         } else {
             self.select.removeAll()
         }
@@ -620,47 +646,111 @@ class SketchPad: NSView {
     }
 
 //    MARK: Rulers
-    func snapToRulers(points: [CGFloat], exclude: CGPoint? = nil) -> CGPoint {
-        let pathPnt = self.findRulers(points: points)
-        self.showRulers(pathPoints: pathPnt)
-        return self.deltaRulers(pathPoints: pathPnt, exclude: exclude)
+    struct RulerPoint {
+        let move: CGPoint
+        let line: CGPoint
+        let maxMove: CGPoint
+        let maxLine: CGPoint
     }
 
-    func clearRulers() {
-        self.rulersPath.removeAllPoints()
-        self.rulersLayer.removeFromSuperlayer()
-    }
+    func snapToRulers(points: [CGPoint],
+                      curvePoints: [CGPoint] = [],
+                      exclude: Curve? = nil,
+                      cmd: Bool = false) -> CGPoint {
+        var rulerPoints = self.findRulersToCurve(points: points,
+                                                 exclude: exclude)
+        let curvePoints = self.findRulersToCurvePoints(point: points[0],
+                                                       curvePoints: curvePoints)
+        rulerPoints.append(contentsOf: curvePoints)
 
-    func showRulers(pathPoints: [(move: CGPoint, line: CGPoint)]) {
-        for pnt in pathPoints {
-            let mX = abs(pnt.move.x - pnt.line.x) <= setup.rulersDelta
-                ? pnt.line.x
-                : pnt.move.x
-            let mY = abs(pnt.move.y - pnt.line.y) <= setup.rulersDelta
-                ? pnt.line.y
-                : pnt.move.y
-            let move = CGPoint(x: mX, y: mY)
-            self.rulersPath.move(to: move)
-            self.rulersPath.addPin(pos: move, size: setup.pinSize)
-            self.rulersPath.line(to: pnt.line)
-            self.rulersPath.addPin(pos: pnt.line, size: setup.pinSize * 2)
-            self.rulersPath.close()
+        self.showRulers(rulerPoints: rulerPoints, cmd: cmd)
+        var snap = CGPoint(x: 0, y: 0)
+        if !cmd {
+           snap = self.deltaRulers(rulerPoints: rulerPoints)
         }
+        return snap
+    }
 
+    func showText(text: String, pos: CGPoint, align: CATextLayerAlignmentMode) {
+        let txt = CATextLayer()
+        txt.frame = CGRect(x: pos.x, y: pos.y,
+                           width: setup.rulersTextWid,
+                           height: setup.rulersTextHei)
+        txt.foregroundColor = setup.controlColor.cgColor
+        txt.alignmentMode = align
+        txt.font = CTFontCreateWithName(
+            NSFont.systemFont(ofSize: 0,
+                              weight: .light).fontName as CFString, 0, nil)
+        txt.fontSize = setup.rulersFontSize
+        txt.string = text
+        self.rulersLayer.addSublayer(txt)
+    }
+
+    func showRulers(rulerPoints: [RulerPoint], cmd: Bool = false) {
+        for pnt in rulerPoints {
+            let distX = abs(pnt.move.x - pnt.line.x)
+            let distY = abs(pnt.move.y - pnt.line.y)
+            var move = CGPoint(x: pnt.move.x, y: pnt.move.y)
+            var maxMove = CGPoint(x: pnt.maxMove.x, y: pnt.maxMove.y)
+            let maxLine =  CGPoint(x: pnt.maxLine.x, y: pnt.maxLine.y)
+            if distX < setup.rulersDelta {
+                move.x = pnt.line.x
+                maxMove.x = pnt.line.x
+            }
+            if distY < setup.rulersDelta {
+                move.y = pnt.line.y
+                maxMove.y = pnt.line.y
+            }
+
+            self.rulersPath.move(to: move)
+            self.rulersPath.addPin(pos: move, size: setup.rulersPinSize)
+            self.rulersPath.line(to: pnt.line)
+            self.rulersPath.addPin(pos: pnt.line, size: setup.rulersPinSize * 2)
+            self.rulersPath.close()
+
+            let dashLayer = CAShapeLayer()
+            dashLayer.fillColor = nil
+            dashLayer.strokeColor = setup.controlColor.sRGB(alpha: 0.5).cgColor
+            dashLayer.lineWidth = setup.lineWidth
+            dashLayer.lineDashPattern = setup.controlDashPattern
+            dashLayer.actions = disabledActions
+            let path = NSBezierPath()
+            path.move(to: maxMove)
+            path.line(to: move)
+            path.move(to: pnt.line)
+            path.line(to: maxLine)
+            path.close()
+            dashLayer.path = path.cgPath
+            self.rulersLayer.addSublayer(dashLayer)
+
+            if (distX<setup.rulersDelta && distY<setup.rulersDelta) && !cmd {
+                continue
+            }
+            if move.x == pnt.line.x {
+                let pos = CGPoint(
+                    x: pnt.line.x + setup.rulersPinSize,
+                    y: pnt.line.y)
+                self.showText(text: String(Double(distY * 10).rounded()/10),
+                              pos: pos, align: .left)
+            }
+            if move.y == pnt.line.y {
+                let pos = CGPoint(
+                    x: pnt.line.x - setup.rulersTextWid - setup.rulersPinSize,
+                    y: pnt.line.y - setup.rulersTextHei)
+                self.showText(text: String(Double(distX * 10).rounded()/10),
+                              pos: pos, align: .right)
+            }
+        }
         self.updatePathLayer(layer: self.rulersLayer, path: self.rulersPath)
     }
 
-    func deltaRulers(pathPoints: [(move: CGPoint, line: CGPoint)],
-                     exclude: CGPoint? = nil) -> CGPoint {
+    func deltaRulers(rulerPoints: [RulerPoint]) -> CGPoint {
         var deltaX: CGFloat = 0
         var signX: CGFloat = 1
         var deltaY: CGFloat = 0
         var signY: CGFloat = 1
 
-        for pnt in pathPoints {
-            if let ex = exclude, pnt.move.x == ex.x, pnt.move.y == ex.y {
-                continue
-            }
+        for pnt in rulerPoints {
             let dX = pnt.move.x - pnt.line.x
             let dY = pnt.move.y - pnt.line.y
             if abs(dX) < setup.rulersDelta && abs(dX) > deltaX {
@@ -675,65 +765,105 @@ class SketchPad: NSView {
         return CGPoint(x: deltaX * signX, y: deltaY * signY)
     }
 
-    func findRulers(points: [CGFloat]) -> [(move: CGPoint, line: CGPoint)] {
-        var pathPoints: [(move: CGPoint, line: CGPoint)] = []
+    func findMinMax(sel: CGFloat, tar: CGFloat,
+                    min: CGFloat,
+                    max: CGFloat) -> (min: CGFloat, max: CGFloat) {
+        var minValue = tar
+        var maxValue = tar
+
+        let t1 = abs(min - sel)
+        let t2 = abs(max - sel)
+        if t1<t2 {
+            minValue = min
+            maxValue = max
+        } else {
+            minValue = max
+            maxValue = min
+        }
+        return (minValue, maxValue)
+    }
+
+    func findRulersToCurve(points: [CGPoint],
+                           exclude: Curve? = nil) -> [RulerPoint] {
+        var rulerPoints: [RulerPoint] = []
         for cur in self.curves {
-            let othPoints = cur.borderedPath
-            if points.count == othPoints.count {
-                if points[2] == othPoints[2] &&  points[3] == othPoints[3] {
-                    continue
-                }
+            if let ex = exclude, ex == cur {
+                continue
             }
 
-            for i in stride(from: 0, to: points.count, by: 2) {
-                for j in stride(from: 0, to: othPoints.count, by: 2) {
-                    let spx = points[i]
-                    let spy = points[i+1]
-                    let tpx = othPoints[j]
-                    let tpy = othPoints[j+1]
-                    if spx < tpx+setup.rulersDelta &&
-                        spx > tpx-setup.rulersDelta {
-                        var maxSelfY = spy
-                        var maxTarY = tpy
-                        if i != 2 {
-                            let yt1 = abs(othPoints[1] - spy)
-                            let yt2 = abs(othPoints[5] - spy)
-                            maxTarY = yt1>yt2 ? othPoints[1] : othPoints[5]
-                            if points.count > 2 {
-                                let ys1 = abs(points[1] - maxTarY)
-                                let ys2 = abs(points[5] - maxTarY)
-                                maxSelfY = ys1>ys2 ? points[1] : points[5]
-                            }
+            for pnt in points {
+                for curPnt in cur.boundsPoints {
+                    if pnt.x <= curPnt.x+setup.rulersDelta &&
+                        pnt.x >= curPnt.x-setup.rulersDelta {
+
+                        let (minTarY, maxTarY) = self.findMinMax(
+                            sel: pnt.y, tar: curPnt.y,
+                            min: cur.boundsPoints[0].y,
+                            max: cur.boundsPoints[2].y)
+
+                        var minSelY = pnt.y
+                        var maxSelY = pnt.y
+
+                        if points.count == 3 {
+                            (minSelY, maxSelY) = self.findMinMax(
+                                sel: minTarY, tar: pnt.y,
+                                min: points[0].y, max: points[2].y)
                         }
-                        pathPoints.append(
-                            (CGPoint(x: spx, y: maxSelfY),
-                             CGPoint(x: tpx, y: maxTarY))
-                        )
+
+                        let pathPoint = RulerPoint(
+                            move: CGPoint(x: pnt.x, y: minSelY),
+                            line: CGPoint(x: curPnt.x, y: minTarY),
+                            maxMove: CGPoint(x: pnt.x, y: maxSelY),
+                            maxLine: CGPoint(x: curPnt.x, y: maxTarY))
+                        rulerPoints.append(pathPoint)
                     }
 
-                    if spy < tpy+setup.rulersDelta &&
-                        spy > tpy-setup.rulersDelta {
-                        var maxSelfX = spx
-                        var maxTarX = tpx
-                        if i != 2 {
-                            let xt1 = abs(othPoints[0] - spx)
-                            let xt2 = abs(othPoints[4] - spx)
-                            maxTarX = xt1>xt2 ? othPoints[0] : othPoints[4]
-                            if points.count > 2 {
-                                let xs1 = abs(points[0] - maxTarX)
-                                let xs2 = abs(points[4] - maxTarX)
-                                maxSelfX = xs1>xs2 ? points[0] : points[4]
-                            }
+                    if pnt.y <= curPnt.y+setup.rulersDelta &&
+                        pnt.y >= curPnt.y-setup.rulersDelta {
+                        let (minTarX, maxTarX) = self.findMinMax(
+                            sel: pnt.x, tar: curPnt.x,
+                            min: cur.boundsPoints[0].x,
+                            max: cur.boundsPoints[2].x)
+
+                        var minSelX = pnt.x
+                        var maxSelX = pnt.x
+
+                        if points.count == 3 {
+                            (minSelX, maxSelX) = self.findMinMax(
+                                sel: minTarX, tar: pnt.x,
+                                min: points[0].x, max: points[2].x)
                         }
-                        pathPoints.append(
-                            (CGPoint(x: maxSelfX, y: spy),
-                             CGPoint(x: maxTarX, y: tpy))
-                        )
+                        let pathPoint = RulerPoint(
+                            move: CGPoint(x: minSelX, y: pnt.y),
+                            line: CGPoint(x: minTarX, y: curPnt.y),
+                            maxMove: CGPoint(x: maxSelX, y: pnt.y),
+                            maxLine: CGPoint(x: maxTarX, y: curPnt.y))
+                        rulerPoints.append(pathPoint)
                     }
                 }
             }
         }
-        return pathPoints
+        return rulerPoints
+    }
+
+    func findRulersToCurvePoints(point: CGPoint,
+                                 curvePoints: [CGPoint]) -> [RulerPoint] {
+        var rulerPoints: [RulerPoint] = []
+        for pnt in curvePoints {
+            if (point.x <= pnt.x+setup.rulersDelta &&
+                point.x >= pnt.x-setup.rulersDelta) ||
+                (point.y <= pnt.y+setup.rulersDelta &&
+                point.y >= pnt.y-setup.rulersDelta) {
+
+                let pathPoint = RulerPoint(
+                    move: CGPoint(x: point.x, y: point.y),
+                    line: CGPoint(x: pnt.x, y: pnt.y),
+                    maxMove: CGPoint(x: point.x, y: point.y),
+                    maxLine: CGPoint(x: pnt.x, y: pnt.y))
+                rulerPoints.append(pathPoint)
+            }
+        }
+        return rulerPoints
     }
 
 //    MARK: Zoom func
@@ -788,23 +918,27 @@ class SketchPad: NSView {
 
     func clearPathLayer(layer: CAShapeLayer, path: NSBezierPath) {
         layer.removeFromSuperlayer()
+        layer.sublayers?.removeAll()
+        layer.path = nil
         path.removeAllPoints()
     }
 
     func addDot(pos: CGPoint, radius: CGFloat,
+                lineWidth: CGFloat = setup.lineWidth,
                 color: NSColor? = setup.fillColor) -> Dot {
         let size = setup.dotSize - (self.zoomed - 1)
         let offset = size / 2
         return Dot.init(x: pos.x, y: pos.y, size: size,
                         offset: CGPoint(x: offset, y: offset),
-                        radius: radius, fillColor: color)
+                        radius: radius, lineWidth: lineWidth,
+                        fillColor: color)
     }
 
     func addControlPoint(mp: CGPoint,
                          cp1: CGPoint,
                          cp2: CGPoint) -> ControlPoint {
         return ControlPoint(
-            mp: addDot(pos: mp, radius: 0),
+            mp: addDot(pos: mp, radius: self.dotRadius, lineWidth: 2),
             cp1: addDot(pos: cp1, radius: self.dotRadius),
             cp2: addDot(pos: cp2, radius: self.dotRadius))
     }
@@ -817,25 +951,7 @@ class SketchPad: NSView {
                               controlPoint2: cPnt[1])
 
         self.controlPoints.append(ControlPoint(mp: mp, cp1: cp1, cp2: cp2))
-    }
-
-    func updateControlSize() {
-        let size = setup.dotSize - (self.zoomed - 1)
-        if let mp = self.movePoint {
-            mp.updateSize(size: size)
-        }
-        if let cp1 = self.controlPoint1,
-            let cp2 = self.controlPoint2 {
-            cp1.updateSize(size: size)
-            cp2.updateSize(size: size)
-        }
-        for point in self.controlPoints {
-            point.clearDots()
-            for dot in point.dots {
-                dot.updateSize(size: size)
-                self.layer?.addSublayer(dot)
-            }
-        }
+        self.updateControlSize()
     }
 
     func finalSegment(fin: (_ mp: Dot, _ cp1: Dot, _ cp2: Dot) -> Void ) {
@@ -854,6 +970,26 @@ class SketchPad: NSView {
             self.clearPathLayer(layer: self.controlLayer,
                                 path: self.controlPath)
             self.editDone = true
+        }
+    }
+
+    func updateControlSize() {
+        let size = setup.dotSize - (self.zoomed - 1)
+        if let mp = self.movePoint {
+            mp.updateSize(size: size)
+        }
+        if let cp1 = self.controlPoint1,
+            let cp2 = self.controlPoint2 {
+            cp1.updateSize(size: size)
+            cp2.updateSize(size: size)
+        }
+        for point in self.controlPoints {
+            point.hideControlDots(parent: self)
+            point.clearDots()
+            for dot in point.dots {
+                dot.updateSize(size: size)
+                self.layer?.addSublayer(dot)
+            }
         }
     }
 
@@ -1105,7 +1241,7 @@ class SketchPad: NSView {
         action()
         if self.filledCurve {
             self.editedPath.close()
-        } 
+        }
         self.editDone = true
     }
 
@@ -1128,9 +1264,10 @@ class SketchPad: NSView {
         }
     }
 
-    func dragCurve(event: NSEvent) {
+    func dragCurve(event: NSEvent, cmd: Bool = false) {
         if let curve = self.selectedCurve, !curve.lock {
-            let snap = self.snapToRulers(points: curve.borderedPath)
+            let snap = self.snapToRulers(points: curve.boundsPoints,
+                                         exclude: curve, cmd: cmd)
 
             let deltaX = (event.deltaX - snap.x) / self.zoomed
             let deltaY = (event.deltaY + snap.y) / self.zoomed
@@ -1154,7 +1291,6 @@ class SketchPad: NSView {
         self.editedPath.curve(to: bottomRight,
                               controlPoint1: bottomRight,
                               controlPoint2: bottomRight)
-        self.editedPath.move(to: bottomRight)
         self.editedPath.move(to: bottomRight)
 
         self.controlPoints = [
@@ -1353,7 +1489,7 @@ class SketchPad: NSView {
             self.addSegment(mp: mp, cp1: cp1, cp2: cp2)
         }
 
-        self.movePoint = addDot(pos: topLeft, radius: 0)
+        self.movePoint = addDot(pos: topLeft, radius: self.dotRadius, lineWidth: 2)
         self.layer?.addSublayer(self.movePoint!)
         self.controlPoint1 = addDot(pos: topLeft, radius: self.dotRadius)
         self.layer?.addSublayer(self.controlPoint1!)
@@ -1396,7 +1532,6 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve, !curve.lock,
             let index = self.curves.firstIndex(of: curve) {
             if curve.edit && curve.points.count > 2 {
-                curve.path.printPath()
                 for (index, point) in curve.points.enumerated() {
                     if !point.cp1.isHidden || !point.cp2.isHidden {
                         curve.points.remove(at: index)
@@ -1407,7 +1542,6 @@ class SketchPad: NSView {
                         break
                     }
                 }
-                curve.path.printPath()
                 curve.resetPoints()
                 self.clearControls(curve: curve)
                 self.createControls(curve: curve)
@@ -1457,15 +1591,16 @@ class SketchPad: NSView {
     func dragFrameControlDots(curve: Curve, finPos: CGPoint,
                               deltaX: CGFloat, deltaY: CGFloat,
                               dot: Dot, cmd: Bool ) {
-//        let exclude = CGPoint(x: curve.path.bounds.midX,
-//                              y: curve.path.bounds.midY)
-//        let snap = self.snapToRulers(points: curve.borderedPath)
-        // tmp
-        let pathPnt = self.findRulers(points: curve.borderedPath)
-        self.showRulers(pathPoints: pathPnt)
 
-        let dX = (deltaX / self.zoomed)
-        let dY = (deltaY / self.zoomed)
+        let pathPnt = self.findRulersToCurve(points: curve.boundsPoints,
+                                             exclude: curve)
+        self.showRulers(rulerPoints: pathPnt)
+        let dX = deltaX / self.zoomed
+        let dY = deltaY / self.zoomed
+
+//        let snap = self.snapToRulers(points: curve.boundsPoints, exclude: curve)
+//        let dX = (deltaX - snap.x) / self.zoomed
+//        let dY = (deltaY + snap.y) / self.zoomed
 
         switch dot.tag! {
         case 0:
@@ -1842,14 +1977,12 @@ class SketchPad: NSView {
             self.clearControls(curve: curve)
         }
     }
-
 //    override func draw(_ dirtyRect: NSRect) {
 //        super.draw(dirtyRect)
         // fill background
 //        NSColor.white.setStroke()
 //        __NSFrameRect(dirtyRect)
 //    }
-
 //    MARK: Support
     func flipSize(topLeft: CGPoint,
                   bottomRight: CGPoint) -> (wid: CGFloat, hei: CGFloat) {
@@ -1870,11 +2003,9 @@ class SketchPad: NSView {
         if let imageRep = bitmapImageRepForCachingDisplay(
             in: self.sketchPath.bounds) {
             self.cacheDisplay(in: self.sketchPath.bounds, to: imageRep)
-
 //            let context = NSGraphicsContext(bitmapImageRep: imageRep)!
 //            let cgCtx = context.cgContext
 //            cgCtx.clear(self.sketchBorder.bounds)
-//
 //            var index = 0
 //            if let layer = self.layer, let sublayers = layer.sublayers {
 //                for sublayer in sublayers {
@@ -1892,11 +2023,6 @@ class SketchPad: NSView {
 //                                ciImage: output) {
 //                                cgCtx.draw(cgImage, in: sublayer.bounds)
 //                            }
-//                            print(sublayer.position,
-//                                  sublayer.frame)
-//                            print(sublayer.position,
-//                                  sublayer.frame)
-//
 //                        }
 //                    } else {
 //                        sublayer.render(in: cgCtx)

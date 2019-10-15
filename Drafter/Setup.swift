@@ -61,9 +61,12 @@ struct Setup {
 
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
-    let pinSize: CGFloat = 2
 
     let rulersDelta: CGFloat = 2
+    let rulersPinSize: CGFloat = 2
+    let rulersFontSize: CGFloat = 10
+    let rulersTextWid: CGFloat = 64
+    let rulersTextHei: CGFloat = 16
 
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"
