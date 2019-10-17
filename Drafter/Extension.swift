@@ -228,9 +228,9 @@ extension NSTextField {
     override open var doubleValue: Double {
         didSet {
             if doubleValue > 10 {
-                self.floatValue = Float(round(doubleValue * 10) / 10)
+                self.stringValue = String(round(doubleValue * 10) / 10)
             } else {
-                self.floatValue = Float(round(doubleValue * 100) / 100)
+                self.stringValue = String(round(doubleValue * 100) / 100)
             }
         }
     }

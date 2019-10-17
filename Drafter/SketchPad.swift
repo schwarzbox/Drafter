@@ -6,12 +6,12 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
 // 0.7
-// update patreon
-// title picture patreon
 
-// button github
-// images for illustrate features for gitthub
+// set color in panel when select curve
+// color bgunder ruler number
 
+
+// hex pent
 // Group curves with main Controlframe
 // show selected members with numbers
 
