@@ -7,8 +7,9 @@
 
 // 0.7
 
+// patreon post fb post
 // set color in panel when select curve
-// color bgunder ruler number
+// color under ruler number (show pos when move mouse)
 
 
 // hex pent
@@ -29,7 +30,6 @@
 
 // 0.77
 // add text immediately in the cursor position
-// refactor text next line
 // add control points to text
 // rotate&resize image
 
@@ -51,8 +51,7 @@
 // disable unused actions
 // save before cmd-w cmd-q AppDelegate
 
-// Bugs fast rotate,  save blur
-
+// Bugs fast rotate, save blur
 
 // add?
 // allow move lineWidth inside outside
@@ -60,7 +59,7 @@
 // polygons rounded corners for all shapes
 // popup menu (locker image on top of curve) (front stack below)
 // visibility of shapes
-
+// text next line
 
 import Cocoa
 

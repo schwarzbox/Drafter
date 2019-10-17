@@ -10,25 +10,25 @@ v0.69
 
 # Features
 
-All tools in canvas. No big hidden menus with many tabs.
+All tools in canvas. No hidden menus with many tabs.
 
 ![Screenshot](screenshot/screenshot1.png)
 
 Create and edit curve with mouse and 3 additional keys (^ (Control),  ⌥(Option) & Delete)
 
-![Screenshot]((screenshot/screenshot2.png)
+![Screenshot](screenshot/screenshot2.png)
 
 Permanent gradient. Every shape has gradient layer.  Setup alpha & color and you done
 
-![Screenshot]((screenshot/screenshot3.png)
+![Screenshot](screenshot/screenshot3.png)
 
 Permanent shadow layer. To remove just set alpha to zero
 
-![Screenshot]((screenshot/screenshot4.png)
+![Screenshot](screenshot/screenshot4.png)
 
 Built-in rulers
 
-![Screenshot]((screenshot/screenshot5.png)
+![Screenshot](screenshot/screenshot5.png)
 
 
 # Tools & Hotkeys
@@ -37,7 +37,7 @@ Select (D), Line (L), Triangle (T), Rectangle (R) Pentagon(P), Hex(H), Arc (A), 
 
 Curve (C) - press ⚙ to edit shape with control dots
 
-Font (F) - put text in text field and create vector representation
+Font (F) - type text in text field, hit Enter and create vector representation
 
 # Combos
 
