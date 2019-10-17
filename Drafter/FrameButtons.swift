@@ -32,9 +32,9 @@ class FrameButtons: NSStackView {
         if let lock = self.subviews.last as? NSButton {
             lock.state = curve.lock ? .on : .off
             if curve.lock {
-                self.isEnable(title: "lock")
+                self.isEnable(tag: 6)
             } else if curve.edit {
-                self.isEnable(title: "edit")
+                self.isEnable(tag: 4)
             } else {
                 self.isEnable(all: true)
             }

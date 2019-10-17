@@ -72,18 +72,6 @@ extension NSBezierPath {
         return path
     }
 
-
-    func moveMovePath() -> NSBezierPath {
-        var cPnt = [CGPoint](repeating: .zero, count: 3)
-        self.element(at: 1, associatedPoints: &cPnt)
-
-        let path = NSBezierPath()
-        path.move(to: cPnt[2])
-        self.copyPath(to: path, start: 1, final: self.elementCount-1)
-        path.move(to: cPnt[2])
-        return path
-    }
-
     func findPath(pos: CGPoint) -> (index: Int, points: [CGPoint])? {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         var oldPoint: CGPoint?
@@ -177,7 +165,6 @@ extension NSBezierPath {
         self.move(to: pos)
     }
 
-
     func printPath() {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         for i in 0 ..< self.elementCount {
@@ -224,10 +211,10 @@ extension NSStackView {
         }
     }
 
-    func isEnable(title: String = "", all: Bool = false) {
+    func isEnable(tag: Int = -1, all: Bool = false) {
         for view in self.subviews {
             if let button = view as? NSButton {
-                if  button.alternateTitle == title || all {
+                if  button.tag == tag || all {
                     button.isEnabled = true
                 } else {
                     button.isEnabled = false
@@ -241,9 +228,9 @@ extension NSTextField {
     override open var doubleValue: Double {
         didSet {
             if doubleValue > 10 {
-                self.stringValue = String(round(doubleValue * 10) / 10)
+                self.floatValue = Float(round(doubleValue * 10) / 10)
             } else {
-                self.stringValue = String(round(doubleValue * 100) / 100)
+                self.floatValue = Float(round(doubleValue * 100) / 100)
             }
         }
     }

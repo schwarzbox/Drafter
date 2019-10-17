@@ -16,10 +16,12 @@ class Curve: Equatable {
     var parent: SketchPad?
     var path: NSBezierPath
     var shape = CAShapeLayer()
-    let mask = CAShapeLayer()
+    let gradientMask = CAShapeLayer()
     let gradient = CAGradientLayer()
-    let canvas = CALayer()
+    let imageMask = CAShapeLayer()
     let image = CALayer()
+
+    let canvas = CALayer()
 
     let dotSize: CGFloat =  setup.dotSize
     let dotRadius: CGFloat = setup.dotRadius
@@ -124,17 +126,20 @@ class Curve: Equatable {
     var dash: [NSNumber] = setup.lineDashPattern
 
     var boundsPoints: [CGPoint] {
-        return [CGPoint(x: self.path.bounds.minX, y: self.path.bounds.minY),
-                CGPoint(x: self.path.bounds.midX, y: self.path.bounds.midY),
+        return [CGPoint(x: self.path.bounds.midX, y: self.path.bounds.midY),
+                CGPoint(x: self.path.bounds.minX, y: self.path.bounds.minY),
                 CGPoint(x: self.path.bounds.maxX, y: self.path.bounds.maxY)]
     }
 
     var rounded: CGPoint?
-    var lock: Bool = false
+    var fill: Bool = false
+
     var points: [ControlPoint] = []
     var edit: Bool = false
-    var fill: Bool = false
+    var visible: Bool = true
     var group: Int?
+    var lock: Bool = false
+
     var controlDot: Dot?
     var controlFrame: ControlFrame?
     var frameAngle: CGFloat = 0
@@ -165,8 +170,10 @@ class Curve: Equatable {
         self.image.actions = ["position": NSNull(),
                               "bounds": NSNull(),
                               "transform": NSNull()]
+
         self.gradient.actions = ["position": NSNull(),
-                                 "bounds": NSNull()]
+                                 "bounds": NSNull(),
+                                 "transform": NSNull()]
         self.canvas.actions = ["position": NSNull(),
                                "bounds": NSNull(),
                                "filters": NSNull(),
@@ -178,7 +185,6 @@ class Curve: Equatable {
         self.canvas.addSublayer(self.shape)
         self.canvas.addSublayer(self.image)
         self.canvas.addSublayer(self.gradient)
-
         self.updateLayer()
 
     }
@@ -251,15 +257,20 @@ class Curve: Equatable {
 //    MARK: Layer func
     func updateLayer() {
         self.shape.path = self.path.cgPath
-        self.mask.path = self.path.cgPath
-        self.gradient.mask = self.mask
+        self.gradientMask.path = self.path.cgPath
+        self.gradient.mask = self.gradientMask
+        self.imageMask.path = self.path.cgPath
+        self.image.mask = self.imageMask
 
         self.canvas.bounds = self.path.bounds
+        self.shape.bounds = self.canvas.bounds
+        self.image.bounds = self.canvas.bounds
         self.gradient.bounds = self.canvas.bounds
 
         self.canvas.position = CGPoint(
             x: self.path.bounds.midX,
             y: self.path.bounds.midY)
+        self.shape.position = self.canvas.position
         self.image.position = self.canvas.position
         self.gradient.position = self.canvas.position
     }
@@ -329,10 +340,13 @@ class Curve: Equatable {
         if self.fill {
             openShift = 0
         }
+
         if index==0 {
             indexLeft = count - 3 + openShift
             var pointsStart = [point.mp.position]
             self.path.setAssociatedPoints(&pointsStart, at: 0)
+            let count = self.path.elementCount-1
+            self.path.setAssociatedPoints(&pointsStart, at: count)
 
             self.path.element(at: 1, associatedPoints: &points)
             var pointsRight = [point.cp1.position,
@@ -350,6 +364,7 @@ class Curve: Equatable {
         var pointsLeft = [points[0],
                           point.cp2.position, point.mp.position]
         self.path.setAssociatedPoints(&pointsLeft, at: indexLeft)
+
     }
 
     func moveControlPoints(index: [Int], tags: [Int],
@@ -475,7 +490,7 @@ class Curve: Equatable {
             } else {
                 if let control = self.controlFrame {
                     if let dot = control.collideControlDot(pos: pos) {
-                        control.showLabel(layer: dot)
+                        control.increaseDotSize(layer: dot)
                     }
                 }
             }
@@ -485,7 +500,7 @@ class Curve: Equatable {
     func hideControl() {
         if !self.edit {
             if let control = self.controlFrame {
-                control.hideLabels()
+                control.decreaseLabels()
             }
         }
     }

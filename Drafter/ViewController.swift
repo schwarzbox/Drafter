@@ -86,12 +86,6 @@ class ViewController: NSViewController {
     var colorPanel: ColorPanel?
     var savePanel: NSSavePanel?
 
-    override var representedObject: Any? {
-        didSet {
-            // Update the view, if already loaded.
-        }
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         // mouse
@@ -109,6 +103,7 @@ class ViewController: NSViewController {
 
 //    MARK: KeyDown
     func keyDownEvent(event: NSEvent) -> Bool {
+        let view = sketchView!
         guard NSApplication.shared.keyWindow === self.window else {
             return false
         }
@@ -119,8 +114,32 @@ class ViewController: NSViewController {
 
             if let ch = event.charactersIgnoringModifiers {
                 if let tool = toolsKeys[ch] {
-                    sketchView!.setTool(tag: tool.rawValue)
+                    view.setTool(tag: tool.rawValue)
                     return true
+                }
+            }
+
+            if let curve = view.selectedCurve {
+                let step = Double(1 / view.zoomed)
+                let midX = Double(curve.path.bounds.midX)
+                let midY = Double(curve.path.bounds.midY)
+                var result: (Int, Double?) = (tag: 0, nil)
+                switch event.keyCode {
+                case 123:
+                    result.1 = midX - step
+                case 124:
+                    result.1 = midX + step
+                case 125:
+                    result.0 = 1
+                    result.1 = midY - step
+                case 126:
+                    result.0 = 1
+                    result.1 = midY + step
+                default:
+                    break
+                }
+                if let value = result.1 {
+                    self.moveCurve((result.0, doubleValue: value))
                 }
             }
         }
@@ -131,11 +150,14 @@ class ViewController: NSViewController {
         super.viewDidAppear()
         window = self.view.window!
 
+        toolUI.layer = CALayer()
+        toolUI.layer?.backgroundColor = setup.guiColor.cgColor
+        frameUI.layer = CALayer()
+        frameUI.layer?.backgroundColor = setup.guiColor.cgColor
         actionUI.layer = CALayer()
         actionUI.layer?.backgroundColor = setup.guiColor.cgColor
 
-        toolUI.layer = CALayer()
-        toolUI.layer?.backgroundColor = setup.guiColor.cgColor
+
 
         zoomSketch.minValue = setup.minZoom * 2
         zoomSketch.maxValue = setup.maxZoom
@@ -447,10 +469,12 @@ class ViewController: NSViewController {
         if let sl = sender as? NSSlider {
             tag = sl.tag
             doubleValue = sl.doubleValue
-        }
-        if let tf = sender as? NSTextField {
+        } else if let tf = sender as? NSTextField {
             tag = tf.tag
             doubleValue = tf.doubleValue
+        } else if let tuple = sender as? (tag: Int, doubleValue: Double) {
+            tag = tuple.tag
+            doubleValue = tuple.doubleValue
         }
         return (tag: tag, value: doubleValue)
     }
@@ -665,13 +689,14 @@ class ViewController: NSViewController {
         sketchView!.editCurve(sender: sender)
     }
 
+    @IBAction func groupCurve(_ sender: NSButton) {
+        sketchView!.groupCurve(sender: sender)
+    }
+
     @IBAction func lockCurve(_ sender: NSButton) {
         sketchView!.lockCurve(sender: sender)
     }
 
-    @IBAction func groupCurve(_ sender: NSButton) {
-        sketchView!.groupCurve(sender: sender)
-    }
 
 //    MARK: Menu actions
     @IBAction func copy(_ sender: NSMenuItem) {
@@ -712,44 +737,6 @@ class ViewController: NSViewController {
         self.window!.title = fileName
     }
 
-    func openPng(filePath: URL) {
-        let view = sketchView!
-        let image = NSImage(contentsOf: filePath)
-        if let wid = image?.size.width, let hei = image?.size.height {
-
-            let topLeft = CGPoint(x: view.frame.midX - wid/2,
-                                  y: view.frame.midY - hei/2)
-            let bottomRight = CGPoint(x: view.frame.midX + wid/2,
-                                      y: view.frame.midY + hei/2)
-            view.createRectangle(topLeft: topLeft,
-                                 bottomRight: bottomRight)
-            if let curve = view.selectedCurve {
-                view.clearControls(curve: curve)
-            }
-            view.addCurve()
-            if let curve = view.selectedCurve {
-                curve.alpha = [CGFloat](repeating: 0, count: 2)
-
-                curve.image.contents = image
-                curve.image.bounds = curve.path.bounds
-                curve.image.position = CGPoint(
-                    x: curve.path.bounds.midX,
-                    y: curve.path.bounds.midY)
-                view.createControls(curve: curve)
-                self.updateSliders()
-            }
-        }
-
-    }
-
-    func openSvg(filePath: URL) {
-        print("open svg")
-    }
-
-    @IBAction func newDocument(_ sender: NSMenuItem) {
-        self.saveDocument(sender)
-    }
-
     func clearSketch(view: SketchPad) {
         view.zoomOrigin = CGPoint(x: view.frame.midX,
                                   y: view.frame.midY)
@@ -760,6 +747,10 @@ class ViewController: NSViewController {
         }
         view.clearPathLayer(layer: view.editLayer, path: view.editedPath)
         frameUI.hide()
+    }
+
+    @IBAction func newDocument(_ sender: NSMenuItem) {
+        self.saveDocument(sender)
     }
 
     func newSketch() {
@@ -785,6 +776,7 @@ class ViewController: NSViewController {
     }
 
     @IBAction func openDocument(_ sender: NSMenuItem) {
+
         self.colorPanel?.closeSharedColorPanel()
         let openPanel = NSOpenPanel()
         openPanel.setupPanel()
@@ -804,7 +796,42 @@ class ViewController: NSViewController {
                 } else {
                     openPanel.close()
                 }
-        })
+            }
+        )
+    }
+
+    func openPng(filePath: URL) {
+        let view = sketchView!
+        let image = NSImage(contentsOf: filePath)
+        if let wid = image?.size.width, let hei = image?.size.height {
+
+            let topLeft = CGPoint(x: view.frame.midX - wid/2,
+                                  y: view.frame.midY - hei/2)
+            let bottomRight = CGPoint(x: view.frame.midX + wid/2,
+                                      y: view.frame.midY + hei/2)
+            view.useTool(view.createRectangle(topLeft: topLeft,
+                                              bottomRight: bottomRight))
+
+            if let curve = view.selectedCurve {
+                view.editFinished(curve: curve)
+                view.clearControls(curve: curve)
+            }
+            view.addCurve()
+            if let curve = view.selectedCurve {
+                curve.alpha = [CGFloat](repeating: 0, count: 2)
+                curve.shadow = [CGFloat](repeating: 0, count: 4)
+                curve.image.contents = image
+                curve.image.bounds = curve.path.bounds
+                curve.image.position = curve.canvas.position
+                view.createControls(curve: curve)
+                self.updateSliders()
+            }
+        }
+
+    }
+
+    func openSvg(filePath: URL) {
+        print("open svg")
     }
 
     func saveSketch(url: URL, name: String, ext: String) {

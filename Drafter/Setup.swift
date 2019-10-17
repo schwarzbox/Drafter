@@ -9,18 +9,18 @@
 import Cocoa
 
 enum Tools: Int {
-    case drag, pen, line, oval, triangle, rectangle, arc, curve, text
+    case drag, line, triangle, rect, pent, hex
+    case arc, oval, stylus, curve, text
 }
 
 let toolsKeys: [String: Tools] =
-    ["d": .drag, "p": .pen, "l": .line, "o": .oval,
-     "t": .triangle, "r": .rectangle, "s": .arc,
-     "c": .curve, "f": .text]
-
+    ["d": .drag, "l": .line, "t": .triangle, "r": .rect,
+     "p": .pent, "h": .hex,
+     "a": .arc, "o": .oval, "s": .stylus, "c": .curve, "f": .text]
 
 struct Setup {
     let minZoom: Double = 20
-    let maxZoom: Double = 400
+    let maxZoom: Double = 800
     let reduceZoom: CGFloat = 40
 
     let screenWidth: Double = 800

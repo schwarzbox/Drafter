@@ -45,16 +45,16 @@ class ControlFrame: CALayer {
             gradientLoc.append(CGPoint(x: locX, y: locY))
         }
 
-        let minX =  self.bounds.minX + self.ctrlPad50
+        let gradMinX =  self.bounds.minX + self.ctrlPad50
         let width = self.bounds.width - self.ctrlPad
-        let minY = self.bounds.minY + self.ctrlPad50
+        let gradMinY = self.bounds.minY + self.ctrlPad50
         let height = self.bounds.height - self.ctrlPad
         let gradientDirStart = CGPoint(
-            x: minX + curve.gradientDirection[0].x * width,
-            y: minY + curve.gradientDirection[0].y * height)
+            x: gradMinX + curve.gradientDirection[0].x * width,
+            y: gradMinY + curve.gradientDirection[0].y * height)
         let gradientDirFinal = CGPoint(
-            x: minX + curve.gradientDirection[1].x * width,
-            y: minY + curve.gradientDirection[1].y * height)
+            x: gradMinX + curve.gradientDirection[1].x * width,
+            y: gradMinY + curve.gradientDirection[1].y * height)
 
         let dots: [CGPoint] = [
             CGPoint(x: self.bounds.minX, y: self.bounds.minY),
@@ -105,6 +105,7 @@ class ControlFrame: CALayer {
                     gradientDirStart: CGPoint,
                     gradientDirFinal: CGPoint) {
         let path = NSBezierPath()
+        // rotate handle
         path.move(to: CGPoint(x: self.bounds.maxX, y: self.bounds.midY))
         path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad,
                               y: self.bounds.midY))
@@ -203,11 +204,11 @@ class ControlFrame: CALayer {
         return nil
     }
 
-    func showLabel(layer: Dot) {
+    func increaseDotSize(layer: Dot) {
         layer.updateSize(size: self.dotSize + 2)
     }
 
-    func hideLabels() {
+    func decreaseLabels() {
         for layer in self.sublayers ?? [] {
             if let dot = layer as? Dot {
                 dot.updateSize(size: self.dotSize)
