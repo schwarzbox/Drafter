@@ -23,16 +23,24 @@ class ControlPoint {
 
     init(mp: Dot, cp1: Dot, cp2: Dot) {
         self.mp=mp
-        self.mp.tag = 2
         self.cp1=cp1
-        self.cp1.tag = 0
         self.cp2=cp2
-        self.cp2.tag = 1
         self.dots = [self.cp1, self.cp2, self.mp]
+        for (i, dot) in self.dots.enumerated() {
+            dot.tag = i
+        }
         self.hideControlDots()
-        self.line1.actions = ["position": NSNull()]
-        self.line2.actions = ["position": NSNull()]
         self.lines = [self.line1, self.line2]
+        for line in self.lines {
+            line.fillColor = nil
+            line.strokeColor = setup.fillColor.cgColor
+            line.lineWidth = setup.lineWidth
+            line.actions = setup.disabledActions
+            line.makeShape(path: NSBezierPath(),
+                           strokeColor: setup.strokeColor,
+                           dashPattern: setup.controlDashPattern,
+                           actions: line.actions)
+        }
     }
 
     func copy() -> ControlPoint? {
@@ -51,7 +59,7 @@ class ControlPoint {
     }
 
     func collideDot(pos: CGPoint, dot: Dot) -> Bool {
-        if dot.collide(origin: pos, width: dot.bounds.width) &&
+        if dot.collide(pos: pos, width: dot.bounds.width) &&
             !dot.excluded {
             return true
         }
@@ -82,6 +90,18 @@ class ControlPoint {
     func createDots(parent: SketchPad, exclude: Int? = nil) {
         self.hideControlDots(parent: parent)
         let size = setup.dotSize - (parent.zoomed - 1)
+
+        for (index, line) in self.lines.enumerated() {
+            if let ex = exclude {
+                if ex != index {
+                    parent.layer!.addSublayer(line)
+                }
+            } else {
+                parent.layer!.addSublayer(line)
+            }
+        }
+        self.updateLines()
+
         for dot in self.dots {
             dot.updateSize(size: size)
             if let ex = exclude {
@@ -94,16 +114,6 @@ class ControlPoint {
                 parent.layer!.addSublayer(dot)
             }
         }
-        for (index, line) in self.lines.enumerated() {
-            if let ex = exclude {
-                if ex != index {
-                    parent.layer!.addSublayer(line)
-                }
-            } else {
-                parent.layer!.addSublayer(line)
-            }
-        }
-        self.updateLines()
         self.trackDot(parent: parent, dot: self.mp)
     }
 
@@ -122,8 +132,9 @@ class ControlPoint {
             path.move(to: self.dots[2].position)
             path.line(to: self.dots[index].position)
             shape.path = path.cgPath
-            shape.lineWidth = 1
-            shape.strokeColor = setup.fillColor.cgColor
+            if let dashLayer = shape.sublayers?.first as? CAShapeLayer {
+                dashLayer.path = shape.path
+            }
         }
     }
 

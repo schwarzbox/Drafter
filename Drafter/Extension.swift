@@ -236,11 +236,18 @@ extension NSTextField {
     }
 }
 
+extension String {
+    func sizeOfString(usingFont font: NSFont) -> CGSize {
+        let fontAttributes = [NSAttributedString.Key.font: font]
+        return self.size(withAttributes: fontAttributes)
+    }
+}
+
 extension CALayer {
     // width not radius
-    func collide(origin: CGPoint, width: CGFloat) -> Bool {
-        let dx = origin.x - self.position.x
-        let dy = origin.y - self.position.y
+    func collide(pos: CGPoint, width: CGFloat) -> Bool {
+        let dx = pos.x - self.position.x
+        let dy = pos.y - self.position.y
         let dist: CGFloat = dx*dx + dy*dy
         if dist < width * width {
             return true
@@ -251,6 +258,7 @@ extension CALayer {
     func ciImage() -> CIImage? {
         let width = Int(self.bounds.width)
         let height = Int(self.bounds.height)
+
         let imageRepresentation = NSBitmapImageRep(
             bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
             bitsPerSample: 8, samplesPerPixel: 4,
@@ -269,32 +277,74 @@ extension CALayer {
     }
 
     func cgImage() -> CGImage? {
-        let width = Int(self.bounds.width)
-        let height = Int(self.bounds.height)
+
+        let width = Int(self.bounds.width+1)
+        let height = Int(self.bounds.height+1)
+
+
         let canvas = CGContext(
             data: nil, width: width, height: height,
             bitsPerComponent: 8, bytesPerRow: 0,
             space: CGColorSpace(name: CGColorSpace.sRGB)!,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
 
-        let nsCanvas = NSGraphicsContext(cgContext: canvas,
-                                         flipped: true)
-        NSGraphicsContext.current = nsCanvas
         self.render(in: canvas)
-        NSGraphicsContext.current = nil
-
         if let image = canvas.makeImage() {
             return image
         }
         return nil
     }
 
-    func makeShape(path: NSBezierPath, color: NSColor, width: CGFloat) {
+    func makeShape(path: NSBezierPath,
+                   strokeColor: NSColor?,
+                   fillColor: NSColor? = nil,
+                   lineWidth: CGFloat = 1.0,
+                   dashPattern: [NSNumber]? = nil,
+                   lineCap: CAShapeLayerLineCap = .square,
+                   actions: [String: CAAction]? = nil) {
         let shape = CAShapeLayer()
         shape.path = path.cgPath
-        shape.strokeColor = color.cgColor
-        shape.lineWidth = width
+
+        shape.strokeColor = strokeColor?.cgColor
+        shape.fillColor = fillColor?.cgColor
+        shape.lineWidth = lineWidth
+        shape.lineDashPattern = dashPattern
+        shape.lineCap = lineCap
+        shape.actions = actions
         self.addSublayer(shape)
+    }
+
+    func makeText(text: String, pos: CGPoint, tag: Int) {
+        let txt = CATextLayer()
+        txt.alignmentMode = .center
+        txt.backgroundColor = setup.controlColor.cgColor
+        txt.foregroundColor = setup.guiColor.cgColor
+        txt.actions = setup.disabledActions
+        let font = CTFontCreateWithName(
+            NSFont.systemFont(
+                ofSize: 0, weight: .light).fontName as CFString, 0, nil)
+        txt.fontSize = setup.rulersFontSize
+        txt.font = font
+        txt.string = text
+
+        var txtSize = text.sizeOfString(usingFont: font)
+        txtSize.height -= setup.rulersPinSize
+        txtSize.width += setup.rulersPinSize
+        var finPos = pos
+        let pad = setup.rulersPinSize * 2
+        if tag==0 {
+            finPos.x += pad
+            finPos.y += pad
+        } else if tag==1 {
+            finPos.x -= (txtSize.width + pad)
+            finPos.y -= (txtSize.height + pad)
+        }
+
+        txt.frame = CGRect(x: finPos.x, y: finPos.y,
+                           width: txtSize.width ,
+                           height: txtSize.height )
+
+        self.addSublayer(txt)
     }
 }
 

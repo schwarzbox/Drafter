@@ -29,15 +29,20 @@ class FrameButtons: NSStackView {
     }
 
     func updateState(curve: Curve) {
-        if let lock = self.subviews.last as? NSButton {
+        if let lock = self.subviews[6] as? NSButton {
             lock.state = curve.lock ? .on : .off
-            if curve.lock {
-                self.isEnable(tag: 6)
-            } else if curve.edit {
-                self.isEnable(tag: 4)
-            } else {
-                self.isEnable(all: true)
-            }
+        }
+
+        if let group = self.subviews[5] as? NSButton {
+            group.state = curve.group > 0 ? .on : .off
+        }
+
+        if curve.edit {
+            self.isEnable(tag: 4)
+        } else if curve.lock {
+            self.isEnable(tag: 6)
+        } else {
+            self.isEnable(all: true)
         }
     }
 

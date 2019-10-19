@@ -11,6 +11,7 @@ import Cocoa
 class ViewController: NSViewController {
     var window: NSWindow!
     @IBOutlet weak var sketchView: SketchPad!
+    @IBOutlet weak var sketchUI: SketchStack!
 
     @IBOutlet weak var toolUI: NSStackView!
     @IBOutlet weak var frameUI: FrameButtons!
@@ -99,79 +100,77 @@ class ViewController: NSViewController {
                 return $0
             }
         }
+        NSEvent.addLocalMonitorForEvents(
+            matching: NSEvent.EventTypeMask.keyUp) {
+            if self.keyUpEvent(event: $0) {
+                return nil
+            } else {
+                return $0
+            }
+        }
     }
 
-//    MARK: KeyDown
-    func keyDownEvent(event: NSEvent) -> Bool {
-        let view = sketchView!
+//    MARK: Key
+    func eventTest(event: NSEvent) -> Bool {
         guard NSApplication.shared.keyWindow === self.window else {
             return false
         }
-
         if !event.modifierFlags.contains(.command),
             let resp = self.window.firstResponder,
             resp.isKind(of: NSWindow.self) {
+            return true
+        }
+        return false
+    }
 
-            if let ch = event.charactersIgnoringModifiers {
-                if let tool = toolsKeys[ch] {
-                    view.setTool(tag: tool.rawValue)
-                    return true
-                }
-            }
+    func keyDownEvent(event: NSEvent) -> Bool {
+        if self.eventTest(event: event) {
+            let view = sketchView!
+            if let ch = event.charactersIgnoringModifiers,
+               let tool = toolsKeys[ch] {
+                view.setTool(tag: tool.rawValue)
+                return true
 
-            if let curve = view.selectedCurve {
-                let step = Double(1 / view.zoomed)
-                let midX = Double(curve.path.bounds.midX)
-                let midY = Double(curve.path.bounds.midY)
-                var result: (Int, Double?) = (tag: 0, nil)
+            } else if event.keyCode >= 123 && event.keyCode <= 126 {
+                var delta = CGPoint(x: 0, y: 0)
                 switch event.keyCode {
-                case 123:
-                    result.1 = midX - step
-                case 124:
-                    result.1 = midX + step
-                case 125:
-                    result.0 = 1
-                    result.1 = midY - step
-                case 126:
-                    result.0 = 1
-                    result.1 = midY + step
-                default:
-                    break
+                case 123: delta.x = -1
+                case 124: delta.x = 1
+                case 125: delta.y = 1
+                case 126: delta.y = -1
+                default: break
                 }
-                if let value = result.1 {
-                    self.moveCurve((result.0, doubleValue: value))
-                }
+
+                view.dragCurve(deltaX: delta.x, deltaY: delta.y,
+                                ctrl: true)
+                return true
             }
         }
         return false
     }
 
+    func keyUpEvent(event: NSEvent) -> Bool {
+        if self.eventTest(event: event) {
+            let view = sketchView!
+            self.restoreControlFrame(view: view)
+            view.rulers.clearRulers()
+            return true
+        }
+        return false
+    }
+
+//    MARK : Appear
     override func viewDidAppear() {
         super.viewDidAppear()
         window = self.view.window!
 
-        toolUI.layer = CALayer()
-        toolUI.layer?.backgroundColor = setup.guiColor.cgColor
-        frameUI.layer = CALayer()
-        frameUI.layer?.backgroundColor = setup.guiColor.cgColor
-        actionUI.layer = CALayer()
-        actionUI.layer?.backgroundColor = setup.guiColor.cgColor
-
-
-
-        zoomSketch.minValue = setup.minZoom * 2
-        zoomSketch.maxValue = setup.maxZoom
-        zoomDefaultSketch.removeAllItems()
-        var zoom: [String] = []
-        for step in stride(from: Int(setup.minZoom),
-                           to: Int(setup.maxZoom) + 1,
-                           by: Int(setup.minZoom)) {
-            zoom.append(String(step))
+        let ui = [sketchUI, toolUI, frameUI, actionUI]
+        for view in ui {
+            view?.layer = CALayer()
+            view?.layer?.backgroundColor = setup.guiColor.cgColor
         }
-        zoomDefaultSketch.addItems(withTitles: zoom)
-        let index100 = zoomDefaultSketch.indexOfItem(withTitle: "100")
-        zoomDefaultSketch.select(zoomDefaultSketch.item(at: index100))
-        zoomDefaultSketch.setTitle("100")
+
+        self.setupZoom()
 
         curveX.maxValue = setup.screenWidth
         curveY.maxValue = setup.screenHeight
@@ -199,14 +198,42 @@ class ViewController: NSViewController {
         curveHeiLabel.doubleValue = setup.screenHeight
         curveWidthLabel.doubleValue = Double(setup.lineWidth)
 
-        curveOpacityStroke.maxValue = Double(setup.alpha[0])
-        curveOpacityFill.maxValue = Double(setup.alpha[1])
-        curveOpacityStroke.doubleValue = curveOpacityStroke.maxValue
-        curveOpacityFill.doubleValue = curveOpacityFill.maxValue
+        self.setupStrokeFillColor()
+        self.setupShadow()
+        self.setupGradientColors()
 
-        curveOpacityStrokeLabel.doubleValue =  curveOpacityStroke.doubleValue
-        curveOpacityFillLabel.doubleValue =  curveOpacityFill.doubleValue
+        curveBlur.minValue = setup.minBlur
+        curveBlur.maxValue = setup.maxBlur
 
+        self.setupSketchView()
+        textUI!.setupTextTool()
+
+        // for precision position create and remove panel
+        ColorPanel.setupSharedColorPanel()
+
+        self.findAllTextFields(root: self.view)
+
+        self.setupObservers()
+        self.showFileName()
+    }
+
+    func setupZoom() {
+        zoomSketch.minValue = setup.minZoom * 2
+        zoomSketch.maxValue = setup.maxZoom
+        zoomDefaultSketch.removeAllItems()
+        var zoom: [String] = []
+        for step in stride(from: Int(setup.minZoom),
+                           to: Int(setup.maxZoom) + 1,
+                           by: Int(setup.minZoom)) {
+            zoom.append(String(step))
+        }
+        zoomDefaultSketch.addItems(withTitles: zoom)
+        let index100 = zoomDefaultSketch.indexOfItem(withTitle: "100")
+        zoomDefaultSketch.select(zoomDefaultSketch.item(at: index100))
+        zoomDefaultSketch.setTitle("100")
+    }
+
+    func setupStrokeFillColor() {
         curveStrokeColor.borderColor = setup.guiColor
         curveStrokeColor.fillColor = setup.strokeColor
         curveFillColor.borderColor = setup.guiColor
@@ -215,11 +242,21 @@ class ViewController: NSViewController {
         curveStrokeLabel.stringValue = setup.strokeColor.hexStr
         curveFillLabel.stringValue = setup.fillColor.hexStr
 
+        curveOpacityStroke.maxValue = Double(setup.alpha[0])
+        curveOpacityFill.maxValue = Double(setup.alpha[1])
+        curveOpacityStroke.doubleValue = curveOpacityStroke.maxValue
+        curveOpacityFill.doubleValue = curveOpacityFill.maxValue
+
+        curveOpacityStrokeLabel.doubleValue =  curveOpacityStroke.doubleValue
+        curveOpacityFillLabel.doubleValue =  curveOpacityFill.doubleValue
+
+    }
+
+    func setupShadow() {
         curveShadowColor.borderColor =  setup.guiColor
         curveShadowColor.fillColor = setup.shadowColor
         curveShadowLabel.stringValue = setup.shadowColor.hexStr
 
-        let shadow = setup.shadow.map {(fl) in Double(fl)}
         curveShadowRadius.maxValue = setup.maxShadowRadius
         curveShadowOpacity.maxValue = 1
 
@@ -227,6 +264,8 @@ class ViewController: NSViewController {
         curveShadowOffsetY.minValue = -setup.maxShadowOffsetY
         curveShadowOffsetX.maxValue = setup.maxShadowOffsetX
         curveShadowOffsetY.maxValue = setup.maxShadowOffsetY
+
+        let shadow = setup.shadow.map {(fl) in Double(fl)}
         curveShadowRadius.doubleValue = shadow[0]
         curveShadowOpacity.doubleValue = shadow[1]
         curveShadowOffsetX.doubleValue = shadow[2]
@@ -236,7 +275,9 @@ class ViewController: NSViewController {
         curveShadowOpacityLabel.doubleValue = shadow[1]
         curveShadowOffsetXLabel.doubleValue = shadow[2]
         curveShadowOffsetYLabel.doubleValue = shadow[3]
+    }
 
+    func setupGradientColors() {
         curveGradStartColor.borderColor = setup.guiColor
         curveGradStartColor.fillColor = setup.gradientColor[0]
         curveGradMiddleColor.borderColor = setup.guiColor
@@ -256,24 +297,11 @@ class ViewController: NSViewController {
         curveGradStLab.stringValue = setup.gradientColor[0].hexStr
         curveGradMidLab.stringValue = setup.gradientColor[1].hexStr
         curveGradFinLab.stringValue = setup.gradientColor[2].hexStr
-
-        curveBlur.minValue = setup.minBlur
-        curveBlur.maxValue = setup.maxBlur
-
-        self.setupSketchView()
-        textUI!.setupTextTool()
-
-        // for precision position create and remove panel
-        ColorPanel.setupSharedColorPanel()
-
-        self.findAllTextFields(root: self.view)
-
-        self.setupObservers()
-        self.showFileName()
-    }
+     }
 
     func setupSketchView() {
         sketchView.parent = self
+        sketchView.sketchUI = sketchUI
         sketchView.toolUI = toolUI
         sketchView.frameUI = frameUI
         sketchView.textUI = textUI
@@ -336,6 +364,9 @@ class ViewController: NSViewController {
 
     @objc func updateSketchColor() {
         sketchView!.colorCurve()
+        if let curve = sketchView!.selectedCurve {
+            self.updateSketchUIButtons(curve: curve)
+        }
     }
 
     @objc func updateSliders() {
@@ -346,7 +377,6 @@ class ViewController: NSViewController {
             self.curveWid.doubleValue = Double(curve.path.bounds.width)
             self.curveHei.doubleValue = Double(curve.path.bounds.height)
             self.curveRotate.doubleValue = Double(curve.angle)
-
             let opacity = curve.alpha.map {(fl) in Double(fl)}
             self.curveOpacityStroke.doubleValue = opacity[0]
             self.curveOpacityFill.doubleValue = opacity[1]
@@ -410,11 +440,31 @@ class ViewController: NSViewController {
                     label.doubleValue = value
                 }
             }
+
+            if let clrPan = self.colorPanel,
+                let sharedClrPan = clrPan.sharedColorPanel {
+                let colors = [
+                    curveStrokeColor, curveFillColor, curveShadowColor,
+                    curveGradStartColor, curveGradMiddleColor,
+                    curveGradFinalColor
+                ]
+                if let view = colors[clrPan.colorTag] {
+                    sharedClrPan.color = view.fillColor
+                }
+            }
+            self.updateSketchUIButtons(curve: curve)
+
         } else {
             self.curveWid!.doubleValue = Double(view.sketchPath.bounds.width)
             self.curveHei!.doubleValue = Double(view.sketchPath.bounds.height)
             self.curveWidLabel!.doubleValue = self.curveWid!.doubleValue
             self.curveHeiLabel!.doubleValue = self.curveHei!.doubleValue
+        }
+    }
+
+    func updateSketchUIButtons(curve: Curve) {
+        if let index = sketchView!.curves.firstIndex(of: curve) {
+            sketchUI.updateImageButton(index: index, curve: curve)
         }
     }
 
@@ -481,7 +531,7 @@ class ViewController: NSViewController {
 
     func restoreControlFrame(view: SketchPad) {
         if NSEvent.pressedMouseButtons == 0 {
-            if let curve = view.selectedCurve {
+            if let curve = view.selectedCurve, !curve.lock {
                 view.createControls(curve: curve)
             }
         }
@@ -678,11 +728,20 @@ class ViewController: NSViewController {
 
 //    MARK: Buttons actions
     @IBAction func sendCurve(_ sender: NSButton) {
-        sketchView!.sendCurve(name: sender.alternateTitle)
+        let view = sketchView!
+        view.sendCurve(name: sender.alternateTitle)
+
+        for (i, curve) in view.curves.enumerated() {
+            sketchUI.updateImageButton(index: i, curve: curve)
+        }
     }
 
     @IBAction func flipCurve(_ sender: NSButton) {
+        let view = sketchView!
         sketchView!.flipCurve(name: sender.alternateTitle)
+        if let curve = view.selectedCurve {
+            self.updateSketchUIButtons(curve: curve)
+        }
     }
 
     @IBAction func editCurve(_ sender: NSButton) {
@@ -696,7 +755,6 @@ class ViewController: NSViewController {
     @IBAction func lockCurve(_ sender: NSButton) {
         sketchView!.lockCurve(sender: sender)
     }
-
 
 //    MARK: Menu actions
     @IBAction func copy(_ sender: NSMenuItem) {
@@ -816,7 +874,7 @@ class ViewController: NSViewController {
                 view.editFinished(curve: curve)
                 view.clearControls(curve: curve)
             }
-            view.addCurve()
+            view.newCurve()
             if let curve = view.selectedCurve {
                 curve.alpha = [CGFloat](repeating: 0, count: 2)
                 curve.shadow = [CGFloat](repeating: 0, count: 4)

@@ -10,6 +10,7 @@ import Cocoa
 
 class ControlFrame: CALayer {
     var parent: SketchPad?
+    var groupFrame: GroupFrame?
     var ctrlPad: CGFloat = setup.dotSize * 4
     var ctrlPad50: CGFloat = setup.dotSize * 2
     var dotSize: CGFloat = setup.dotSize
@@ -19,15 +20,23 @@ class ControlFrame: CALayer {
         super.init(coder: aDecoder)
     }
 
-    init(parent: SketchPad, curve: Curve) {
-        self.parent = parent
+    init(parent: SketchPad) {
         super.init()
+        self.parent = parent
+        if let layer = self.parent!.layer {
+            layer.addSublayer(self)
+        }
+    }
+
+    init(parent: SketchPad, curve: Curve) {
+        super.init()
+        self.parent = parent
         let line50 = curve.lineWidth/2
-        self.frame = CGRect(
-            x: curve.path.bounds.minX - line50,
-            y: curve.path.bounds.minY - line50,
-            width: curve.path.bounds.width + curve.lineWidth,
-            height: curve.path.bounds.height + curve.lineWidth)
+
+        self.frame = CGRect(x: curve.path.bounds.minX - line50,
+                            y: curve.path.bounds.minY - line50,
+                            width: curve.path.bounds.width + curve.lineWidth,
+                            height: curve.path.bounds.height + curve.lineWidth)
 
         self.borderWidth = setup.lineWidth
         self.borderColor = setup.fillColor.cgColor
@@ -56,7 +65,7 @@ class ControlFrame: CALayer {
             x: gradMinX + curve.gradientDirection[1].x * width,
             y: gradMinY + curve.gradientDirection[1].y * height)
 
-        let dots: [CGPoint] = [
+        let points: [CGPoint] = [
             CGPoint(x: self.bounds.minX, y: self.bounds.minY),
             CGPoint(x: self.bounds.minX, y: self.bounds.midY),
             CGPoint(x: self.bounds.minX, y: self.bounds.maxY),
@@ -75,30 +84,30 @@ class ControlFrame: CALayer {
                         gradientDirStart: gradientDirStart,
                         gradientDirFinal: gradientDirFinal)
 
-        var fillColor = setup.fillColor
-        var strokeColor = setup.strokeColor
-        var gradIndex = 0
-        for i in 0..<dots.count {
-            var radius: CGFloat = 0
-            if i==dots.count-6 {
-                radius = self.dot50Size
-            } else if i==dots.count-5 || i==dots.count-4 {
-                fillColor = setup.strokeColor
-                strokeColor = setup.fillColor
-                radius = self.dot50Size
-            } else if i==dots.count-3 || i==dots.count-2 || i==dots.count-1 {
-                radius = self.dot50Size/2
-                fillColor = curve.gradientColor[gradIndex]
-                strokeColor = setup.strokeColor
-                gradIndex += 1
-            }
-            self.makeDot(parent: parent, tag: i,
-                         x: dots[i].x, y: dots[i].y, radius: radius,
-                         strokeColor: strokeColor, fillColor: fillColor)
+        self.initDots(parent: parent, curve: curve, pnt: points)
+
+        self.initRoundedCornerDots(parent: parent, curve: curve,
+                                      numDots: points.count)
+
+        let curves = parent.groups[curve.group]
+
+        let numberDots = curve.rounded != nil
+            ? points.count + 2
+            : points.count
+
+        if curves.count>1 {
+            groupFrame = GroupFrame(parent: parent, curves: curves,
+                                    numberDots: numberDots)
         }
 
-        self.initRoundedCornerControl(parent: parent, curve: curve,
-                                      numDots: dots.count)
+        if let layer = self.parent!.layer {
+            layer.addSublayer(self)
+        }
+    }
+
+    deinit {
+        self.groupFrame?.removeFromSuperlayer()
+        self.groupFrame = nil
     }
 
     func initShapes(gradientLoc: [CGPoint],
@@ -109,28 +118,56 @@ class ControlFrame: CALayer {
         path.move(to: CGPoint(x: self.bounds.maxX, y: self.bounds.midY))
         path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad,
                               y: self.bounds.midY))
+
         for point in gradientLoc {
             path.move(to: CGPoint(x: point.x,
                                   y: point.y + self.ctrlPad50))
             path.line(to: point)
         }
 
-        self.makeShape(path: path, color: setup.fillColor,
-                       width: setup.lineWidth)
+        self.makeShape(path: path, strokeColor: setup.fillColor,
+                       lineWidth: setup.lineWidth)
 
         path.removeAllPoints()
         path.move(to: gradientDirStart)
         path.line(to: gradientDirFinal)
-        self.makeShape(path: path, color: setup.strokeColor,
-                       width: setup.lineWidth)
-
+        self.makeShape(path: path, strokeColor: setup.strokeColor,
+                       lineWidth: setup.lineWidth)
+        self.makeShape(path: path, strokeColor: setup.fillColor,
+                       lineWidth: setup.lineWidth,
+                       dashPattern: setup.controlDashPattern)
     }
 
-    func initRoundedCornerControl(parent: SketchPad,
-                                  curve: Curve, numDots: Int) {
+    func initDots(parent: SketchPad, curve: Curve, pnt: [CGPoint]) {
+        var fillColor = setup.fillColor
+        var strokeColor = setup.strokeColor
+        var gradIndex = 0
+        for i in 0..<pnt.count {
+            var rounded: CGFloat = 0
+            if i==pnt.count-6 {
+                rounded = self.dot50Size
+            } else if i==pnt.count-5 || i==pnt.count-4 {
+                fillColor = setup.strokeColor
+                strokeColor = setup.fillColor
+                rounded = self.dot50Size
+            } else if i==pnt.count-3 || i==pnt.count-2 || i==pnt.count-1 {
+                rounded = self.dot50Size/2
+                fillColor = curve.gradientColor[gradIndex]
+                strokeColor = setup.strokeColor
+                gradIndex += 1
+            }
+            self.makeDot(parent: parent, tag: i,
+                         x: pnt[i].x, y: pnt[i].y, radius: rounded,
+                         strokeColor: strokeColor,
+                         fillColor: fillColor)
+        }
+    }
+
+    func initRoundedCornerDots(parent: SketchPad,
+                               curve: Curve, numDots: Int) {
         if let rounded = curve.rounded {
-            let fillColor = setup.controlColor
-            let strokeColor = setup.strokeColor
+            let fillColor = setup.strokeColor
+            let strokeColor = setup.fillColor
 
             let wid50 = self.bounds.width/2
             let hei50 = self.bounds.height/2
@@ -147,8 +184,8 @@ class ControlFrame: CALayer {
 
             path.move(to: CGPoint(x: self.bounds.maxX, y: roundedY.y))
             path.line(to: roundedY)
-            self.makeShape(path: path, color: setup.fillColor,
-                           width: setup.lineWidth)
+            self.makeShape(path: path, strokeColor: setup.fillColor,
+                           lineWidth: setup.lineWidth)
 
             self.makeDot(parent: parent, tag: numDots,
                          x: roundedX.x, y: roundedX.y,
@@ -166,8 +203,7 @@ class ControlFrame: CALayer {
 
     func makeDot(parent: SketchPad, tag: Int, x: CGFloat, y: CGFloat,
                  radius: CGFloat, strokeColor: NSColor, fillColor: NSColor) {
-        let cp = Dot.init(x: x, y: y,
-                          size: self.dotSize,
+        let cp = Dot.init(x: x, y: y, size: self.dotSize,
                           offset: CGPoint(
                             x: self.dot50Size,
                             y: self.dot50Size),
@@ -195,7 +231,7 @@ class ControlFrame: CALayer {
                            y: pos.y - self.frame.minY)
         for layer in self.sublayers! {
             if let dot = layer as? Dot {
-                if dot.collide(origin: mpos,
+                if dot.collide(pos: mpos,
                                width: self.dotSize) {
                     return dot
                 }
@@ -208,7 +244,7 @@ class ControlFrame: CALayer {
         layer.updateSize(size: self.dotSize + 2)
     }
 
-    func decreaseLabels() {
+    func decreaseDotSize() {
         for layer in self.sublayers ?? [] {
             if let dot = layer as? Dot {
                 dot.updateSize(size: self.dotSize)

@@ -10,6 +10,7 @@ import Cocoa
 
 class ColorPanel: NSStackView {
     var sharedColorPanel: NSColorPanel?
+    var colorTag: Int = -1
 
     static func setupSharedColorPanel() {
         NSColorPanel.setPickerMask(NSColorPanel.Options.wheelModeMask)
@@ -36,9 +37,8 @@ class ColorPanel: NSStackView {
 
         let title = sender?.alternateTitle ?? ""
         let tag = sender?.tag ?? -1
-
+        self.colorTag = tag
         self.sharedColorPanel?.title = title.capitalized
-
         if let parent = self.superview as? NSStackView {
             parent.isOn(on: tag)
         }

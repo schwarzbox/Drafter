@@ -23,6 +23,7 @@ struct Setup {
     let maxZoom: Double = 800
     let reduceZoom: CGFloat = 40
 
+    let sketchIconSize: CGSize = CGSize(width: 16, height: 16)
     let screenWidth: Double = 800
     let screenHeight: Double = 600
     let maxScreenWidth: Double = 1600
@@ -44,7 +45,7 @@ struct Setup {
     let fillColor = NSColor.systemBlue.sRGB()
     let guiColor = NSColor.unemphasizedSelectedContentBackgroundColor.sRGB()
     let controlColor = NSColor.green.sRGB()
-    let controlDashPattern: [NSNumber] = [4, 2, 0, 0]
+    let controlDashPattern: [NSNumber] = [4, 4, 0, 0]
 
     let shadow: [CGFloat] = [2.0, 0.5, 8.0, 8.0]
     let shadowColor =  NSColor.black
@@ -65,8 +66,6 @@ struct Setup {
     let rulersDelta: CGFloat = 2
     let rulersPinSize: CGFloat = 2
     let rulersFontSize: CGFloat = 10
-    let rulersTextWid: CGFloat = 64
-    let rulersTextHei: CGFloat = 16
 
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"
@@ -74,6 +73,10 @@ struct Setup {
 
     let filename: String = "untitled"
     let fileTypes: [String] = ["png", "svg"]
+
+
+    let disabledActions = ["position": NSNull(), "bounds": NSNull(),
+                           "path": NSNull()]
 }
 
 var setup = Setup()

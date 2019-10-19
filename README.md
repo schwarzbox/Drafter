@@ -86,7 +86,7 @@ Pan gesture. Drag canvas with two fingers
 
 # Future releases
 
-v0.7 Groups
+v0.71 Edit Groups
 
 v0.73 Undo Redo
 

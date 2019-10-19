@@ -136,8 +136,7 @@ class Curve: Equatable {
 
     var points: [ControlPoint] = []
     var edit: Bool = false
-    var visible: Bool = true
-    var group: Int?
+    var group: Int = 0
     var lock: Bool = false
 
     var controlDot: Dot?
@@ -186,7 +185,6 @@ class Curve: Equatable {
         self.canvas.addSublayer(self.image)
         self.canvas.addSublayer(self.gradient)
         self.updateLayer()
-
     }
 
     let lineCapStyles: [CAShapeLayerLineCap] = [
@@ -458,20 +456,14 @@ class Curve: Equatable {
 
 //    MARK: ControlFrame func
     func createControlFrame() {
-        let control = ControlFrame.init(parent: self.parent!,
-                                        curve: self)
-        if let layer = self.parent!.layer {
-            layer.addSublayer(control)
-            self.controlFrame = control
-        }
+        self.controlFrame = ControlFrame.init(parent: self.parent!,
+                                              curve: self)
     }
 
     func clearControlFrame() {
         self.clearTrackArea()
-        if let control = self.controlFrame {
-            control.removeFromSuperlayer()
-            self.controlFrame = nil
-        }
+        self.controlFrame?.removeFromSuperlayer()
+        self.controlFrame = nil
     }
 
 //    MARK: Global Control
@@ -488,9 +480,12 @@ class Curve: Equatable {
                     }
                 }
             } else {
-                if let control = self.controlFrame {
-                    if let dot = control.collideControlDot(pos: pos) {
-                        control.increaseDotSize(layer: dot)
+                if let ctrlF = self.controlFrame {
+                    if let dot = ctrlF.collideControlDot(pos: pos) {
+                        ctrlF.increaseDotSize(layer: dot)
+                    } else if let groupF = ctrlF.groupFrame,
+                        let dot = groupF.collideControlDot(pos: pos) {
+                        groupF.increaseDotSize(layer: dot)
                     }
                 }
             }
@@ -499,8 +494,11 @@ class Curve: Equatable {
 
     func hideControl() {
         if !self.edit {
-            if let control = self.controlFrame {
-                control.decreaseLabels()
+            if let ctrlF = self.controlFrame {
+                ctrlF.decreaseDotSize()
+                if let groupF = ctrlF.groupFrame {
+                    groupF.decreaseDotSize()
+                }
             }
         }
     }
