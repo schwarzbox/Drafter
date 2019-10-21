@@ -8,8 +8,7 @@
 
 import Cocoa
 
-struct RulerPoint {
-
+struct RulerPoint {    
     let move: CGPoint
     let line: CGPoint
     let maxMove: CGPoint
@@ -30,11 +29,6 @@ class Ruler: CAShapeLayer {
             strokeColor: setup.controlColor.sRGB(alpha: 0.5),
             dashPattern: setup.controlDashPattern,
             actions: setup.disabledActions)
-        self.makeShape(
-            path: NSBezierPath(),
-            strokeColor: setup.guiColor,
-            dashPattern: setup.controlDashPattern,
-            actions: setup.disabledActions)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -46,41 +40,56 @@ class Ruler: CAShapeLayer {
                       exclude: Curve?, ctrl: Bool = false) -> CGPoint {
 
         self.clearRulers()
-
+        var minDistX: CGFloat = CGFloat(MAXFLOAT)
+        var minDistY: CGFloat = CGFloat(MAXFLOAT)
         var rulerPoints = self.findRulersToCurve(points: points,
                                                  curves: curves,
-                                                 exclude: exclude)
+                                                 exclude: exclude,
+                                                 minDistX: &minDistX,
+                                                 minDistY: &minDistY)
+
         let curvePoints = self.findRulersToPoints(point: points[0],
-                                                   curvePoints: curvePoints)
-        rulerPoints.append(contentsOf: curvePoints)
+                                                  curvePoints: curvePoints,
+                                                  minDistX: minDistX,
+                                                  minDistY: minDistY)
+        if curvePoints["x"] != nil {
+            rulerPoints["x"] = curvePoints["x"]
+        }
+        if curvePoints["y"] != nil {
+            rulerPoints["y"] = curvePoints["y"]
+        }
 
         self.showRulers(rulerPoints: rulerPoints, ctrl: ctrl)
         var snap = CGPoint(x: 0, y: 0)
         if !ctrl {
             snap = self.deltaRulers(rulerPoints: rulerPoints)
         }
-
-        self.parent?.layer?.addSublayer(self)
-
         return snap
+    }
+
+    func updateRulers() {
+        self.removeFromSuperlayer()
+        if let subs = self.sublayers, subs.count > 1 {
+            self.parent?.layer?.addSublayer(self)
+        }
     }
 
     func clearRulers() {
         self.removeFromSuperlayer()
         if let subs = self.sublayers {
-            for i in 2..<subs.count {
+            for i in 1..<subs.count {
                 subs[i].removeFromSuperlayer()
             }
         }
     }
 
-    func deltaRulers(rulerPoints: [RulerPoint?]) -> CGPoint {
+    func deltaRulers(rulerPoints: [String: RulerPoint?]) -> CGPoint {
         var deltaX: CGFloat = 0
         var signX: CGFloat = 1
         var deltaY: CGFloat = 0
         var signY: CGFloat = 1
 
-        for point in rulerPoints {
+        for (_, point) in rulerPoints {
             guard let pnt = point else { continue }
             let dX = pnt.move.x - pnt.line.x
             let dY = pnt.move.y - pnt.line.y
@@ -96,11 +105,11 @@ class Ruler: CAShapeLayer {
         return CGPoint(x: deltaX * signX, y: deltaY * signY)
     }
 
-    func findRulersToCurve(points: [CGPoint], curves: [Curve],
-                           exclude: Curve? = nil) -> [RulerPoint?] {
-        var rulerPoints: [RulerPoint?] = []
-        var minDistX: CGFloat = CGFloat(MAXFLOAT)
-        var minDistY: CGFloat = CGFloat(MAXFLOAT)
+    func findRulersToCurve(
+        points: [CGPoint], curves: [Curve], exclude: Curve? = nil,
+        minDistX: inout CGFloat,
+        minDistY: inout CGFloat) -> [String: RulerPoint?] {
+        var rulerPoints: [String: RulerPoint?] = [:]
         var rulerPointX: RulerPoint?
         var rulerPointY: RulerPoint?
         for cur in curves {
@@ -127,7 +136,7 @@ class Ruler: CAShapeLayer {
                                 min: points[1].y, max: points[2].y)
                         }
                         let dist = abs(minTarY - minSelY)
-                        if curPnt.y < minDistY {
+                        if dist < minDistY {
                             minDistY = dist
                             rulerPointY = RulerPoint(
                                 move: CGPoint(x: pnt.x, y: minSelY),
@@ -165,18 +174,85 @@ class Ruler: CAShapeLayer {
                 }
             }
         }
-
-        rulerPoints.append(rulerPointX)
-        rulerPoints.append(rulerPointY)
+        if rulerPointX != nil {
+            rulerPoints["x"] = rulerPointX
+        }
+        if rulerPointY != nil {
+            rulerPoints["y"] = rulerPointY
+        }
 
         return rulerPoints
     }
 
-    func showRulers(rulerPoints: [RulerPoint?], ctrl: Bool = false) {
+    func findRulersToPoints(point: CGPoint,
+                            curvePoints: [CGPoint],
+                            minDistX: CGFloat,
+                            minDistY: CGFloat) -> [String: RulerPoint?] {
+        var rulerPoints: [String: RulerPoint?] = [:]
+        var minDistX: CGFloat = minDistX
+        var minDistY: CGFloat = minDistY
+        var rulerPointX: RulerPoint?
+        var rulerPointY: RulerPoint?
+        for pnt in curvePoints {
+            if point.x <= pnt.x+setup.rulersDelta &&
+                point.x >= pnt.x-setup.rulersDelta {
+                let distY = abs(pnt.y - point.y)
+                if distY < minDistY {
+                    minDistY = distY
+                    rulerPointY = RulerPoint(
+                    move: CGPoint(x: point.x, y: point.y),
+                    line: CGPoint(x: pnt.x, y: pnt.y),
+                    maxMove: CGPoint(x: point.x, y: point.y),
+                    maxLine: CGPoint(x: pnt.x, y: pnt.y))
+                }
+            }
+            if point.y <= pnt.y+setup.rulersDelta &&
+                point.y >= pnt.y-setup.rulersDelta {
+                let distX = abs(pnt.x - point.x)
+                if distX < minDistX {
+                    minDistX = distX
+                    rulerPointX = RulerPoint(
+                    move: CGPoint(x: point.x, y: point.y),
+                    line: CGPoint(x: pnt.x, y: pnt.y),
+                    maxMove: CGPoint(x: point.x, y: point.y),
+                    maxLine: CGPoint(x: pnt.x, y: pnt.y))
+                }
+            }
+        }
+        if rulerPointX != nil {
+            rulerPoints["x"] = rulerPointX
+        }
+        if rulerPointY != nil {
+            rulerPoints["y"] = rulerPointY
+        }
+        return rulerPoints
+    }
+
+    func findMinMax(sel: CGFloat, tar: CGFloat,
+                    min: CGFloat,
+                    max: CGFloat) -> (min: CGFloat, max: CGFloat) {
+        var minValue = tar
+        var maxValue = tar
+
+        let t1 = abs(min - sel)
+        let t2 = abs(max - sel)
+        if t1<t2 {
+            minValue = min
+            maxValue = max
+        } else {
+            minValue = max
+            maxValue = min
+        }
+        return (minValue, maxValue)
+    }
+
+    func showRulers(rulerPoints: [String: RulerPoint?],
+                    ctrl: Bool = false) {
         let solidPath = NSBezierPath()
         let alphaPath = NSBezierPath()
+        self.clearRulers()
 
-        for point in rulerPoints {
+        for (_, point) in rulerPoints {
             guard let pnt = point else { continue }
             let distX = abs(pnt.move.x - pnt.line.x)
             let distY = abs(pnt.move.y - pnt.line.y)
@@ -216,7 +292,7 @@ class Ruler: CAShapeLayer {
                 self.makeText(text: String(Double(distX * 10).rounded()/10),
                               pos: move, tag: 1)
             }
-            break
+
         }
         self.path = solidPath.cgPath
 
@@ -225,41 +301,4 @@ class Ruler: CAShapeLayer {
         }
     }
 
-    func findRulersToPoints(point: CGPoint,
-                            curvePoints: [CGPoint]) -> [RulerPoint] {
-        var rulerPoints: [RulerPoint] = []
-        for pnt in curvePoints {
-            if (point.x <= pnt.x+setup.rulersDelta &&
-                point.x >= pnt.x-setup.rulersDelta) ||
-                (point.y <= pnt.y+setup.rulersDelta &&
-                point.y >= pnt.y-setup.rulersDelta) {
-
-                let pathPoint = RulerPoint(
-                    move: CGPoint(x: point.x, y: point.y),
-                    line: CGPoint(x: pnt.x, y: pnt.y),
-                    maxMove: CGPoint(x: point.x, y: point.y),
-                    maxLine: CGPoint(x: pnt.x, y: pnt.y))
-                rulerPoints.append(pathPoint)
-            }
-        }
-        return rulerPoints
-    }
-
-    func findMinMax(sel: CGFloat, tar: CGFloat,
-                    min: CGFloat,
-                    max: CGFloat) -> (min: CGFloat, max: CGFloat) {
-        var minValue = tar
-        var maxValue = tar
-
-        let t1 = abs(min - sel)
-        let t2 = abs(max - sel)
-        if t1<t2 {
-            minValue = min
-            maxValue = max
-        } else {
-            minValue = max
-            maxValue = min
-        }
-        return (minValue, maxValue)
-    }
 }

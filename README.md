@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.69
+v0.71
 
 # Features
 
@@ -86,7 +86,9 @@ Pan gesture. Drag canvas with two fingers
 
 # Future releases
 
-v0.71 Edit Groups
+v.072 Refactor curve edit
+
+v0.74 Improve Groups
 
 v0.73 Undo Redo
 
@@ -98,6 +100,6 @@ v0.9 Layers
 
 v1.0 .svg
 
-Bugs:  FastRotate, SaveBlur
+Bugs:  SaveBlur
 
 

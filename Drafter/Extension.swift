@@ -36,8 +36,9 @@ extension NSBezierPath {
     func rectPath(_ path: NSBezierPath,
                   pad: CGFloat = 0) -> CGRect {
         let rect = CGRect(
-            x: path.bounds.minX-pad/2, y: path.bounds.minY-pad/2,
-            width: path.bounds.width+pad, height: path.bounds.height+pad)
+            x: path.bounds.minX-pad, y: path.bounds.minY-pad,
+            width: path.bounds.width+pad * 2,
+            height: path.bounds.height+pad * 2)
         return rect
     }
 
@@ -207,6 +208,10 @@ extension NSStackView {
                             state: &colorbox.state)
                     colorbox.restore()
                 }
+            } else if let stack = view as? NSStackView {
+                if let button = stack.arrangedSubviews.first as? NSButton {
+                restore(tag: button.tag, state: &button.state)
+                }
             }
         }
     }
@@ -280,7 +285,6 @@ extension CALayer {
 
         let width = Int(self.bounds.width+1)
         let height = Int(self.bounds.height+1)
-
 
         let canvas = CGContext(
             data: nil, width: width, height: height,

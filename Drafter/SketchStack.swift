@@ -9,69 +9,125 @@
 import Cocoa
 
 class SketchStack: NSStackView {
-    var action: (_ : Int) -> Void = {(index) in }
-
-    func moveToZero(curve: Curve, action: () -> Void) {
-        let oX = curve.canvas.bounds.minX
-        let oY = curve.canvas.bounds.minY
-        curve.applyTransform(oX: oX, oY: oY,
+    var stackAction: (_ : NSButton) -> Void = {(index) in }
+    var visibleAction: (_ : NSButton) -> Void = {(index) in}
+    func moveToZero(curve: Curve, action: () -> NSImage?) -> NSImage? {
+        var image: NSImage?
+        curve.applyTransform(oX: curve.canvas.bounds.minX,
+                             oY: curve.canvas.bounds.minY,
             transform: {
-                curve.updatePoints(deltax: oX, deltay: -oY)
-                action()
+                curve.updateLayer()
+                image = action()
         })
-        curve.updatePoints(deltax: -oX, deltay: oY)
+        curve.updateLayer()
+        return image
     }
 
-    func appendContolStack() {
-
+    func getImage(index: Int, curve: Curve) -> NSImage? {
+        return self.moveToZero(curve: curve, action: {
+             if let img = curve.canvas.cgImage() {
+                 return NSImage(cgImage: img, size: setup.sketchIconSize)
+             }
+            return nil
+        })
     }
 
-    func appendImageButton(index: Int, curve: Curve,
-                           action:  @escaping (_ : Int) -> Void ) {
-        self.action = action
-        self.moveToZero(curve: curve, action: {
-            if let img = curve.canvas.cgImage() {
-                let button = NSButton()
-                button.image =  NSImage(cgImage: img,
-                                        size: setup.sketchIconSize)
+    func appendSketchStackCell(
+        index: Int, curve: Curve,
+        stackAction:  @escaping (_ : NSButton) -> Void,
+        visibleAction:  @escaping (_ : NSButton) -> Void) {
+        self.isOn(on: -1)
+        self.stackAction = stackAction
+        self.visibleAction = visibleAction
 
-                button.target = self
-                button.isSpringLoaded = true
-                button.action =  #selector(self.selectCurveFromStack)
-                button.tag = index
-                button.isBordered = true
+        let curveButton = NSButton()
+        curveButton.image = self.getImage(index: index, curve: curve)
+        curveButton.bezelStyle = .shadowlessSquare
+        curveButton.action = #selector(self.selectCurveFromStack)
+        curveButton.isTransparent = false
 
-                button.imageScaling = .scaleProportionallyDown
-                button.isTransparent = false
-                button.bezelStyle = .regularSquare
-                button.setButtonType(.onOff)
-                button.setFrameSize(setup.sketchIconSize)
-                self.isOn(on: -1)
-                button.state = .on
-                self.addArrangedSubview(button)
-            }
-       })
+        let eyeButton = NSButton()
+        eyeButton.image = NSImage.init(
+                   named: NSImage.quickLookTemplateName)
+        eyeButton.bezelStyle = .circular
+        eyeButton.isTransparent = true
+        eyeButton.action = #selector(self.visibleCurve)
+
+        for button in [curveButton, eyeButton] {
+            button.target = self
+            button.tag = index
+            button.imageScaling = .scaleProportionallyDown
+            button.isTransparent = false
+
+            button.setButtonType(.onOff)
+            button.setFrameSize(setup.sketchIconSize)
+
+            button.state = .on
+        }
+
+//        let groupLabel = NSTextField()
+//        groupLabel.placeholderString = ""
+//        groupLabel.alignment = .right
+//        groupLabel.drawsBackground = false
+//        groupLabel.isBordered = false
+//        groupLabel.bezelStyle = .squareBezel
+//        groupLabel.isSelectable = false
+//        groupLabel.isEditable = false
+
+        let stack = NSStackView()
+        stack.spacing = 4
+        stack.addArrangedSubview(curveButton)
+        stack.addArrangedSubview(eyeButton)
+//        stack.addArrangedSubview(groupLabel)
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.addArrangedSubview(stack)
     }
 
     @objc func selectCurveFromStack(_ sender: NSButton) {
-        self.action(sender.tag)
-        self.isOn(on: sender.tag)
+        self.stackAction(sender)
+    }
+
+    @objc func visibleCurve(_ sender: NSButton) {
+         self.visibleAction(sender)
     }
 
     func remove(at: Int) {
        self.subviews.remove(at: at)
     }
 
-    func updateImageButton(index: Int, curve: Curve) {
-       if let button = self.arrangedSubviews[index] as? NSButton {
-            self.moveToZero(curve: curve, action: {
-                if let img = curve.canvas.cgImage() {
-                    button.image = NSImage(cgImage: img,
-                                           size: setup.sketchIconSize)
-                    button.tag = index
-                    self.isOn(on: button.tag)
+    func updateGroup(index: Int, group: Int) {
+        if let stack =  self.arrangedSubviews[index] as? NSStackView {
+            if let field = stack.arrangedSubviews.last as? NSTextField {
+                field.placeholderString = String(group)
+            }
+        }
+    }
+
+    func updateTag(index: Int, with: Int) {
+        if let stack =  self.arrangedSubviews[index] as? NSStackView {
+            for view in stack.arrangedSubviews {
+                if let button = view as? NSButton {
+                    button.tag = with
                 }
-            })
-       }
+                if let field = view as? NSTextField {
+                    field.tag = with
+                }
+            }
+        }
+    }
+
+    func updateImageButton(index: Int, curve: Curve) {
+        if let stack = self.arrangedSubviews[index] as? NSStackView {
+            if let button = stack.arrangedSubviews[0] as? NSButton {
+                button.image = self.getImage(index: index, curve: curve)
+            }
+            if let button = stack.arrangedSubviews[1] as? NSButton {
+                if curve.canvas.isHidden {
+                    button.state = .off
+                } else {
+                    button.state = .on
+                }
+            }
+        }
     }
 }

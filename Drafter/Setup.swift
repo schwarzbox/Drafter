@@ -20,12 +20,12 @@ let toolsKeys: [String: Tools] =
 
 struct Setup {
     let minZoom: Double = 20
-    let maxZoom: Double = 800
+    let maxZoom: Double = 640
     let reduceZoom: CGFloat = 40
 
     let sketchIconSize: CGSize = CGSize(width: 16, height: 16)
-    let screenWidth: Double = 800
-    let screenHeight: Double = 600
+    let screenWidth: Double = 320
+    let screenHeight: Double = 240
     let maxScreenWidth: Double = 1600
     let maxScreenHeight: Double = 1200
     let minResize: Double = 0.1
@@ -47,7 +47,7 @@ struct Setup {
     let controlColor = NSColor.green.sRGB()
     let controlDashPattern: [NSNumber] = [4, 4, 0, 0]
 
-    let shadow: [CGFloat] = [2.0, 0.5, 8.0, 8.0]
+    let shadow: [CGFloat] = [2.0, 0.0, 8.0, 8.0]
     let shadowColor =  NSColor.black
     let maxShadowRadius: Double = 32
     let maxShadowOffsetX: Double = 256
@@ -73,7 +73,6 @@ struct Setup {
 
     let filename: String = "untitled"
     let fileTypes: [String] = ["png", "svg"]
-
 
     let disabledActions = ["position": NSNull(), "bounds": NSNull(),
                            "path": NSNull()]

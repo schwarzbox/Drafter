@@ -17,7 +17,11 @@ class ViewController: NSViewController {
     @IBOutlet weak var frameUI: FrameButtons!
     @IBOutlet weak var textUI: TextTool!
     @IBOutlet weak var actionUI: NSStackView!
+
+    @IBOutlet weak var basicUI: NSStackView!
+    @IBOutlet weak var strokeUI: NSStackView!
     @IBOutlet weak var colorUI: NSStackView!
+    @IBOutlet weak var filterUI: NSStackView!
 
     @IBOutlet weak var zoomSketch: NSSlider!
     @IBOutlet weak var zoomDefaultSketch: NSPopUpButton!
@@ -164,7 +168,7 @@ class ViewController: NSViewController {
         super.viewDidAppear()
         window = self.view.window!
 
-        let ui = [sketchUI, toolUI, frameUI, actionUI]
+        let ui = [toolUI, frameUI, actionUI]
         for view in ui {
             view?.layer = CALayer()
             view?.layer?.backgroundColor = setup.guiColor.cgColor
@@ -231,6 +235,7 @@ class ViewController: NSViewController {
         let index100 = zoomDefaultSketch.indexOfItem(withTitle: "100")
         zoomDefaultSketch.select(zoomDefaultSketch.item(at: index100))
         zoomDefaultSketch.setTitle("100")
+
     }
 
     func setupStrokeFillColor() {
@@ -301,6 +306,7 @@ class ViewController: NSViewController {
 
     func setupSketchView() {
         sketchView.parent = self
+
         sketchView.sketchUI = sketchUI
         sketchView.toolUI = toolUI
         sketchView.frameUI = frameUI
@@ -369,9 +375,24 @@ class ViewController: NSViewController {
         }
     }
 
+    func hideUnusedView(_ bool: Bool) {
+        for index in 0..<basicUI.subviews.count {
+            if let stack = basicUI.subviews[index] as? NSStackView {
+                if index != 3 && index != 4 {
+                    stack.isHidden = bool
+                }
+            }
+        }
+        for view in [strokeUI, colorUI, filterUI] {
+            view?.isHidden = bool
+        }
+    }
+
     @objc func updateSliders() {
         let view = sketchView!
         if let curve = view.selectedCurve {
+            self.hideUnusedView(false)
+
             self.curveX.doubleValue = Double(curve.path.bounds.midX)
             self.curveY.doubleValue = Double(curve.path.bounds.midY)
             self.curveWid.doubleValue = Double(curve.path.bounds.width)
@@ -455,6 +476,8 @@ class ViewController: NSViewController {
             self.updateSketchUIButtons(curve: curve)
 
         } else {
+            self.hideUnusedView(true)
+
             self.curveWid!.doubleValue = Double(view.sketchPath.bounds.width)
             self.curveHei!.doubleValue = Double(view.sketchPath.bounds.height)
             self.curveWidLabel!.doubleValue = self.curveWid!.doubleValue
@@ -492,7 +515,10 @@ class ViewController: NSViewController {
     }
 
     @IBAction func zoomSketch(_ sender: NSSlider) {
-        sketchView!.zoomSketch(value: sender.doubleValue)
+        let view = sketchView!
+        view.zoomOrigin = CGPoint(x: view.sketchPath.bounds.midX,
+                                  y: view.sketchPath.bounds.midY)
+        view.zoomSketch(value: sender.doubleValue)
         zoomDefaultSketch.title = String(sender.intValue)
     }
 
@@ -500,8 +526,9 @@ class ViewController: NSViewController {
         let view = sketchView!
         if let value = Double(sender.itemTitle(
             at: sender.indexOfSelectedItem)) {
-            view.zoomOrigin = CGPoint(x: view.frame.midX,
-                                      y: view.frame.midY)
+            view.zoomOrigin = CGPoint(x: view.sketchPath.bounds.midX,
+                                      y: view.sketchPath.bounds.midY)
+            print(view.zoomOrigin)
             sender.title = sender.itemTitle(at: sender.indexOfSelectedItem)
             zoomSketch.doubleValue = value
             view.zoomSketch(value: value)
@@ -538,10 +565,14 @@ class ViewController: NSViewController {
     }
 
     @IBAction func alignLeftRightCurve(_ sender: NSSegmentedControl) {
-        sketchView!.alignLeftRightCurve(value: sender.indexOfSelectedItem)
+        let view = sketchView!
+        view.alignLeftRightCurve(value: sender.indexOfSelectedItem)
+        self.restoreControlFrame(view: view)
     }
     @IBAction func alignUpDownCurve(_ sender: NSSegmentedControl) {
+        let view = sketchView!
         sketchView!.alignUpDownCurve(value: sender.indexOfSelectedItem)
+        self.restoreControlFrame(view: view)
     }
 
     @IBAction func moveCurve(_ sender: Any) {
@@ -728,20 +759,11 @@ class ViewController: NSViewController {
 
 //    MARK: Buttons actions
     @IBAction func sendCurve(_ sender: NSButton) {
-        let view = sketchView!
-        view.sendCurve(name: sender.alternateTitle)
-
-        for (i, curve) in view.curves.enumerated() {
-            sketchUI.updateImageButton(index: i, curve: curve)
-        }
+        sketchView!.sendCurve(tag: sender.tag)
     }
 
     @IBAction func flipCurve(_ sender: NSButton) {
-        let view = sketchView!
-        sketchView!.flipCurve(name: sender.alternateTitle)
-        if let curve = view.selectedCurve {
-            self.updateSketchUIButtons(curve: curve)
-        }
+        sketchView!.flipCurve(tag: sender.tag)
     }
 
     @IBAction func editCurve(_ sender: NSButton) {

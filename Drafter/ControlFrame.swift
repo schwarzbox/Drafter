@@ -231,6 +231,7 @@ class ControlFrame: CALayer {
                            y: pos.y - self.frame.minY)
         for layer in self.sublayers! {
             if let dot = layer as? Dot {
+
                 if dot.collide(pos: mpos,
                                width: self.dotSize) {
                     return dot
