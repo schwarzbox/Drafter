@@ -59,7 +59,7 @@ class ControlPoint {
     }
 
     func collideDot(pos: CGPoint, dot: Dot) -> Bool {
-        if dot.collide(pos: pos, width: dot.bounds.width) &&
+        if dot.collide(pos: pos, radius: dot.bounds.width) &&
             !dot.excluded {
             return true
         }
@@ -88,8 +88,8 @@ class ControlPoint {
     }
 
     func createDots(parent: SketchPad, exclude: Int? = nil) {
-        self.hideControlDots(parent: parent)
-        let size = setup.dotSize - (parent.zoomed - 1)
+        self.hideControlDots(dotSize: parent.dotSize)
+        let size = parent.dotSize
 
         for (index, line) in self.lines.enumerated() {
             if let ex = exclude {
@@ -100,10 +100,11 @@ class ControlPoint {
                 parent.layer!.addSublayer(line)
             }
         }
-        self.updateLines()
-
+        self.updateLines(lineWidth: parent.lineWidth)
+        
         for dot in self.dots {
-            dot.updateSize(size: size)
+            dot.updateSize(width: size, height: size)
+            dot.borderWidth = parent.lineWidth
             if let ex = exclude {
                 if ex == dot.tag {
                     dot.excluded = true
@@ -126,14 +127,20 @@ class ControlPoint {
         }
     }
 
-    func updateLines() {
+    func updateLines(lineWidth: CGFloat? = nil) {
         for (index, shape) in self.lines.enumerated() {
             let path = NSBezierPath()
             path.move(to: self.dots[2].position)
             path.line(to: self.dots[index].position)
             shape.path = path.cgPath
+            if let wid = lineWidth {
+                shape.lineWidth = wid
+            }
             if let dashLayer = shape.sublayers?.first as? CAShapeLayer {
                 dashLayer.path = shape.path
+                if let wid = lineWidth {
+                    dashLayer.lineWidth = wid
+                }
             }
         }
     }
@@ -201,19 +208,18 @@ class ControlPoint {
         }
     }
 
-    func showControlDots(parent: SketchPad) {
-        let size = setup.dotSize - (parent.zoomed - 1)
-        self.mp.updateSize(size: size + 2)
+    func showControlDots(dotSize: CGFloat, dotMag: CGFloat) {
+        let size = dotSize + dotMag
+        self.mp.updateSize(width: size, height: size)
         self.makeHidden(items: self.dots, last: 1, hide: false)
         self.makeHidden(items: self.lines, last: 0, hide: false)
     }
 
-    func hideControlDots(parent: SketchPad? = nil) {
-        var size = setup.dotSize
-        if let par = parent {
-            size = setup.dotSize - (par.zoomed - 1)
+    func hideControlDots(dotSize: CGFloat? = nil) {
+        if let size = dotSize {
+            self.mp.updateSize(width: size, height: size)
         }
-        self.mp.updateSize(size: size)
+
         self.makeHidden(items: self.dots, last: 1, hide: true)
         self.makeHidden(items: self.lines, last: 0, hide: true)
     }

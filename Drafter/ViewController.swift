@@ -30,9 +30,13 @@ class ViewController: NSViewController {
     @IBOutlet weak var curveWid: NSSlider!
     @IBOutlet weak var curveHei: NSSlider!
     @IBOutlet weak var curveRotate: NSSlider!
-    @IBOutlet weak var curveOpacityStroke: NSSlider!
-    @IBOutlet weak var curveOpacityFill: NSSlider!
+
     @IBOutlet weak var curveWidth: NSSlider!
+
+    @IBOutlet weak var curveCap: NSSegmentedControl!
+    @IBOutlet weak var curveJoin: NSSegmentedControl!
+    @IBOutlet weak var curveDashGap: NSStackView!
+    @IBOutlet weak var curveDashGapLabel: NSStackView!
 
     @IBOutlet weak var curveXLabel: NSTextField!
     @IBOutlet weak var curveYLabel: NSTextField!
@@ -40,11 +44,11 @@ class ViewController: NSViewController {
     @IBOutlet weak var curveHeiLabel: NSTextField!
     @IBOutlet weak var curveRotateLabel: NSTextField!
     @IBOutlet weak var curveWidthLabel: NSTextField!
+
+    @IBOutlet weak var curveOpacityStroke: NSSlider!
+    @IBOutlet weak var curveOpacityFill: NSSlider!
     @IBOutlet weak var curveOpacityStrokeLabel: NSTextField!
     @IBOutlet weak var curveOpacityFillLabel: NSTextField!
-
-    @IBOutlet weak var curveBlur: NSSlider!
-    @IBOutlet weak var curveBlurLabel: NSTextField!
 
     @IBOutlet weak var curveStrokeColorPanel: ColorPanel!
     @IBOutlet weak var curveFillColorPanel: ColorPanel!
@@ -82,10 +86,8 @@ class ViewController: NSViewController {
     @IBOutlet weak var curveShadowOffsetY: NSSlider!
     @IBOutlet weak var curveShadowOffsetYLabel: NSTextField!
 
-    @IBOutlet weak var curveCap: NSSegmentedControl!
-    @IBOutlet weak var curveJoin: NSSegmentedControl!
-    @IBOutlet weak var curveDashGap: NSStackView!
-    @IBOutlet weak var curveDashGapLabel: NSStackView!
+    @IBOutlet weak var curveBlur: NSSlider!
+    @IBOutlet weak var curveBlurLabel: NSTextField!
 
     var textFields: [NSTextField] = []
     var colorPanel: ColorPanel?
@@ -155,6 +157,7 @@ class ViewController: NSViewController {
 
     func keyUpEvent(event: NSEvent) -> Bool {
         if self.eventTest(event: event) {
+
             let view = sketchView!
             self.restoreControlFrame(view: view)
             view.rulers.clearRulers()
@@ -212,7 +215,6 @@ class ViewController: NSViewController {
         self.setupSketchView()
         textUI!.setupTextTool()
 
-        // for precision position create and remove panel
         ColorPanel.setupSharedColorPanel()
 
         self.findAllTextFields(root: self.view)
@@ -313,6 +315,7 @@ class ViewController: NSViewController {
         sketchView.textUI = textUI
         sketchView.colorUI = colorUI
 
+        sketchView.curveWidth = curveWidth
         sketchView.curveOpacityStroke = curveOpacityStroke
         sketchView.curveOpacityFill = curveOpacityFill
 
@@ -856,7 +859,9 @@ class ViewController: NSViewController {
     }
 
     @IBAction func openDocument(_ sender: NSMenuItem) {
-
+        if let curve = sketchView!.selectedCurve, curve.edit {
+            return
+        }
         self.colorPanel?.closeSharedColorPanel()
         let openPanel = NSOpenPanel()
         openPanel.setupPanel()
@@ -885,25 +890,26 @@ class ViewController: NSViewController {
         let image = NSImage(contentsOf: filePath)
         if let wid = image?.size.width, let hei = image?.size.height {
 
-            let topLeft = CGPoint(x: view.frame.midX - wid/2,
-                                  y: view.frame.midY - hei/2)
-            let bottomRight = CGPoint(x: view.frame.midX + wid/2,
-                                      y: view.frame.midY + hei/2)
-            view.useTool(view.createRectangle(topLeft: topLeft,
-                                              bottomRight: bottomRight))
-
-            if let curve = view.selectedCurve {
-                view.editFinished(curve: curve)
-                view.clearControls(curve: curve)
+            if view.selectedCurve == nil {
+                let topLeft = CGPoint(x: view.sketchPath.bounds.midX - wid/2,
+                                      y: view.sketchPath.bounds.midY - hei/2)
+                let bottomRight = CGPoint(
+                    x: view.sketchPath.bounds.midX + wid/2,
+                    y: view.sketchPath.bounds.midY + hei/2)
+                view.useTool(view.createRectangle(topLeft: topLeft,
+                                                  bottomRight: bottomRight))
+                view.newCurve()
+                if let curve = view.selectedCurve {
+                    view.createControls(curve: curve)
+                }
             }
-            view.newCurve()
+
             if let curve = view.selectedCurve {
                 curve.alpha = [CGFloat](repeating: 0, count: 2)
                 curve.shadow = [CGFloat](repeating: 0, count: 4)
-                curve.image.contents = image
-                curve.image.bounds = curve.path.bounds
-                curve.image.position = curve.canvas.position
-                view.createControls(curve: curve)
+                curve.imageLayer.contents = image
+                curve.imageLayer.bounds = curve.path.bounds
+                curve.imageLayer.position = curve.canvas.position
                 self.updateSliders()
             }
         }

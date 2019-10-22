@@ -13,39 +13,14 @@ class GroupFrame: ControlFrame {
         super.init(coder: aDecoder)
     }
 
-    init(parent: SketchPad, curves: [Curve], numberDots: Int) {
+    init(parent: SketchPad, curves: [Curve]) {
         super.init(parent: parent)
-
+        
         if let rect = self.initGroupFrame(curves: curves) {
             self.frame = rect
         }
         self.borderWidth = setup.lineWidth
         self.borderColor = setup.controlColor.cgColor
-        self.dotSize = dotSize
-        self.dot50Size = dot50Size
-
-        let dots: [CGPoint] = [
-            CGPoint(x: self.bounds.maxX + self.ctrlPad, y: self.bounds.minY),
-            CGPoint(x: self.bounds.maxX, y: self.bounds.minY)]
-
-        var rounded = self.dot50Size
-        var offset: CGFloat = 0
-        for i in 0..<dots.count {
-            self.makeDot(parent: parent, tag: numberDots + i,
-                         x: dots[i].x + offset,
-                         y: dots[i].y - offset, radius: rounded,
-                         strokeColor: setup.strokeColor,
-                         fillColor: setup.controlColor)
-            rounded = 0
-            offset = self.dot50Size
-        }
-
-        let path = NSBezierPath()
-        path.move(to: CGPoint(x: self.bounds.maxX, y: self.bounds.minY))
-        path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad,
-                              y: self.bounds.minY))
-        self.makeShape(path: path, strokeColor: setup.controlColor,
-                       lineWidth: setup.lineWidth)
 
         if curves[0].group > 0 {
             self.initGroupNumber(groupIndex: curves[0].group)
@@ -79,6 +54,7 @@ class GroupFrame: ControlFrame {
     func initGroupNumber(groupIndex: Int) {
         self.makeText(text: String(groupIndex),
                       pos: CGPoint(x: self.bounds.minX,
-                                   y: self.bounds.maxY), tag: -1)
+                                   y: self.bounds.maxY),
+                      pad: 4, tag: -1, backgroundColor: setup.controlColor)
     }
 }

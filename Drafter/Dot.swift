@@ -7,34 +7,48 @@
 //
 
 import Cocoa
-class Dot: CALayer {
+class Dot: CAShapeLayer {
     var tag: Int?
     var excluded: Bool = false
-    var size: CGFloat?
-    var offset: CGPoint?
-    var strokeColor: NSColor?
-    var fillColor: NSColor?
+    var width: CGFloat!
+    var height: CGFloat!
+    var anchor: CGPoint!
+    var strokeNSColor: NSColor!
+    var fillNSColor: NSColor!
 
-    init(x: CGFloat, y: CGFloat, size: CGFloat, offset: CGPoint,
-         radius: CGFloat, lineWidth: CGFloat = setup.lineWidth,
-         strokeColor: NSColor? = setup.strokeColor,
-         fillColor: NSColor? = setup.fillColor,
+    init(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat,
+         rounded: CGFloat, anchor: CGPoint = CGPoint(x: 0.5, y: 0.5),
+         lineWidth: CGFloat = 1,
+         strokeColor: NSColor = NSColor.white,
+         fillColor: NSColor = NSColor.systemBlue,
+         path: NSBezierPath = NSBezierPath(),
+         dashPattern: [NSNumber]? = nil,
          hidden: Bool = false) {
 
         super.init()
         // disable animation
         self.actions = ["position": NSNull()]
-        self.frame = CGRect(x: x-offset.y, y: y-offset.x,
-                            width: size, height: size)
+        self.frame = CGRect(x: x-anchor.x * width,
+                            y: y-anchor.y * height,
+                            width: width, height: height)
 
-        self.size = size
-        self.offset = offset
-        self.strokeColor = strokeColor
-        self.fillColor = fillColor
-        self.cornerRadius = radius
+        self.width = width
+        self.height = height
+        self.anchor = anchor
+        self.strokeNSColor = strokeColor
+        self.fillNSColor = fillColor
+        self.lineWidth = lineWidth
+        self.strokeColor = strokeColor.cgColor
+        self.fillColor = fillColor.cgColor
+        self.cornerRadius = rounded
         self.borderWidth = lineWidth
-        self.borderColor = strokeColor?.cgColor
-        self.backgroundColor = fillColor?.cgColor
+        self.borderColor = strokeColor.cgColor
+        self.backgroundColor = fillColor.cgColor
+
+        self.path = path.cgPath
+        if let dash = dashPattern {
+            self.lineDashPattern = dash
+        }
 
         self.isHidden = hidden
     }
@@ -46,24 +60,30 @@ class Dot: CALayer {
         super.init(coder: aDecoder)
     }
 
-    func updateSize(size: CGFloat) {
+    func updateSize(width: CGFloat, height: CGFloat, circle: Bool = true) {
         let pos = self.position
-        let size50 = size/2
-        let rect = NSRect(x: pos.x - size50,
-                          y: pos.y - size50,
-                          width: size, height: size)
+        let wid50 = width/2
+        let hei50 = height/2
+        let rect = NSRect(x: pos.x - wid50,
+                          y: pos.y - hei50,
+                          width: width, height: height)
         self.frame = rect
+        if circle {
+            self.cornerRadius = wid50 < hei50 ? wid50 : hei50
+        }
     }
 
     override func copy() -> Any {
         return Dot.init(x: self.frame.midX,
                         y: self.frame.midY,
-                        size: self.size ?? 0,
-                        offset: self.offset ?? CGPoint(x: 0, y: 0),
-                        radius: self.cornerRadius,
+                        width: self.width,
+                        height: self.height,
+                        rounded: self.cornerRadius,
+                        anchor: self.anchor,
                         lineWidth: self.borderWidth,
-                        strokeColor: self.strokeColor,
-                        fillColor: self.fillColor,
+                        strokeColor: self.strokeNSColor,
+                        fillColor: self.fillNSColor,
+                        dashPattern: self.lineDashPattern,
                         hidden: self.isHidden)
     }
 }

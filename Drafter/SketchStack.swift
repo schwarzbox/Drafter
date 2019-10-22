@@ -26,7 +26,8 @@ class SketchStack: NSStackView {
     func getImage(index: Int, curve: Curve) -> NSImage? {
         return self.moveToZero(curve: curve, action: {
              if let img = curve.canvas.cgImage() {
-                 return NSImage(cgImage: img, size: setup.sketchIconSize)
+                 return NSImage(cgImage: img,
+                                size: setup.stackSketchButtonSize)
              }
             return nil
         })
@@ -44,24 +45,18 @@ class SketchStack: NSStackView {
         curveButton.image = self.getImage(index: index, curve: curve)
         curveButton.bezelStyle = .shadowlessSquare
         curveButton.action = #selector(self.selectCurveFromStack)
-        curveButton.isTransparent = false
-
         let eyeButton = NSButton()
         eyeButton.image = NSImage.init(
                    named: NSImage.quickLookTemplateName)
-        eyeButton.bezelStyle = .circular
-        eyeButton.isTransparent = true
+        eyeButton.bezelStyle = .inline
         eyeButton.action = #selector(self.visibleCurve)
 
         for button in [curveButton, eyeButton] {
             button.target = self
             button.tag = index
             button.imageScaling = .scaleProportionallyDown
-            button.isTransparent = false
-
             button.setButtonType(.onOff)
-            button.setFrameSize(setup.sketchIconSize)
-
+            button.setFrameSize(setup.stackSketchButtonSize)
             button.state = .on
         }
 

@@ -8,7 +8,7 @@
 
 import Cocoa
 
-struct RulerPoint {    
+struct RulerPoint {
     let move: CGPoint
     let line: CGPoint
     let maxMove: CGPoint
@@ -17,28 +17,40 @@ struct RulerPoint {
 
 class Ruler: CAShapeLayer {
     var parent: SketchPad?
-    override init() {
-        super.init()
-        self.strokeColor = setup.controlColor.cgColor
-        self.fillColor = nil
-        self.lineWidth = setup.lineWidth
-        self.actions = setup.disabledActions
+    var dotSize: CGFloat = setup.dotRadius
 
-        self.makeShape(
-            path: NSBezierPath(),
-            strokeColor: setup.controlColor.sRGB(alpha: 0.5),
-            dashPattern: setup.controlDashPattern,
-            actions: setup.disabledActions)
+    override init(layer: Any) {
+        super.init(layer: layer)
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
+    init(parent: SketchPad) {
+        self.parent = parent
+        super.init()
+        self.strokeColor = setup.controlColor.cgColor
+        self.fillColor = nil
+
+        self.dotSize = parent.dotRadius
+        self.lineWidth = parent.lineWidth
+        self.actions = setup.disabledActions
+
+        self.makeShape(
+            path: NSBezierPath(),
+            strokeColor: setup.controlColor,
+            dashPattern: setup.controlDashPattern,
+            actions: setup.disabledActions)
+    }
+
+
+
     func createRulers(points: [CGPoint], curves: [Curve],
                       curvePoints: [CGPoint] = [],
                       exclude: Curve?, ctrl: Bool = false) -> CGPoint {
-
+        self.dotSize = self.parent!.dotRadius
+        self.lineWidth = self.parent!.lineWidth
         self.clearRulers()
         var minDistX: CGFloat = CGFloat(MAXFLOAT)
         var minDistY: CGFloat = CGFloat(MAXFLOAT)
@@ -69,7 +81,7 @@ class Ruler: CAShapeLayer {
 
     func updateRulers() {
         self.removeFromSuperlayer()
-        if let subs = self.sublayers, subs.count > 1 {
+        if let subs = self.sublayers, subs.count>1 {
             self.parent?.layer?.addSublayer(self)
         }
     }
@@ -275,22 +287,29 @@ class Ruler: CAShapeLayer {
             alphaPath.line(to: maxLine)
 
             solidPath.move(to: move)
-            solidPath.addPin(pos: move, size: setup.rulersPinSize)
+            solidPath.addPin(pos: move, size: self.dotSize / 2)
             solidPath.line(to: pnt.line)
-            solidPath.addPin(pos: pnt.line, size: setup.rulersPinSize * 2)
+            solidPath.addPin(pos: pnt.line, size: self.dotSize)
             solidPath.close()
 
-            if (distX<setup.rulersDelta && distY<setup.rulersDelta) && !ctrl {
-                continue
+            var txtX = Double(distY * 10).rounded()/10
+            var txtY = Double(distX * 10).rounded()/10
+            if (distX<=setup.rulersDelta && distY<=setup.rulersDelta) && !ctrl {
+                txtX = 0
+                txtY = 0
             }
 
             if move.x == pnt.line.x {
-                self.makeText(text: String(Double(distY * 10).rounded()/10),
-                              pos: move, tag: 0)
+                self.makeText(text: String(txtX),
+                              pos: move, pad: self.dotSize, tag: 0,
+                              backgroundColor: setup.controlColor,
+                              foregroundColor: setup.guiColor)
             }
             if move.y == pnt.line.y {
-                self.makeText(text: String(Double(distX * 10).rounded()/10),
-                              pos: move, tag: 1)
+                self.makeText(text: String(txtY),
+                              pos: move, pad: self.dotSize, tag: 1,
+                              backgroundColor: setup.controlColor,
+                              foregroundColor: setup.guiColor)
             }
 
         }
@@ -298,6 +317,7 @@ class Ruler: CAShapeLayer {
 
         if let alphaLayer = self.sublayers?[0] as? CAShapeLayer {
             alphaLayer.path = alphaPath.cgPath
+            alphaLayer.lineWidth = self.lineWidth
         }
     }
 

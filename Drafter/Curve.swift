@@ -15,55 +15,44 @@ class Curve: Equatable {
     }
     var parent: SketchPad?
     var path: NSBezierPath
-    var shape = CAShapeLayer()
     let gradientMask = CAShapeLayer()
-    let gradient = CAGradientLayer()
+    let gradientLayer = CAGradientLayer()
     let imageMask = CAShapeLayer()
-    let image = CALayer()
+    let imageLayer = CAShapeLayer()
+    let filterLayer = CAShapeLayer()
+    let canvas = CAShapeLayer()
+    var layers: [CALayer] = []
 
-    let canvas = CALayer()
+    var angle: CGFloat = 0.0
 
-    let dotSize: CGFloat =  setup.dotSize
-    let dotRadius: CGFloat = setup.dotRadius
+    var lineWidth = setup.lineWidth {
+        willSet(value) {
+            self.canvas.lineWidth = value
+            self.filterLayer.lineWidth = value
+        }
+    }
+
+    var cap: Int = setup.lineCap
+    var join: Int = setup.lineJoin
+    var dash: [NSNumber] = setup.lineDashPattern
 
     var strokeColor = setup.strokeColor {
         willSet(value) {
-            self.shape.strokeColor = value.cgColor.sRGB(alpha: self.alpha[0])
+            self.canvas.strokeColor = value.cgColor.sRGB(alpha: self.alpha[0])
         }
     }
     var fillColor = setup.fillColor {
         willSet(value) {
-            if self.fill {
-                self.shape.fillColor = value.cgColor.sRGB(alpha: self.alpha[1])
-            } else {
-                self.shape.fillColor = nil
-            }
+            self.canvas.fillColor = value.cgColor.sRGB(alpha: self.alpha[1])
         }
     }
 
-    var lineWidth = setup.lineWidth {
-        willSet(value) {
-            self.shape.lineWidth = value
-        }
-    }
-    var angle: CGFloat = 0.0
     var alpha: [CGFloat] = setup.alpha {
         willSet(value) {
-            self.shape.strokeColor = self.shape.strokeColor?.sRGB(
+            self.canvas.strokeColor = self.canvas.strokeColor?.sRGB(
                 alpha: value[0])
-            if self.fill {
-                self.shape.fillColor = self.shape.fillColor?.sRGB(
-                    alpha: value[1])
-            } else {
-                self.shape.fillColor = nil
-            }
-        }
-    }
-
-    var blur: Double = setup.minBlur {
-        willSet(value) {
-            self.canvas.setValue(value,
-                forKeyPath: "filters.CIGaussianBlur.inputRadius")
+            self.canvas.fillColor = self.canvas.fillColor?.sRGB(
+                alpha: value[1])
         }
     }
 
@@ -89,7 +78,7 @@ class Curve: Equatable {
                 let srgb = color.sRGB(alpha: self.gradientOpacity[i])
                 alphaColors.append(srgb)
             }
-            self.gradient.colors = [alphaColors[0].cgColor,
+            self.gradientLayer.colors = [alphaColors[0].cgColor,
                                     alphaColors[1].cgColor,
                                     alphaColors[2].cgColor]
         }
@@ -102,7 +91,7 @@ class Curve: Equatable {
                 let srgb = color.sRGB(alpha: value[i])
                 alphaColors.append(srgb)
             }
-            self.gradient.colors = [alphaColors[0].cgColor,
+            self.gradientLayer.colors = [alphaColors[0].cgColor,
                                     alphaColors[1].cgColor,
                                     alphaColors[2].cgColor]
         }
@@ -110,20 +99,36 @@ class Curve: Equatable {
 
     var gradientDirection: [CGPoint] = setup.gradientDirection {
         willSet(value) {
-            self.gradient.startPoint = value[0]
-            self.gradient.endPoint = value[1]
+            self.gradientLayer.startPoint = value[0]
+            self.gradientLayer.endPoint = value[1]
         }
     }
 
     var gradientLocation: [NSNumber] = setup.gradientLocation {
         willSet(value) {
-            self.gradient.locations = value
+            self.gradientLayer.locations = value
         }
     }
 
-    var cap: Int = setup.lineCap
-    var join: Int = setup.lineJoin
-    var dash: [NSNumber] = setup.lineDashPattern
+    var filterOpacity: CGFloat = setup.filterOpacity {
+        willSet(value) {
+            self.filterLayer.strokeColor = self.canvas.strokeColor?.sRGB(
+                alpha: value)
+            if self.fill {
+                self.filterLayer.fillColor = self.canvas.fillColor?.sRGB(
+                    alpha: value)
+            } else {
+                self.self.filterLayer.fillColor = nil
+            }
+        }
+    }
+
+    var blur: Double = setup.minBlur {
+          willSet(value) {
+              self.filterLayer.setValue(value,
+                  forKeyPath: "filters.CIGaussianBlur.inputRadius")
+          }
+      }
 
     var boundsPoints: [CGPoint] {
         return [CGPoint(x: self.path.bounds.midX, y: self.path.bounds.midY),
@@ -132,6 +137,7 @@ class Curve: Equatable {
     }
 
     var rounded: CGPoint?
+    var gradient: Bool = false
     var fill: Bool = false
 
     var points: [ControlPoint] = []
@@ -150,40 +156,24 @@ class Curve: Equatable {
 
         self.fill = fill
         self.rounded = rounded
+
+        self.layers = [imageLayer, filterLayer, gradientLayer]
         // filters
-        self.canvas.filters = []
-        self.canvas.backgroundColor = NSColor.clear.cgColor
-        // CIPointillize
+        self.filterLayer.filters = []
+        self.filterLayer.backgroundColor = NSColor.clear.cgColor
+//        // CIPointillize
         for filterName in ["CIGaussianBlur"] {
             if let filter = CIFilter(name: filterName,
                                      parameters: ["inputRadius": 0]) {
-                self.canvas.filters?.append(filter)
+                self.filterLayer.filters?.append(filter)
             }
         }
 
-        self.shape.actions = ["position": NSNull(),
-                               "bounds": NSNull(),
-                               "strokeColor": NSNull(),
-                               "fillColor": NSNull(),
-                               "lineWidth": NSNull()]
-        self.image.actions = ["position": NSNull(),
-                              "bounds": NSNull(),
-                              "transform": NSNull()]
-
-        self.gradient.actions = ["position": NSNull(),
-                                 "bounds": NSNull(),
-                                 "transform": NSNull()]
-        self.canvas.actions = ["position": NSNull(),
-                               "bounds": NSNull(),
-                               "filters": NSNull(),
-                               "shadowRadius": NSNull(),
-                               "shadowOpacity": NSNull(),
-                               "shadowOffset": NSNull(),
-                               "shadowColor": NSNull()]
-
-        self.canvas.addSublayer(self.shape)
-        self.canvas.addSublayer(self.image)
-        self.canvas.addSublayer(self.gradient)
+        self.canvas.actions = setup.disabledActions
+        for i in 0..<self.layers.count {
+            self.layers[i].actions = setup.disabledActions
+            self.canvas.addSublayer(layers[i])
+        }
         self.updateLayer()
     }
 
@@ -193,7 +183,8 @@ class Curve: Equatable {
 
     func setLineCap(value: Int) {
         self.cap = value
-        self.shape.lineCap = lineCapStyles[value]
+        self.canvas.lineCap = lineCapStyles[value]
+        self.filterLayer.lineCap = lineCapStyles[value]
     }
 
     let lineJoinStyles: [CAShapeLayerLineJoin] = [
@@ -202,14 +193,16 @@ class Curve: Equatable {
 
     func setLineJoin(value: Int) {
         self.join = value
-        self.shape.lineJoin = lineJoinStyles[value]
+        self.canvas.lineJoin = lineJoinStyles[value]
+        self.filterLayer.lineJoin = lineJoinStyles[value]
     }
 
     func setDash(dash: [NSNumber]) {
         self.dash = dash
         if dash.first(where: { num in
             return Int(truncating: num) > 0}) != nil {
-            self.shape.lineDashPattern = dash
+            self.canvas.lineDashPattern = dash
+             self.filterLayer.lineDashPattern = dash
         }
     }
 
@@ -221,20 +214,22 @@ class Curve: Equatable {
     }
 
     func insertPoint(pos: CGPoint, index: Int) -> ControlPoint {
-        let mp = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
-                          offset: CGPoint(x: self.dotRadius,
-                                          y: self.dotRadius),
-                          radius: self.dotRadius, lineWidth: 2)
-
-        let cp1 = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
-                           offset: CGPoint(x: self.dotRadius,
-                                           y: self.dotRadius),
-                           radius: self.dotRadius)
-
-        let cp2 = Dot.init(x: pos.x, y: pos.y, size: self.dotSize,
-                           offset: CGPoint(x: self.dotRadius,
-                                           y: self.dotRadius),
-                           radius: self.dotRadius)
+        var size = setup.dotSize
+        var dotRadius = size/2
+        if let parent = self.parent {
+            size = parent.dotSize
+            dotRadius = parent.dotRadius
+        }
+        let mp = Dot.init(x: pos.x, y: pos.y,
+                          width: size, height: size, rounded: dotRadius)
+        let cp1 = Dot.init(x: pos.x, y: pos.y,
+                           width: size, height: size, rounded: dotRadius,
+                           strokeColor: setup.fillColor,
+                           fillColor: setup.strokeColor)
+        let cp2 = Dot.init(x: pos.x, y: pos.y,
+                           width: size, height: size, rounded: dotRadius,
+                           strokeColor: setup.fillColor,
+                           fillColor: setup.strokeColor)
 
         let cp = ControlPoint.init(mp: mp, cp1: cp1, cp2: cp2)
         if index >= self.points.count {
@@ -246,31 +241,32 @@ class Curve: Equatable {
     }
 
     func delete() {
-        self.shape.removeFromSuperlayer()
-        self.image.removeFromSuperlayer()
-        self.gradient.removeFromSuperlayer()
+        self.imageLayer.removeFromSuperlayer()
+        self.filterLayer.removeFromSuperlayer()
+        self.gradientLayer.removeFromSuperlayer()
         self.canvas.removeFromSuperlayer()
     }
 
 //    MARK: Layer func
     func updateLayer() {
-        self.shape.path = self.path.cgPath
         self.gradientMask.path = self.path.cgPath
-        self.gradient.mask = self.gradientMask
+        self.gradientLayer.mask = self.gradientMask
         self.imageMask.path = self.path.cgPath
-        self.image.mask = self.imageMask
+        self.imageLayer.mask = self.imageMask
 
+        self.filterLayer.path = self.path.cgPath
+
+        self.canvas.path = self.path.cgPath
         self.canvas.bounds = self.path.bounds
-        self.shape.bounds = self.canvas.bounds
-        self.image.bounds = self.canvas.bounds
-        self.gradient.bounds = self.canvas.bounds
 
         self.canvas.position = CGPoint(
             x: self.path.bounds.midX,
             y: self.path.bounds.midY)
-        self.shape.position = self.canvas.position
-        self.image.position = self.canvas.position
-        self.gradient.position = self.canvas.position
+
+        for i in 0..<self.layers.count {
+            self.layers[i].bounds = self.canvas.bounds
+            self.layers[i].position = self.canvas.position
+        }
     }
 
 //    MARK: ControlPoints func
@@ -289,7 +285,7 @@ class Curve: Equatable {
     func clearPoints() {
         self.clearTrackArea()
         for point in self.points {
-            point.hideControlDots(parent: self.parent)
+            point.hideControlDots(dotSize: self.parent!.dotSize)
             point.clearDots()
         }
     }
@@ -301,13 +297,14 @@ class Curve: Equatable {
                     self.controlDot = dot
                     return
                 } else {
-                    point.hideControlDots(parent: self.parent)
+                    point.hideControlDots(dotSize: self.parent!.dotSize)
                 }
             }
 
             if self.path.rectPath(self.path,
                                   pad: setup.dotRadius).contains(pos),
                 let segment = self.path.findPath(pos: pos) {
+
                 let pnt = self.insertPoint(pos: pos,
                                            index: segment.index)
                 self.path = self.path.insertCurve(to: pnt.mp.position,
@@ -316,7 +313,8 @@ class Curve: Equatable {
 
                 self.resetPoints()
                 self.controlDot = pnt.mp
-                pnt.showControlDots(parent: self.parent!)
+                pnt.showControlDots(dotSize: self.parent!.dotSize,
+                                    dotMag: self.parent!.dotMag)
 
             }
         }
@@ -471,11 +469,15 @@ class Curve: Equatable {
         if !self.lock {
             if self.edit {
                 if self.controlDot == nil {
+                    var find = false
                     for point in self.points {
-                        if point.collideDot(pos: pos, dot: point.mp) {
-                            point.showControlDots(parent: self.parent!)
+                        if point.collideDot(pos: pos, dot: point.mp) &&
+                            !find {
+                            point.showControlDots(dotSize: self.parent!.dotSize,
+                                                  dotMag: self.parent!.dotMag)
+                            find = true
                         } else {
-                            point.hideControlDots(parent: self.parent)
+                            point.hideControlDots(dotSize: self.parent!.dotSize)
                         }
                     }
                 }

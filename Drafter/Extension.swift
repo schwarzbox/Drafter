@@ -250,12 +250,20 @@ extension String {
 
 extension CALayer {
     // width not radius
-    func collide(pos: CGPoint, width: CGFloat) -> Bool {
-        let dx = pos.x - self.position.x
-        let dy = pos.y - self.position.y
-        let dist: CGFloat = dx*dx + dy*dy
-        if dist < width * width {
-            return true
+    func collide(pos: CGPoint, radius: CGFloat,
+                 circular: Bool = true) -> Bool {
+        if circular {
+            let dx = pos.x - self.position.x
+            let dy = pos.y - self.position.y
+            let dist: CGFloat = dx*dx + dy*dy
+            if dist < radius * radius {
+                 return true
+            }
+        } else {
+            if pos.x > self.frame.minX && pos.x < self.frame.maxX  &&
+                pos.y > self.frame.minY && pos.y < self.frame.maxY {
+                return true
+            }
         }
         return false
     }
@@ -318,11 +326,13 @@ extension CALayer {
         self.addSublayer(shape)
     }
 
-    func makeText(text: String, pos: CGPoint, tag: Int) {
+    func makeText(text: String, pos: CGPoint, pad: CGFloat, tag: Int,
+                  backgroundColor: NSColor? = nil,
+                  foregroundColor: NSColor? = nil) {
         let txt = CATextLayer()
         txt.alignmentMode = .center
-        txt.backgroundColor = setup.controlColor.cgColor
-        txt.foregroundColor = setup.guiColor.cgColor
+        txt.backgroundColor = backgroundColor?.cgColor
+        txt.foregroundColor = foregroundColor?.cgColor
         txt.actions = setup.disabledActions
         let font = CTFontCreateWithName(
             NSFont.systemFont(
@@ -332,10 +342,9 @@ extension CALayer {
         txt.string = text
 
         var txtSize = text.sizeOfString(usingFont: font)
-        txtSize.height -= setup.rulersPinSize
-        txtSize.width += setup.rulersPinSize
+        txtSize.height -= pad / 2
+        txtSize.width += pad / 2
         var finPos = pos
-        let pad = setup.rulersPinSize * 2
         if tag==0 {
             finPos.x += pad
             finPos.y += pad
