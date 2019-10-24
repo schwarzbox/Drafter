@@ -21,7 +21,7 @@ let toolsKeys: [String: Tools] =
 struct Setup {
     let minZoom: Double = 20
     let maxZoom: Double = 640
-    let reduceZoom: CGFloat = 40
+    let reduceZoom: CGFloat = 20
 
     let stackSketchButtonSize: CGSize = CGSize(width: 16, height: 16)
     let screenWidth: Double = 320
@@ -66,6 +66,7 @@ struct Setup {
     let dotRadius: CGFloat = 4
 
     let rulersDelta: CGFloat = 2
+
     let rulersFontSize: CGFloat = 10
 
     let fontFamily: String = "Helvetica"

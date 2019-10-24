@@ -13,6 +13,7 @@ struct RulerPoint {
     let line: CGPoint
     let maxMove: CGPoint
     let maxLine: CGPoint
+    var dist: [CGFloat] = [0]
 }
 
 class Ruler: CAShapeLayer {
@@ -22,12 +23,12 @@ class Ruler: CAShapeLayer {
     override init(layer: Any) {
         super.init(layer: layer)
     }
-    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
 
     init(parent: SketchPad) {
+
         self.parent = parent
         super.init()
         self.strokeColor = setup.controlColor.cgColor
@@ -36,22 +37,23 @@ class Ruler: CAShapeLayer {
         self.dotSize = parent.dotRadius
         self.lineWidth = parent.lineWidth
         self.actions = setup.disabledActions
-
+        
         self.makeShape(
             path: NSBezierPath(),
-            strokeColor: setup.controlColor,
-            dashPattern: setup.controlDashPattern,
+            strokeColor: setup.controlColor.sRGB(alpha: 0.5),
             actions: setup.disabledActions)
     }
 
-
-
     func createRulers(points: [CGPoint], curves: [Curve],
                       curvePoints: [CGPoint] = [],
-                      exclude: Curve?, ctrl: Bool = false) -> CGPoint {
+                      exclude: Curve?, ctrl: Bool = false)
+        -> (delta: CGPoint, pnt: [String: (pos: CGPoint?,
+                                            dist: CGFloat)]) {
+
         self.dotSize = self.parent!.dotRadius
         self.lineWidth = self.parent!.lineWidth
         self.clearRulers()
+
         var minDistX: CGFloat = CGFloat(MAXFLOAT)
         var minDistY: CGFloat = CGFloat(MAXFLOAT)
         var rulerPoints = self.findRulersToCurve(points: points,
@@ -64,6 +66,7 @@ class Ruler: CAShapeLayer {
                                                   curvePoints: curvePoints,
                                                   minDistX: minDistX,
                                                   minDistY: minDistY)
+
         if curvePoints["x"] != nil {
             rulerPoints["x"] = curvePoints["x"]
         }
@@ -72,49 +75,61 @@ class Ruler: CAShapeLayer {
         }
 
         self.showRulers(rulerPoints: rulerPoints, ctrl: ctrl)
-        var snap = CGPoint(x: 0, y: 0)
-        if !ctrl {
-            snap = self.deltaRulers(rulerPoints: rulerPoints)
+        var snap = self.deltaRulers(rulerPoints: rulerPoints)
+        if ctrl {
+            snap.delta = CGPoint(x: 0, y: 0)
         }
         return snap
     }
 
     func updateRulers() {
         self.removeFromSuperlayer()
-        if let subs = self.sublayers, subs.count>1 {
-            self.parent?.layer?.addSublayer(self)
-        }
+        self.parent?.layer?.addSublayer(self)
     }
 
     func clearRulers() {
         self.removeFromSuperlayer()
-        if let subs = self.sublayers {
-            for i in 1..<subs.count {
-                subs[i].removeFromSuperlayer()
-            }
+        self.path = nil
+        if let subs = self.sublayers,
+            let alphaLayer = subs[0] as? CAShapeLayer {
+            alphaLayer.path = nil
         }
     }
 
-    func deltaRulers(rulerPoints: [String: RulerPoint?]) -> CGPoint {
+    func deltaRulers(rulerPoints: [String: RulerPoint?])
+        -> (delta: CGPoint, pnt: [String: (pos: CGPoint?,
+        dist: CGFloat)]) {
         var deltaX: CGFloat = 0
-        var signX: CGFloat = 1
         var deltaY: CGFloat = 0
+        var signX: CGFloat = 1
         var signY: CGFloat = 1
-
-        for (_, point) in rulerPoints {
+        var result: [String: (pos: CGPoint?, dist: CGFloat)] = [:]
+        result["x"] = (pos: nil, dist: 0)
+        result["y"] = (pos: nil, dist: 0)
+        for (key, point) in rulerPoints {
             guard let pnt = point else { continue }
+
             let dX = pnt.move.x - pnt.line.x
             let dY = pnt.move.y - pnt.line.y
-            if abs(dX) < setup.rulersDelta && abs(dX) > deltaX {
+
+            result[key] = (pos: pnt.move, dist: 0)
+            if abs(dX) < setup.rulersDelta && abs(dX) >= deltaX {
+                if dY != 0 {
+                    result["y"]?.dist = (abs(dY) * 10).rounded()/10
+                }
                 deltaX = abs(dX)
                 signX = dX>0 ? 1 : -1
             }
-            if abs(dY) < setup.rulersDelta && abs(dY) > deltaY {
+            if abs(dY) < setup.rulersDelta && abs(dY) >= deltaY {
+                if dX != 0 {
+                    result["x"]?.dist = (abs(dX) * 10).rounded()/10
+                }
                 deltaY = abs(dY)
                 signY = dY>0 ? 1 : -1
             }
         }
-        return CGPoint(x: deltaX * signX, y: deltaY * signY)
+        return (CGPoint(x: deltaX * signX,
+                        y: deltaY * signY), result)
     }
 
     func findRulersToCurve(
@@ -262,7 +277,6 @@ class Ruler: CAShapeLayer {
                     ctrl: Bool = false) {
         let solidPath = NSBezierPath()
         let alphaPath = NSBezierPath()
-        self.clearRulers()
 
         for (_, point) in rulerPoints {
             guard let pnt = point else { continue }
@@ -285,40 +299,19 @@ class Ruler: CAShapeLayer {
             alphaPath.line(to: move)
             alphaPath.move(to: pnt.line)
             alphaPath.line(to: maxLine)
+            alphaPath.close()
 
             solidPath.move(to: move)
             solidPath.addPin(pos: move, size: self.dotSize / 2)
             solidPath.line(to: pnt.line)
             solidPath.addPin(pos: pnt.line, size: self.dotSize)
             solidPath.close()
-
-            var txtX = Double(distY * 10).rounded()/10
-            var txtY = Double(distX * 10).rounded()/10
-            if (distX<=setup.rulersDelta && distY<=setup.rulersDelta) && !ctrl {
-                txtX = 0
-                txtY = 0
-            }
-
-            if move.x == pnt.line.x {
-                self.makeText(text: String(txtX),
-                              pos: move, pad: self.dotSize, tag: 0,
-                              backgroundColor: setup.controlColor,
-                              foregroundColor: setup.guiColor)
-            }
-            if move.y == pnt.line.y {
-                self.makeText(text: String(txtY),
-                              pos: move, pad: self.dotSize, tag: 1,
-                              backgroundColor: setup.controlColor,
-                              foregroundColor: setup.guiColor)
-            }
-
         }
-        self.path = solidPath.cgPath
 
+        self.path = solidPath.cgPath
         if let alphaLayer = self.sublayers?[0] as? CAShapeLayer {
             alphaLayer.path = alphaPath.cgPath
             alphaLayer.lineWidth = self.lineWidth
         }
     }
-
 }

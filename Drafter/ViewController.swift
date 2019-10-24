@@ -13,6 +13,9 @@ class ViewController: NSViewController {
     @IBOutlet weak var sketchView: SketchPad!
     @IBOutlet weak var sketchUI: SketchStack!
 
+    @IBOutlet weak var locationX: NSTextField!
+    @IBOutlet weak var locationY: NSTextField!
+
     @IBOutlet weak var toolUI: NSStackView!
     @IBOutlet weak var frameUI: FrameButtons!
     @IBOutlet weak var textUI: TextTool!
@@ -157,10 +160,11 @@ class ViewController: NSViewController {
 
     func keyUpEvent(event: NSEvent) -> Bool {
         if self.eventTest(event: event) {
-
             let view = sketchView!
-            self.restoreControlFrame(view: view)
-            view.rulers.clearRulers()
+            if event.keyCode >= 123 && event.keyCode <= 126 {
+                self.restoreControlFrame(view: view)
+            }
+            view.clearRulers()
             return true
         }
         return false
@@ -170,6 +174,13 @@ class ViewController: NSViewController {
     override func viewDidAppear() {
         super.viewDidAppear()
         window = self.view.window!
+
+        let textShadow = NSShadow()
+        textShadow.shadowColor = setup.guiColor
+        textShadow.shadowOffset = NSSize(width: 1, height: -1.5)
+
+        locationX.shadow = textShadow
+        locationY.shadow = textShadow
 
         let ui = [toolUI, frameUI, actionUI]
         for view in ui {
@@ -308,6 +319,8 @@ class ViewController: NSViewController {
 
     func setupSketchView() {
         sketchView.parent = self
+        sketchView.locationX = locationX
+        sketchView.locationY = locationY
 
         sketchView.sketchUI = sketchUI
         sketchView.toolUI = toolUI
@@ -621,7 +634,7 @@ class ViewController: NSViewController {
         let val = self.getTagValue(sender: sender)
         let lim = val.value < 0 ? 0 : val.value
         self.curveWidthLabel.doubleValue = lim
-        view.borderWidthCurve(value: lim)
+        view.lineWidthCurve(value: lim)
         self.restoreControlFrame(view: view)
     }
 

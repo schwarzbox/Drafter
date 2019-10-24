@@ -131,9 +131,12 @@ class Curve: Equatable {
       }
 
     var boundsPoints: [CGPoint] {
+        let line50 = self.lineWidth/2
         return [CGPoint(x: self.path.bounds.midX, y: self.path.bounds.midY),
-                CGPoint(x: self.path.bounds.minX, y: self.path.bounds.minY),
-                CGPoint(x: self.path.bounds.maxX, y: self.path.bounds.maxY)]
+                CGPoint(x: self.path.bounds.minX-line50,
+                        y: self.path.bounds.minY-line50),
+                CGPoint(x: self.path.bounds.maxX+line50,
+                        y: self.path.bounds.maxY+line50)]
     }
 
     var rounded: CGPoint?
@@ -285,19 +288,21 @@ class Curve: Equatable {
     func clearPoints() {
         self.clearTrackArea()
         for point in self.points {
-            point.hideControlDots(dotSize: self.parent!.dotSize)
+            point.hideControlDots(lineWidth: self.parent!.lineWidth)
             point.clearDots()
         }
     }
 
     func selectPoint(pos: CGPoint) {
         if !self.lock {
-            for point in self.points {
+            for i in stride(from: self.points.count-1,
+                        through: 0, by: -1) {
+            let point = self.points[i]
                 if let dot = point.collidedPoint(pos: pos) {
                     self.controlDot = dot
                     return
                 } else {
-                    point.hideControlDots(dotSize: self.parent!.dotSize)
+                    point.hideControlDots(lineWidth: self.parent!.lineWidth)
                 }
             }
 
@@ -313,8 +318,8 @@ class Curve: Equatable {
 
                 self.resetPoints()
                 self.controlDot = pnt.mp
-                pnt.showControlDots(dotSize: self.parent!.dotSize,
-                                    dotMag: self.parent!.dotMag)
+                pnt.showControlDots(dotMag: self.parent!.dotMag,
+                                    lineWidth: self.parent!.lineWidth)
 
             }
         }
@@ -470,14 +475,18 @@ class Curve: Equatable {
             if self.edit {
                 if self.controlDot == nil {
                     var find = false
-                    for point in self.points {
+                    for i in stride(from: self.points.count-1,
+                                    through: 0, by: -1) {
+                        let point = self.points[i]
                         if point.collideDot(pos: pos, dot: point.mp) &&
                             !find {
-                            point.showControlDots(dotSize: self.parent!.dotSize,
-                                                  dotMag: self.parent!.dotMag)
+                            point.showControlDots(
+                                dotMag: self.parent!.dotMag,
+                                lineWidth: self.parent!.lineWidth)
                             find = true
                         } else {
-                            point.hideControlDots(dotSize: self.parent!.dotSize)
+                            point.hideControlDots(
+                                lineWidth: self.parent!.lineWidth)
                         }
                     }
                 }

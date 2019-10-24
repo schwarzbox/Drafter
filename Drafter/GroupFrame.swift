@@ -15,7 +15,7 @@ class GroupFrame: ControlFrame {
 
     init(parent: SketchPad, curves: [Curve]) {
         super.init(parent: parent)
-        
+
         if let rect = self.initGroupFrame(curves: curves) {
             self.frame = rect
         }

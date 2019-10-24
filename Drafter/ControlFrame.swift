@@ -160,13 +160,13 @@ class ControlFrame: CALayer {
                 var dy: CGFloat = 0
                 var width = self.frame.width - self.dotSize
                 var height: CGFloat = self.dotRadius
-                let dt = self.dotMag
+                let dt = self.dotMag / 2
                 if i==1 || i==5 {
-                    dx = i==1 ? -dt : dt
+                    dx = i==1 ? dt : -dt
                     width = self.dotRadius
                     height = self.frame.height - self.dotSize
                 } else {
-                    dy = i==3 ? dt : -dt
+                    dy = i==3 ? -dt : dt
                 }
                 self.makeDot(parent: parent, tag: i,
                              x: pnt[i].x + dx, y: pnt[i].y + dy,
@@ -251,8 +251,7 @@ class ControlFrame: CALayer {
                           rounded: rounded, anchor: anchor,
                           lineWidth: lineWidth,
                           strokeColor: strokeColor,
-                          fillColor: fillColor,
-                          path: path, dashPattern: dashPattern)
+                          fillColor: fillColor)
 
         let options: NSTrackingArea.Options = [
             .mouseEnteredAndExited, .activeInActiveApp]
@@ -290,7 +289,9 @@ class ControlFrame: CALayer {
     func increaseDotSize(layer: Dot) {
         if layer.tag == 9 {
             let size = self.dotSize + self.dotMag
-            layer.updateSize(width: size, height: size, circle: false)
+            layer.updateSize(width: size, height: size,
+                             lineWidth: self.lineWidth,
+                             circle: false)
         }
     }
 
@@ -298,7 +299,9 @@ class ControlFrame: CALayer {
         for layer in self.sublayers ?? [] {
             if let dot = layer as? Dot, dot.tag == 9 {
                 let size = self.dotSize
-                dot.updateSize(width: size, height: size, circle: false)
+                dot.updateSize(width: size, height: size,
+                               lineWidth: self.lineWidth,
+                               circle: false)
             }
         }
     }

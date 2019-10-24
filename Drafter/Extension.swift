@@ -121,6 +121,12 @@ extension NSBezierPath {
         return nil
     }
 
+    func findPoint(_ at: Int) -> [CGPoint] {
+        var cPnt = [CGPoint](repeating: .zero, count: 3)
+        self.element(at: at, associatedPoints: &cPnt)
+        return cPnt
+    }
+
     func findPoints(_ elementType: NSBezierPath.ElementType) -> [[CGPoint]] {
         var points: [[CGPoint]] = []
         for i in 0 ..< self.elementCount {
@@ -157,15 +163,6 @@ extension NSBezierPath {
         return path
     }
 
-    func addPin(pos: CGPoint, size: CGFloat) {
-        self.move(to: pos)
-        let size50 = size/2
-        let moveRect = NSRect(x: pos.x - size50, y: pos.y - size50,
-                              width: size, height: size)
-        self.appendOval(in: moveRect)
-        self.move(to: pos)
-    }
-
     func printPath() {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         for i in 0 ..< self.elementCount {
@@ -183,6 +180,15 @@ extension NSBezierPath {
                 break
             }
         }
+    }
+
+    func addPin(pos: CGPoint, size: CGFloat) {
+        self.move(to: pos)
+        let size50 = size/2
+        let moveRect = NSRect(x: pos.x - size50, y: pos.y - size50,
+                              width: size, height: size)
+        self.appendOval(in: moveRect)
+        self.move(to: pos)
     }
 }
 
@@ -256,7 +262,7 @@ extension CALayer {
             let dx = pos.x - self.position.x
             let dy = pos.y - self.position.y
             let dist: CGFloat = dx*dx + dy*dy
-            if dist < radius * radius {
+            if dist < (radius * radius) {
                  return true
             }
         } else {
@@ -313,6 +319,7 @@ extension CALayer {
                    lineWidth: CGFloat = 1.0,
                    dashPattern: [NSNumber]? = nil,
                    lineCap: CAShapeLayerLineCap = .square,
+                   lineJoin: CAShapeLayerLineJoin = .miter,
                    actions: [String: CAAction]? = nil) {
         let shape = CAShapeLayer()
         shape.path = path.cgPath
@@ -322,6 +329,7 @@ extension CALayer {
         shape.lineWidth = lineWidth
         shape.lineDashPattern = dashPattern
         shape.lineCap = lineCap
+        shape.lineJoin = lineJoin
         shape.actions = actions
         self.addSublayer(shape)
     }

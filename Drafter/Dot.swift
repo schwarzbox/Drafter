@@ -7,22 +7,21 @@
 //
 
 import Cocoa
-class Dot: CAShapeLayer {
+class Dot: CALayer {
     var tag: Int?
     var excluded: Bool = false
     var width: CGFloat!
     var height: CGFloat!
     var anchor: CGPoint!
-    var strokeNSColor: NSColor!
-    var fillNSColor: NSColor!
+    var strokeColor: NSColor!
+    var fillColor: NSColor!
+    var lineWidth: CGFloat!
 
     init(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat,
          rounded: CGFloat, anchor: CGPoint = CGPoint(x: 0.5, y: 0.5),
          lineWidth: CGFloat = 1,
          strokeColor: NSColor = NSColor.white,
          fillColor: NSColor = NSColor.systemBlue,
-         path: NSBezierPath = NSBezierPath(),
-         dashPattern: [NSNumber]? = nil,
          hidden: Bool = false) {
 
         super.init()
@@ -35,20 +34,13 @@ class Dot: CAShapeLayer {
         self.width = width
         self.height = height
         self.anchor = anchor
-        self.strokeNSColor = strokeColor
-        self.fillNSColor = fillColor
+        self.strokeColor = strokeColor
+        self.fillColor = fillColor
         self.lineWidth = lineWidth
-        self.strokeColor = strokeColor.cgColor
-        self.fillColor = fillColor.cgColor
         self.cornerRadius = rounded
         self.borderWidth = lineWidth
         self.borderColor = strokeColor.cgColor
         self.backgroundColor = fillColor.cgColor
-
-        self.path = path.cgPath
-        if let dash = dashPattern {
-            self.lineDashPattern = dash
-        }
 
         self.isHidden = hidden
     }
@@ -60,13 +52,16 @@ class Dot: CAShapeLayer {
         super.init(coder: aDecoder)
     }
 
-    func updateSize(width: CGFloat, height: CGFloat, circle: Bool = true) {
+    func updateSize(width: CGFloat, height: CGFloat,
+                    lineWidth: CGFloat,
+                    circle: Bool = true) {
         let pos = self.position
         let wid50 = width/2
         let hei50 = height/2
         let rect = NSRect(x: pos.x - wid50,
                           y: pos.y - hei50,
                           width: width, height: height)
+        self.borderWidth = lineWidth
         self.frame = rect
         if circle {
             self.cornerRadius = wid50 < hei50 ? wid50 : hei50
@@ -81,9 +76,8 @@ class Dot: CAShapeLayer {
                         rounded: self.cornerRadius,
                         anchor: self.anchor,
                         lineWidth: self.borderWidth,
-                        strokeColor: self.strokeNSColor,
-                        fillColor: self.fillNSColor,
-                        dashPattern: self.lineDashPattern,
+                        strokeColor: self.strokeColor,
+                        fillColor: self.fillColor,
                         hidden: self.isHidden)
     }
 }

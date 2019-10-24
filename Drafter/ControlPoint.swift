@@ -28,10 +28,14 @@ class ControlPoint {
         self.dots = [self.cp1, self.cp2, self.mp]
         for (i, dot) in self.dots.enumerated() {
             dot.tag = i
+            if i<self.dots.count-1 {
+                dot.isHidden = true
+            }
         }
-        self.hideControlDots()
+
         self.lines = [self.line1, self.line2]
         for line in self.lines {
+            line.isHidden = true
             line.fillColor = nil
             line.strokeColor = setup.fillColor.cgColor
             line.lineWidth = setup.lineWidth
@@ -88,8 +92,7 @@ class ControlPoint {
     }
 
     func createDots(parent: SketchPad, exclude: Int? = nil) {
-        self.hideControlDots(dotSize: parent.dotSize)
-        let size = parent.dotSize
+        self.hideControlDots(lineWidth: parent.lineWidth)
 
         for (index, line) in self.lines.enumerated() {
             if let ex = exclude {
@@ -101,10 +104,11 @@ class ControlPoint {
             }
         }
         self.updateLines(lineWidth: parent.lineWidth)
-        
+
         for dot in self.dots {
-            dot.updateSize(width: size, height: size)
-            dot.borderWidth = parent.lineWidth
+            dot.updateSize(width: parent.dotSize,
+                           height: parent.dotSize,
+                           lineWidth: parent.lineWidth)
             if let ex = exclude {
                 if ex == dot.tag {
                     dot.excluded = true
@@ -208,18 +212,15 @@ class ControlPoint {
         }
     }
 
-    func showControlDots(dotSize: CGFloat, dotMag: CGFloat) {
-        let size = dotSize + dotMag
-        self.mp.updateSize(width: size, height: size)
+    func showControlDots(dotMag: CGFloat,
+                         lineWidth: CGFloat) {
+        self.mp.borderWidth = (lineWidth + dotMag)
         self.makeHidden(items: self.dots, last: 1, hide: false)
         self.makeHidden(items: self.lines, last: 0, hide: false)
     }
 
-    func hideControlDots(dotSize: CGFloat? = nil) {
-        if let size = dotSize {
-            self.mp.updateSize(width: size, height: size)
-        }
-
+    func hideControlDots(lineWidth: CGFloat) {
+        self.mp.borderWidth = lineWidth
         self.makeHidden(items: self.dots, last: 1, hide: true)
         self.makeHidden(items: self.lines, last: 0, hide: true)
     }
