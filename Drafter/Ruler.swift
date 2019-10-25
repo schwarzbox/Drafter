@@ -19,6 +19,8 @@ struct RulerPoint {
 class Ruler: CAShapeLayer {
     var parent: SketchPad?
     var dotSize: CGFloat = setup.dotRadius
+    var solidPath = NSBezierPath()
+    var alphaPath = NSBezierPath()
 
     override init(layer: Any) {
         super.init(layer: layer)
@@ -28,7 +30,6 @@ class Ruler: CAShapeLayer {
     }
 
     init(parent: SketchPad) {
-
         self.parent = parent
         super.init()
         self.strokeColor = setup.controlColor.cgColor
@@ -37,7 +38,6 @@ class Ruler: CAShapeLayer {
         self.dotSize = parent.dotRadius
         self.lineWidth = parent.lineWidth
         self.actions = setup.disabledActions
-        
         self.makeShape(
             path: NSBezierPath(),
             strokeColor: setup.controlColor.sRGB(alpha: 0.5),
@@ -89,11 +89,8 @@ class Ruler: CAShapeLayer {
 
     func clearRulers() {
         self.removeFromSuperlayer()
-        self.path = nil
-        if let subs = self.sublayers,
-            let alphaLayer = subs[0] as? CAShapeLayer {
-            alphaLayer.path = nil
-        }
+        self.solidPath.removeAllPoints()
+        self.alphaPath.removeAllPoints()
     }
 
     func deltaRulers(rulerPoints: [String: RulerPoint?])
@@ -114,14 +111,14 @@ class Ruler: CAShapeLayer {
 
             result[key] = (pos: pnt.move, dist: 0)
             if abs(dX) < setup.rulersDelta && abs(dX) >= deltaX {
-                if dY != 0 {
+                if abs(dY) > result["y"]?.dist ?? 0 {
                     result["y"]?.dist = (abs(dY) * 10).rounded()/10
                 }
                 deltaX = abs(dX)
                 signX = dX>0 ? 1 : -1
             }
             if abs(dY) < setup.rulersDelta && abs(dY) >= deltaY {
-                if dX != 0 {
+                if abs(dX) > result["x"]?.dist ?? 0 {
                     result["x"]?.dist = (abs(dX) * 10).rounded()/10
                 }
                 deltaY = abs(dY)
@@ -151,7 +148,7 @@ class Ruler: CAShapeLayer {
 
                         let (minTarY, maxTarY) = self.findMinMax(
                             sel: pnt.y, tar: curPnt.y,
-                            min: cur.boundsPoints[1].y,
+                            min: cur.boundsPoints[0].y,
                             max: cur.boundsPoints[2].y)
 
                         var minSelY = pnt.y
@@ -160,10 +157,10 @@ class Ruler: CAShapeLayer {
                         if points.count == 3 {
                             (minSelY, maxSelY) = self.findMinMax(
                                 sel: minTarY, tar: pnt.y,
-                                min: points[1].y, max: points[2].y)
+                                min: points[0].y, max: points[2].y)
                         }
                         let dist = abs(minTarY - minSelY)
-                        if dist < minDistY {
+                        if dist <= minDistY {
                             minDistY = dist
                             rulerPointY = RulerPoint(
                                 move: CGPoint(x: pnt.x, y: minSelY),
@@ -177,7 +174,7 @@ class Ruler: CAShapeLayer {
                         pnt.y >= curPnt.y-setup.rulersDelta {
                         let (minTarX, maxTarX) = self.findMinMax(
                             sel: pnt.x, tar: curPnt.x,
-                            min: cur.boundsPoints[1].x,
+                            min: cur.boundsPoints[0].x,
                             max: cur.boundsPoints[2].x)
 
                         var minSelX = pnt.x
@@ -186,10 +183,10 @@ class Ruler: CAShapeLayer {
                         if points.count == 3 {
                             (minSelX, maxSelX) = self.findMinMax(
                                 sel: minTarX, tar: pnt.x,
-                                min: points[1].x, max: points[2].x)
+                                min: points[0].x, max: points[2].x)
                         }
                         let dist = abs(minTarX - minSelX)
-                        if dist < minDistX {
+                        if dist <= minDistX {
                             minDistX = dist
                             rulerPointX = RulerPoint(
                                 move: CGPoint(x: minSelX, y: pnt.y),
@@ -273,10 +270,15 @@ class Ruler: CAShapeLayer {
         return (minValue, maxValue)
     }
 
+    func appendCustomRule(move: CGPoint, line: CGPoint) {
+        self.solidPath.move(to: move)
+        self.solidPath.line(to: line)
+        self.solidPath.close()
+        self.path = self.solidPath.cgPath
+    }
+
     func showRulers(rulerPoints: [String: RulerPoint?],
                     ctrl: Bool = false) {
-        let solidPath = NSBezierPath()
-        let alphaPath = NSBezierPath()
 
         for (_, point) in rulerPoints {
             guard let pnt = point else { continue }

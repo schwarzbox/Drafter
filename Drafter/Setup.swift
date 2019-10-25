@@ -24,8 +24,8 @@ struct Setup {
     let reduceZoom: CGFloat = 20
 
     let stackSketchButtonSize: CGSize = CGSize(width: 16, height: 16)
-    let screenWidth: Double = 320
-    let screenHeight: Double = 240
+    let screenWidth: Double = 640
+    let screenHeight: Double = 480
     let maxScreenWidth: Double = 1600
     let maxScreenHeight: Double = 1200
     let minResize: Double = 0.1

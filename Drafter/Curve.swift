@@ -114,27 +114,24 @@ class Curve: Equatable {
         willSet(value) {
             self.filterLayer.strokeColor = self.canvas.strokeColor?.sRGB(
                 alpha: value)
-            if self.fill {
-                self.filterLayer.fillColor = self.canvas.fillColor?.sRGB(
+            self.filterLayer.fillColor = self.canvas.fillColor?.sRGB(
                     alpha: value)
-            } else {
-                self.self.filterLayer.fillColor = nil
-            }
+
         }
     }
 
     var blur: Double = setup.minBlur {
-          willSet(value) {
-              self.filterLayer.setValue(value,
-                  forKeyPath: "filters.CIGaussianBlur.inputRadius")
-          }
-      }
+        willSet(value) {
+            self.filterLayer.setValue(value,
+                forKeyPath: "filters.CIGaussianBlur.inputRadius")
+        }
+    }
 
     var boundsPoints: [CGPoint] {
         let line50 = self.lineWidth/2
-        return [CGPoint(x: self.path.bounds.midX, y: self.path.bounds.midY),
-                CGPoint(x: self.path.bounds.minX-line50,
+        return [CGPoint(x: self.path.bounds.minX-line50,
                         y: self.path.bounds.minY-line50),
+                CGPoint(x: self.path.bounds.midX, y: self.path.bounds.midY),
                 CGPoint(x: self.path.bounds.maxX+line50,
                         y: self.path.bounds.maxY+line50)]
     }
@@ -147,6 +144,7 @@ class Curve: Equatable {
     var edit: Bool = false
     var group: Int = 0
     var lock: Bool = false
+    var awake: Bool = false
 
     var controlDot: Dot?
     var controlFrame: ControlFrame?
@@ -205,7 +203,11 @@ class Curve: Equatable {
         if dash.first(where: { num in
             return Int(truncating: num) > 0}) != nil {
             self.canvas.lineDashPattern = dash
-             self.filterLayer.lineDashPattern = dash
+            self.filterLayer.lineDashPattern = dash
+
+        } else {
+            self.canvas.lineDashPattern = nil
+            self.filterLayer.lineDashPattern = nil
         }
     }
 

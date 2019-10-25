@@ -9,6 +9,27 @@
 import Cocoa
 
 class ColorPanel: NSStackView {
+    @IBOutlet weak var field: NSTextField!
+    @IBOutlet weak var box: NSBox!
+
+    var borderColor: NSColor = setup.guiColor {
+        willSet {
+            box.borderColor = newValue
+        }
+    }
+
+    var fillColor: NSColor = setup.fillColor {
+        willSet {
+            box.fillColor = newValue
+        }
+    }
+
+    var stringValue: String = setup.fillColor.hexStr {
+        willSet {
+            field.stringValue = newValue
+        }
+    }
+
     var sharedColorPanel: NSColorPanel?
     var colorTag: Int = -1
 
@@ -55,22 +76,16 @@ class ColorPanel: NSStackView {
     }
 
     func setColor(color: NSColor) -> NSColor {
-        if let label = self.subviews.first as? NSTextField,
-            let box = self.subviews.last as? NSBox {
-            label.stringValue = color.hexStr
-            box.fillColor = color
-        }
+        self.stringValue = color.hexStr
+        self.fillColor = color
         return color
     }
 
     func setHexColor(hex: String) -> NSColor {
         let color = NSColor.init(
             hex: Int(hex, radix: 16) ?? 0xFFFFFF)
-        if let label = self.subviews.first as? NSTextField,
-            let box = self.subviews.last as? NSBox {
-            label.stringValue = color.hexStr
-            box.fillColor = color
-        }
+        self.stringValue = color.hexStr
+        self.fillColor = color
         return color
     }
 

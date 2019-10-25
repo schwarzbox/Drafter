@@ -705,18 +705,12 @@ CA
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="ViewController" customModule="Drafter" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="m2S-Jp-Qdl">
-                        <rect key="frame" x="0.0" y="0.0" width="800" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView focusRingType="none" translatesAutoresizingMaskIntoConstraints="NO" id="O9R-EM-mHj" customClass="SketchPad" customModule="Drafter">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="600"/>
+                                <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
                                 <gestureRecognizers>
-                                    <panGestureRecognizer delaysSecondaryMouseButtonEvents="YES" id="WWc-ly-N1a">
-                                        <buttonMask key="buttonMask" secondary="YES"/>
-                                        <connections>
-                                            <action selector="zoomOrigin:" target="XfG-lQ-9wD" id="bAy-t7-mQE"/>
-                                        </connections>
-                                    </panGestureRecognizer>
                                     <magnificationGestureRecognizer delaysMagnificationEvents="YES" magnification="0.0" id="yPe-Ot-E3W">
                                         <connections>
                                             <action selector="zoomGesture:" target="XfG-lQ-9wD" id="UUx-1A-GvQ"/>
@@ -725,10 +719,10 @@ CA
                                 </gestureRecognizers>
                             </customView>
                             <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" tag="1" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WHP-Tp-i3C" userLabel="x">
-                                <rect key="frame" x="254" y="256" width="48" height="14"/>
+                                <rect key="frame" x="254" y="424" width="48" height="14"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" focusRingType="none" alignment="right" title="0" usesSingleLineMode="YES" id="S78-Uf-pJ3">
-                                    <font key="font" metaFont="label" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <allowedInputSourceLocales>
@@ -737,10 +731,10 @@ CA
                                 </textFieldCell>
                             </textField>
                             <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" tag="1" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Iiw-0f-p6q" userLabel="y">
-                                <rect key="frame" x="254" y="200" width="48" height="14"/>
+                                <rect key="frame" x="254" y="368" width="48" height="14"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" focusRingType="none" alignment="left" title="0" usesSingleLineMode="YES" id="XjF-X4-03k">
-                                    <font key="font" metaFont="label" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <allowedInputSourceLocales>
@@ -749,7 +743,7 @@ CA
                                 </textFieldCell>
                             </textField>
                             <stackView hidden="YES" distribution="fill" orientation="horizontal" alignment="top" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xPr-66-BwF" userLabel="TextUI" customClass="TextTool" customModule="Drafter" customModuleProvider="target">
-                                <rect key="frame" x="64" y="128" width="257" height="32"/>
+                                <rect key="frame" x="130" y="296" width="257" height="32"/>
                                 <subviews>
                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iqw-kg-3iC" userLabel="toolToolField">
                                         <rect key="frame" x="0.0" y="0.0" width="128" height="32"/>
@@ -835,7 +829,7 @@ CA
                                 </connections>
                             </stackView>
                             <stackView hidden="YES" distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tZ4-A6-VtG" userLabel="FrameUI" customClass="FrameButtons" customModule="Drafter" customModuleProvider="target">
-                                <rect key="frame" x="64" y="0.0" width="16" height="118"/>
+                                <rect key="frame" x="130" y="168" width="16" height="118"/>
                                 <subviews>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="51t-HD-8xx">
                                         <rect key="frame" x="0.0" y="102" width="16" height="16"/>
@@ -956,7 +950,7 @@ CA
                                 </customSpacing>
                             </stackView>
                             <stackView distribution="fill" orientation="horizontal" alignment="centerY" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8J2-pI-a7r">
-                                <rect key="frame" x="219" y="568" width="362" height="32"/>
+                                <rect key="frame" x="331" y="736" width="362" height="32"/>
                                 <subviews>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JrE-lb-EMk">
                                         <rect key="frame" x="0.0" y="0.0" width="32" height="32"/>
@@ -1141,19 +1135,19 @@ CA
                                 </customSpacing>
                             </stackView>
                             <scrollView borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="0.0" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="3CV-76-icw" userLabel="StackScrool">
-                                <rect key="frame" x="0.0" y="0.0" width="48" height="600"/>
+                                <rect key="frame" x="0.0" y="0.0" width="130" height="768"/>
                                 <clipView key="contentView" copiesOnScroll="NO" id="Rhf-cr-IV1">
-                                    <rect key="frame" x="0.0" y="0.0" width="48" height="600"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="130" height="768"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <view id="E5a-jZ-OPM">
-                                            <rect key="frame" x="0.0" y="0.0" width="48" height="600"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="130" height="768"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <stackView distribution="fillProportionally" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wM8-iu-rIZ" userLabel="SketchUI" customClass="SketchStack" customModule="Drafter" customModuleProvider="target">
-                                                    <rect key="frame" x="0.0" y="600" width="48" height="0.0"/>
+                                                    <rect key="frame" x="0.0" y="768" width="130" height="0.0"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="width" constant="48" id="YBl-DJ-p9x"/>
+                                                        <constraint firstAttribute="width" constant="130" id="YBl-DJ-p9x"/>
                                                     </constraints>
                                                 </stackView>
                                             </subviews>
@@ -1167,7 +1161,7 @@ CA
                                     <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="48" id="BQA-WJ-kVd"/>
+                                    <constraint firstAttribute="width" constant="130" id="BQA-WJ-kVd"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="xqn-Ak-eqa">
                                     <rect key="frame" x="-100" y="-100" width="64" height="16"/>
@@ -1179,10 +1173,10 @@ CA
                                 </scroller>
                             </scrollView>
                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hb4-rr-j5H" userLabel="ActionUI">
-                                <rect key="frame" x="670" y="1" width="130" height="599"/>
+                                <rect key="frame" x="894" y="71" width="130" height="627"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tt1-Nb-GLs" userLabel="ZoomUI">
-                                        <rect key="frame" x="0.0" y="583" width="130" height="16"/>
+                                        <rect key="frame" x="0.0" y="611" width="130" height="16"/>
                                         <subviews>
                                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E9Y-ZP-pyd">
                                                 <rect key="frame" x="-2" y="0.0" width="18" height="16"/>
@@ -1191,7 +1185,7 @@ CA
                                                     <constraint firstAttribute="width" constant="14" id="Haw-l9-7AD"/>
                                                 </constraints>
                                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="⚲" usesSingleLineMode="YES" id="f9p-AG-FYm" userLabel="Label">
-                                                    <font key="font" metaFont="label" size="11"/>
+                                                    <font key="font" metaFont="message" size="11"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                     <allowedInputSourceLocales>
@@ -1211,7 +1205,7 @@ CA
                                                 </connections>
                                             </slider>
                                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WfQ-tr-m6g" userLabel="Default">
-                                                <rect key="frame" x="80" y="0.0" width="51" height="16"/>
+                                                <rect key="frame" x="80" y="-1" width="51" height="16"/>
                                                 <popUpButtonCell key="cell" type="push" title="100" bezelStyle="rounded" alignment="center" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="K4m-Np-TAF" id="bQ9-oP-ET9">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="miniSystem"/>
@@ -1244,20 +1238,20 @@ CA
                                         </customSpacing>
                                     </stackView>
                                     <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="CwB-jj-Wma">
-                                        <rect key="frame" x="0.0" y="578" width="96" height="5"/>
+                                        <rect key="frame" x="0.0" y="606" width="96" height="5"/>
                                     </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Em-2e-JeU" userLabel="BasicUI">
-                                        <rect key="frame" x="0.0" y="439" width="130" height="139"/>
+                                        <rect key="frame" x="0.0" y="467" width="130" height="139"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FRE-6b-slA" userLabel="Key">
                                                 <rect key="frame" x="0.0" y="127" width="29" height="12"/>
-                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" placeholderString="Basic" id="D5a-CU-3MU" userLabel="Basic">
+                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Basic" id="D5a-CU-3MU" userLabel="Basic">
                                                     <font key="font" size="10" name="HelveticaNeue"/>
-                                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YVm-we-s7f" userLabel="X">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="YVm-we-s7f" userLabel="X" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="108" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O9H-Uq-eQl" userLabel="Label">
@@ -1267,7 +1261,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="UZz-Pd-Vwr"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="x" usesSingleLineMode="YES" id="eWD-ok-leU" userLabel="Label">
-                                                            <font key="font" metaFont="label" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1315,8 +1309,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="XVW-93-PK8" id="JFR-pE-12P"/>
+                                                    <outlet property="slider" destination="pJG-uj-eHb" id="KTF-gT-5Uw"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nm1-io-l7e" userLabel="Y">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nm1-io-l7e" userLabel="Y" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="89" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9dJ-Zb-jvM" userLabel="Label">
@@ -1326,7 +1324,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="Nfp-Tu-1fV"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="y" usesSingleLineMode="YES" id="5mz-u2-Y1g" userLabel="Label">
-                                                            <font key="font" metaFont="label" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1374,8 +1372,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="ujF-Qh-aGD" id="IIN-WN-odj"/>
+                                                    <outlet property="slider" destination="jQF-8o-lX9" id="v7p-yK-67p"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sOc-G5-A1b" userLabel="→">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sOc-G5-A1b" userLabel="→" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="70" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8u0-HV-Zg0" userLabel="Label">
@@ -1433,8 +1435,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="F9w-qK-dyP" id="h5O-G5-Xzw"/>
+                                                    <outlet property="slider" destination="UL1-f8-Me1" id="yQL-sv-HxL"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pGW-v8-alg" userLabel="↑">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pGW-v8-alg" userLabel="↑" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="51" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="h1c-v3-EwQ" userLabel="Label">
@@ -1492,8 +1498,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="5K6-Sv-Qa9" id="a50-YO-wog"/>
+                                                    <outlet property="slider" destination="na4-Sk-thz" id="K4K-Xg-vwD"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AjF-c7-u8G" userLabel="↺">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="AjF-c7-u8G" userLabel="↺" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="32" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9tW-4I-Irr" userLabel="Label">
@@ -1503,7 +1513,7 @@ CA
                                                             <constraint firstAttribute="width" constant="14" id="klp-de-q41"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="↺" usesSingleLineMode="YES" id="ABR-hK-3fO" userLabel="Label">
-                                                            <font key="font" metaFont="label" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1551,6 +1561,10 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="2OX-ml-c00" id="I2A-kj-dvR"/>
+                                                    <outlet property="slider" destination="KFm-wT-9Q2" id="4TK-bI-n03"/>
+                                                </connections>
                                             </stackView>
                                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="arS-jm-yha" userLabel="Align">
                                                 <rect key="frame" x="0.0" y="0.0" width="130" height="31"/>
@@ -1622,18 +1636,21 @@ CA
                                             <real value="3.4028234663852886e+38"/>
                                         </customSpacing>
                                     </stackView>
+                                    <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="xGo-G5-52y">
+                                        <rect key="frame" x="0.0" y="462" width="96" height="5"/>
+                                    </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VsG-jT-1k6" userLabel="StrokeUI">
-                                        <rect key="frame" x="0.0" y="358" width="130" height="79"/>
+                                        <rect key="frame" x="0.0" y="383" width="130" height="79"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ekO-2p-KIb" userLabel="Stroke">
                                                 <rect key="frame" x="0.0" y="67" width="34" height="12"/>
-                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" placeholderString="Stroke" id="zem-nd-5xX" userLabel="Stroke">
+                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Stroke" id="zem-nd-5xX" userLabel="Stroke">
                                                     <font key="font" size="10" name="HelveticaNeue"/>
-                                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V2L-9t-x5W" userLabel="﹅">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V2L-9t-x5W" userLabel="▣" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="48" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZVa-vf-Tvd" userLabel="Label">
@@ -1643,7 +1660,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="gag-nL-Aen"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="▣" usesSingleLineMode="YES" id="ge9-CH-Lcu" userLabel="Label">
-                                                            <font key="font" metaFont="label" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1691,6 +1708,10 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="ClF-JB-nVM" id="sSK-MS-Sgj"/>
+                                                    <outlet property="slider" destination="W12-jJ-JFl" id="K21-0h-hAh"/>
+                                                </connections>
                                             </stackView>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wfY-Xa-kod" userLabel="CapJoin">
                                                 <rect key="frame" x="0.0" y="32" width="130" height="15"/>
@@ -1903,14 +1924,17 @@ CA
                                             <real value="3.4028234663852886e+38"/>
                                         </customSpacing>
                                     </stackView>
+                                    <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="ODY-7c-OOL">
+                                        <rect key="frame" x="0.0" y="378" width="96" height="5"/>
+                                    </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="crj-eD-SYI" userLabel="ColorUI">
-                                        <rect key="frame" x="0.0" y="33" width="130" height="323"/>
+                                        <rect key="frame" x="0.0" y="55" width="130" height="323"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Wsr-HC-Yul">
                                                 <rect key="frame" x="0.0" y="311" width="29" height="12"/>
-                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" placeholderString="Color" id="haD-1V-jwr" userLabel="Color">
+                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Color" id="haD-1V-jwr" userLabel="Color">
                                                     <font key="font" size="10" name="HelveticaNeue"/>
-                                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
@@ -1923,7 +1947,7 @@ CA
                                                             <constraint firstAttribute="width" constant="80" id="p2s-MQ-GKJ"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Stroke" usesSingleLineMode="YES" id="e3Q-vu-6up" userLabel="Label">
-                                                            <font key="font" metaFont="label" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="unemphasizedSelectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1964,8 +1988,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="box" destination="i7s-ch-2YB" id="L4e-Hy-iOk"/>
+                                                    <outlet property="field" destination="qhF-0w-xFU" id="r5K-NC-Upz"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hV0-mx-U0Y" userLabel="αs">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hV0-mx-U0Y" userLabel="αs" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="273" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9eR-Il-8ID" userLabel="Label">
@@ -2023,6 +2051,10 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="WS9-yv-tv3" id="fJ1-xo-gfP"/>
+                                                    <outlet property="slider" destination="chd-Ga-uy4" id="2ud-MK-1JA"/>
+                                                </connections>
                                             </stackView>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bRj-IO-uih" userLabel="FillColor" customClass="ColorPanel" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="254" width="128" height="18"/>
@@ -2074,8 +2106,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="box" destination="fT5-tc-Ym4" id="PfO-50-RMt"/>
+                                                    <outlet property="field" destination="UOy-J1-ZA7" id="uGS-60-0D1"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rV1-6R-Gf8" userLabel="αf">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rV1-6R-Gf8" userLabel="αf" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="235" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yzy-CV-RsJ" userLabel="Label">
@@ -2133,12 +2169,16 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="3ha-J6-MKT" id="8zT-lp-BE8"/>
+                                                    <outlet property="slider" destination="qDl-mn-AG2" id="tWr-yZ-Mqd"/>
+                                                </connections>
                                             </stackView>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="4qE-UP-jfs" userLabel="Shadow">
                                                 <rect key="frame" x="0.0" y="222" width="41" height="12"/>
-                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" placeholderString="Shadow" id="z3e-Tn-gpZ">
+                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Shadow" id="z3e-Tn-gpZ">
                                                     <font key="font" size="10" name="HelveticaNeue"/>
-                                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
@@ -2192,8 +2232,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="box" destination="bhZ-TJ-W6O" id="XZb-PE-8In"/>
+                                                    <outlet property="field" destination="Zkm-qM-czy" id="PxM-jO-BrS"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="226-09-wn7" userLabel="αsh">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="226-09-wn7" userLabel="αsh" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="184" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fYL-5h-6qw" userLabel="Label">
@@ -2251,8 +2295,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="5Gh-zL-HD5" id="diN-bB-DtT"/>
+                                                    <outlet property="slider" destination="mdq-6Q-8wn" id="JF5-7q-duj"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oLT-I6-kzm" userLabel="ShadowRadius">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oLT-I6-kzm" userLabel="ShadowRadius" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="165" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kIt-ej-9ed" userLabel="Label">
@@ -2310,8 +2358,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="Je6-2T-QJW" id="cBh-eF-BL7"/>
+                                                    <outlet property="slider" destination="d8m-Xg-ZdH" id="Ccf-UQ-R5L"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vun-6O-RWm" userLabel="OffsetX">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vun-6O-RWm" userLabel="OffsetX" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="146" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f2x-mS-4yC" userLabel="Label">
@@ -2369,8 +2421,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="5rx-hV-RJH" id="d0a-f6-DC3"/>
+                                                    <outlet property="slider" destination="tyT-In-lGL" id="2r8-E7-ADb"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DB4-aL-5Pr" userLabel="OffsetY">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DB4-aL-5Pr" userLabel="OffsetY" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="127" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d7e-Tt-iK0" userLabel="Label">
@@ -2428,12 +2484,16 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="ABH-PB-vdv" id="Qnx-gM-8LM"/>
+                                                    <outlet property="slider" destination="qPp-QE-MN6" id="OrN-0W-WG5"/>
+                                                </connections>
                                             </stackView>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xTe-Iu-lwc">
                                                 <rect key="frame" x="0.0" y="114" width="43" height="12"/>
-                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" placeholderString="Gradient" id="w13-k2-gHG">
+                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Gradient" id="w13-k2-gHG">
                                                     <font key="font" size="10" name="HelveticaNeue"/>
-                                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
@@ -2487,8 +2547,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="box" destination="erN-wy-77h" id="VYf-KK-6vA"/>
+                                                    <outlet property="field" destination="YaJ-cs-MX8" id="zIN-EX-k9G"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jLp-uc-jKL" userLabel="αgs">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jLp-uc-jKL" userLabel="αgs" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="76" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tf3-Wh-d8u" userLabel="Label">
@@ -2546,6 +2610,10 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="Jg8-EK-sY4" id="a8T-p8-3sj"/>
+                                                    <outlet property="slider" destination="xp7-PQ-WcA" id="dC1-io-tgX"/>
+                                                </connections>
                                             </stackView>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZT5-b3-Hvi" userLabel="MiddleColor" customClass="ColorPanel" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="57" width="128" height="18"/>
@@ -2597,8 +2665,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="box" destination="r0P-zA-yBA" id="csI-hn-wN7"/>
+                                                    <outlet property="field" destination="gWR-FM-Cq6" id="7qK-6O-lOO"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Wzb-re-Xcl" userLabel="αgm">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Wzb-re-Xcl" userLabel="αgm" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="38" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5q4-bo-3OA" userLabel="Label">
@@ -2656,6 +2728,10 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="m8q-c6-7VM" id="qKG-u1-anB"/>
+                                                    <outlet property="slider" destination="cc2-J6-k2T" id="3tL-ea-QBv"/>
+                                                </connections>
                                             </stackView>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OOy-nU-5GK" userLabel="FinalColor" customClass="ColorPanel" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="19" width="128" height="18"/>
@@ -2707,8 +2783,12 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="box" destination="Lhy-X0-cBM" id="cQF-kO-vMf"/>
+                                                    <outlet property="field" destination="hSF-8Y-Ey6" id="dnk-l6-i6C"/>
+                                                </connections>
                                             </stackView>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IDR-Sq-tdd" userLabel="αgf">
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IDR-Sq-tdd" userLabel="αgf" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
                                                 <rect key="frame" x="1" y="0.0" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4fX-RG-C0j" userLabel="Label">
@@ -2766,6 +2846,10 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="L99-hr-NgA" id="CW8-ms-32u"/>
+                                                    <outlet property="slider" destination="1E3-aF-a4L" id="Rm7-it-lgg"/>
+                                                </connections>
                                             </stackView>
                                         </subviews>
                                         <constraints>
@@ -2830,19 +2914,22 @@ CA
                                             <real value="3.4028234663852886e+38"/>
                                         </customSpacing>
                                     </stackView>
+                                    <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="Hyi-jB-hKP">
+                                        <rect key="frame" x="0.0" y="50" width="96" height="5"/>
+                                    </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Dt8-Zp-RN6" userLabel="FiltersUI">
-                                        <rect key="frame" x="0.0" y="0.0" width="130" height="31"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="130" height="50"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="VSX-NE-m9f" userLabel="Filter">
-                                                <rect key="frame" x="0.0" y="19" width="27" height="12"/>
-                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" placeholderString="Filter" id="lIv-Jv-hCX">
+                                                <rect key="frame" x="0.0" y="38" width="27" height="12"/>
+                                                <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Filter" id="lIv-Jv-hCX">
                                                     <font key="font" size="10" name="HelveticaNeue"/>
-                                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                    <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DLF-9B-oMc" userLabel="❋">
-                                                <rect key="frame" x="1" y="0.0" width="128" height="18"/>
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DLF-9B-oMc" userLabel="❋" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
+                                                <rect key="frame" x="1" y="19" width="128" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="h3O-76-PYh" userLabel="Label">
                                                         <rect key="frame" x="-2" y="0.0" width="18" height="18"/>
@@ -2899,18 +2986,88 @@ CA
                                                     <real value="3.4028234663852886e+38"/>
                                                     <real value="3.4028234663852886e+38"/>
                                                 </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="MXP-od-OJl" id="T11-IQ-9NY"/>
+                                                    <outlet property="slider" destination="CiC-ru-YHV" id="agL-A5-WSb"/>
+                                                </connections>
+                                            </stackView>
+                                            <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hEX-ml-IFK" userLabel="αfil" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
+                                                <rect key="frame" x="1" y="0.0" width="128" height="18"/>
+                                                <subviews>
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="40y-E5-Opj" userLabel="Label">
+                                                        <rect key="frame" x="-2" y="0.0" width="18" height="18"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="18" id="OcJ-z5-Slh"/>
+                                                            <constraint firstAttribute="width" constant="14" id="jSZ-YP-U18"/>
+                                                        </constraints>
+                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="α" usesSingleLineMode="YES" id="QQp-9o-rH3" userLabel="Label">
+                                                            <font key="font" metaFont="message" size="11"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
+                                                            <allowedInputSourceLocales>
+                                                                <string>NSAllRomanInputSourcesLocaleIdentifier</string>
+                                                            </allowedInputSourceLocales>
+                                                        </textFieldCell>
+                                                    </textField>
+                                                    <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zn7-Tb-YDo" userLabel="FilterSlider">
+                                                        <rect key="frame" x="16" y="-1" width="64" height="20"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="18" id="W5I-jB-3OW"/>
+                                                            <constraint firstAttribute="width" constant="64" id="eWM-yS-VS2"/>
+                                                        </constraints>
+                                                        <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="1" tickMarkPosition="above" sliderType="linear" id="d1m-dH-Uxo"/>
+                                                        <connections>
+                                                            <action selector="opacityFilter:" target="XfG-lQ-9wD" id="cdm-tA-Dkf"/>
+                                                        </connections>
+                                                    </slider>
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gK9-BU-aZh" userLabel="FilterLabel">
+                                                        <rect key="frame" x="82" y="0.0" width="46" height="18"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="width" constant="46" id="h5y-0R-7XK"/>
+                                                            <constraint firstAttribute="height" constant="18" id="ydl-9s-bvt"/>
+                                                        </constraints>
+                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="center" title="0" usesSingleLineMode="YES" id="4N9-xT-yEC" userLabel="Label">
+                                                            <font key="font" metaFont="system" size="10"/>
+                                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                                            <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
+                                                            <allowedInputSourceLocales>
+                                                                <string>NSAllRomanInputSourcesLocaleIdentifier</string>
+                                                            </allowedInputSourceLocales>
+                                                        </textFieldCell>
+                                                        <connections>
+                                                            <action selector="opacityFilter:" target="XfG-lQ-9wD" id="iJT-9a-7ob"/>
+                                                        </connections>
+                                                    </textField>
+                                                </subviews>
+                                                <visibilityPriorities>
+                                                    <integer value="1000"/>
+                                                    <integer value="1000"/>
+                                                    <integer value="1000"/>
+                                                </visibilityPriorities>
+                                                <customSpacing>
+                                                    <real value="3.4028234663852886e+38"/>
+                                                    <real value="3.4028234663852886e+38"/>
+                                                    <real value="3.4028234663852886e+38"/>
+                                                </customSpacing>
+                                                <connections>
+                                                    <outlet property="field" destination="gK9-BU-aZh" id="1xx-eN-FGI"/>
+                                                    <outlet property="slider" destination="Zn7-Tb-YDo" id="P3V-qL-o5g"/>
+                                                </connections>
                                             </stackView>
                                         </subviews>
                                         <constraints>
                                             <constraint firstItem="DLF-9B-oMc" firstAttribute="centerX" secondItem="Dt8-Zp-RN6" secondAttribute="centerX" id="7EX-Pw-AqN"/>
                                             <constraint firstAttribute="width" constant="130" id="7GJ-Hv-QeI"/>
                                             <constraint firstItem="VSX-NE-m9f" firstAttribute="leading" secondItem="Dt8-Zp-RN6" secondAttribute="leading" constant="2" id="r4V-yf-8KY"/>
+                                            <constraint firstItem="hEX-ml-IFK" firstAttribute="centerX" secondItem="Dt8-Zp-RN6" secondAttribute="centerX" id="zGB-QP-h2b"/>
                                         </constraints>
                                         <visibilityPriorities>
                                             <integer value="1000"/>
                                             <integer value="1000"/>
+                                            <integer value="1000"/>
                                         </visibilityPriorities>
                                         <customSpacing>
+                                            <real value="3.4028234663852886e+38"/>
                                             <real value="3.4028234663852886e+38"/>
                                             <real value="3.4028234663852886e+38"/>
                                         </customSpacing>
@@ -2929,8 +3086,14 @@ CA
                                     <integer value="1000"/>
                                     <integer value="1000"/>
                                     <integer value="1000"/>
+                                    <integer value="1000"/>
+                                    <integer value="1000"/>
+                                    <integer value="1000"/>
                                 </visibilityPriorities>
                                 <customSpacing>
+                                    <real value="3.4028234663852886e+38"/>
+                                    <real value="3.4028234663852886e+38"/>
+                                    <real value="3.4028234663852886e+38"/>
                                     <real value="3.4028234663852886e+38"/>
                                     <real value="3.4028234663852886e+38"/>
                                     <real value="3.4028234663852886e+38"/>
@@ -2944,7 +3107,7 @@ CA
                             <constraint firstItem="8J2-pI-a7r" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="1dX-dI-E0F"/>
                             <constraint firstItem="O9R-EM-mHj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="7Qj-t1-5X2"/>
                             <constraint firstItem="3CV-76-icw" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="8Hi-4Z-7x9"/>
-                            <constraint firstItem="hb4-rr-j5H" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="8Q9-Fi-EEZ"/>
+                            <constraint firstItem="hb4-rr-j5H" firstAttribute="centerY" secondItem="m2S-Jp-Qdl" secondAttribute="centerY" id="K3A-AP-N0g"/>
                             <constraint firstItem="3CV-76-icw" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Oui-ex-Sau"/>
                             <constraint firstAttribute="bottom" secondItem="3CV-76-icw" secondAttribute="bottom" id="PR2-s8-zaG"/>
                             <constraint firstAttribute="trailing" secondItem="O9R-EM-mHj" secondAttribute="trailing" id="Pob-Ho-uZS"/>
@@ -2958,60 +3121,33 @@ CA
                         <outlet property="actionUI" destination="hb4-rr-j5H" id="fPT-MN-lUG"/>
                         <outlet property="basicUI" destination="5Em-2e-JeU" id="yuR-rz-2ez"/>
                         <outlet property="colorUI" destination="crj-eD-SYI" id="GE2-3Y-IIk"/>
-                        <outlet property="curveBlur" destination="CiC-ru-YHV" id="YHR-ny-n0H"/>
-                        <outlet property="curveBlurLabel" destination="MXP-od-OJl" id="zQn-S1-tk1"/>
+                        <outlet property="curveBlur" destination="DLF-9B-oMc" id="RfE-UU-vhc"/>
                         <outlet property="curveCap" destination="CUY-UM-Qrn" id="C8W-G8-PCA"/>
                         <outlet property="curveDashGap" destination="4et-ub-QrO" id="rCc-Xv-EUO"/>
                         <outlet property="curveDashGapLabel" destination="Tzc-m4-TMu" id="OfZ-7j-Uxq"/>
-                        <outlet property="curveFillColor" destination="fT5-tc-Ym4" id="2cD-uh-4qt"/>
-                        <outlet property="curveFillColorPanel" destination="bRj-IO-uih" id="kdp-Gn-0Vj"/>
-                        <outlet property="curveFillLabel" destination="UOy-J1-ZA7" id="7Wu-if-sET"/>
-                        <outlet property="curveGradFinLab" destination="hSF-8Y-Ey6" id="okP-V0-TPE"/>
-                        <outlet property="curveGradFinOpacity" destination="1E3-aF-a4L" id="Wsf-SA-WXL"/>
-                        <outlet property="curveGradFinOpacityLab" destination="L99-hr-NgA" id="aDt-nK-bTe"/>
-                        <outlet property="curveGradFinalColor" destination="Lhy-X0-cBM" id="bOt-6b-x8Z"/>
-                        <outlet property="curveGradMidLab" destination="gWR-FM-Cq6" id="0Wb-HE-tMj"/>
-                        <outlet property="curveGradMidOpacity" destination="cc2-J6-k2T" id="4wE-pu-vjf"/>
-                        <outlet property="curveGradMidOpacityLab" destination="m8q-c6-7VM" id="DSP-bd-5Ms"/>
-                        <outlet property="curveGradMiddleColor" destination="r0P-zA-yBA" id="P6c-3T-c4a"/>
-                        <outlet property="curveGradStLab" destination="YaJ-cs-MX8" id="lik-xX-yAE"/>
-                        <outlet property="curveGradStOpacity" destination="xp7-PQ-WcA" id="1sb-Ui-FqK"/>
-                        <outlet property="curveGradStOpacityLab" destination="Jg8-EK-sY4" id="w8N-Cy-MIC"/>
-                        <outlet property="curveGradStartColor" destination="erN-wy-77h" id="cRW-MQ-fNd"/>
-                        <outlet property="curveGradientFinalPanel" destination="OOy-nU-5GK" id="bLN-ME-30C"/>
-                        <outlet property="curveGradientMiddlePanel" destination="ZT5-b3-Hvi" id="z7Y-cQ-vnX"/>
-                        <outlet property="curveGradientStartPanel" destination="EXf-g8-Fl6" id="e0a-GO-p6M"/>
-                        <outlet property="curveHei" destination="na4-Sk-thz" id="Unu-81-aoh"/>
-                        <outlet property="curveHeiLabel" destination="5K6-Sv-Qa9" id="aFS-Fo-NtC"/>
+                        <outlet property="curveFillColor" destination="bRj-IO-uih" id="kdp-Gn-0Vj"/>
+                        <outlet property="curveFilterOpacity" destination="hEX-ml-IFK" id="WbH-Dc-SDO"/>
+                        <outlet property="curveGradFinOpacity" destination="IDR-Sq-tdd" id="kBw-fy-hUL"/>
+                        <outlet property="curveGradFinal" destination="OOy-nU-5GK" id="bLN-ME-30C"/>
+                        <outlet property="curveGradMidOpacity" destination="Wzb-re-Xcl" id="f9O-7M-sLF"/>
+                        <outlet property="curveGradMiddle" destination="ZT5-b3-Hvi" id="z7Y-cQ-vnX"/>
+                        <outlet property="curveGradStOpacity" destination="jLp-uc-jKL" id="VsD-rk-k3l"/>
+                        <outlet property="curveGradStart" destination="EXf-g8-Fl6" id="e0a-GO-p6M"/>
+                        <outlet property="curveHei" destination="pGW-v8-alg" id="YxR-PH-1Ur"/>
                         <outlet property="curveJoin" destination="bcx-p5-59K" id="b4g-b7-bzM"/>
-                        <outlet property="curveOpacityFill" destination="qDl-mn-AG2" id="qiL-z9-3Ga"/>
-                        <outlet property="curveOpacityFillLabel" destination="3ha-J6-MKT" id="n7R-aS-KXZ"/>
-                        <outlet property="curveOpacityStroke" destination="chd-Ga-uy4" id="kJ9-5B-92f"/>
-                        <outlet property="curveOpacityStrokeLabel" destination="WS9-yv-tv3" id="JAy-IL-pbd"/>
-                        <outlet property="curveRotate" destination="KFm-wT-9Q2" id="oSQ-Av-PkY"/>
-                        <outlet property="curveRotateLabel" destination="2OX-ml-c00" id="bNs-u0-oTD"/>
-                        <outlet property="curveShadowColor" destination="bhZ-TJ-W6O" id="swd-9f-Noo"/>
-                        <outlet property="curveShadowColorPanel" destination="eAz-tN-gv1" id="bEG-18-ONS"/>
-                        <outlet property="curveShadowLabel" destination="Zkm-qM-czy" id="7pq-LF-rUn"/>
-                        <outlet property="curveShadowOffsetX" destination="tyT-In-lGL" id="Lfe-o0-tqe"/>
-                        <outlet property="curveShadowOffsetXLabel" destination="5rx-hV-RJH" id="0Fq-eW-UIE"/>
-                        <outlet property="curveShadowOffsetY" destination="qPp-QE-MN6" id="Fps-Un-2T3"/>
-                        <outlet property="curveShadowOffsetYLabel" destination="ABH-PB-vdv" id="14h-QO-pc9"/>
-                        <outlet property="curveShadowOpacity" destination="mdq-6Q-8wn" id="Ppb-VH-EqF"/>
-                        <outlet property="curveShadowOpacityLabel" destination="5Gh-zL-HD5" id="AGy-Ru-BHI"/>
-                        <outlet property="curveShadowRadius" destination="d8m-Xg-ZdH" id="dzf-Zg-zuS"/>
-                        <outlet property="curveShadowRadiusLabel" destination="Je6-2T-QJW" id="yBw-Sk-WCw"/>
-                        <outlet property="curveStrokeColor" destination="i7s-ch-2YB" id="dBr-Mt-uXo"/>
-                        <outlet property="curveStrokeColorPanel" destination="GtU-Ln-b9N" id="TUW-a3-0Xf"/>
-                        <outlet property="curveStrokeLabel" destination="qhF-0w-xFU" id="dZO-er-KHN"/>
-                        <outlet property="curveWid" destination="UL1-f8-Me1" id="r3G-U3-Ji4"/>
-                        <outlet property="curveWidLabel" destination="F9w-qK-dyP" id="MNc-OX-Bwl"/>
-                        <outlet property="curveWidth" destination="W12-jJ-JFl" id="pbD-Ed-Kzq"/>
-                        <outlet property="curveWidthLabel" destination="ClF-JB-nVM" id="RtE-6Z-PJU"/>
-                        <outlet property="curveX" destination="pJG-uj-eHb" id="utf-Zm-lyp"/>
-                        <outlet property="curveXLabel" destination="XVW-93-PK8" id="r6o-Bn-OZR"/>
-                        <outlet property="curveY" destination="jQF-8o-lX9" id="A25-3I-zZZ"/>
-                        <outlet property="curveYLabel" destination="ujF-Qh-aGD" id="SOh-dn-9OQ"/>
+                        <outlet property="curveOpacityFill" destination="rV1-6R-Gf8" id="gAZ-ct-pp5"/>
+                        <outlet property="curveOpacityStroke" destination="hV0-mx-U0Y" id="I4A-WY-rnh"/>
+                        <outlet property="curveRotate" destination="AjF-c7-u8G" id="LO4-Ii-rRt"/>
+                        <outlet property="curveShadowColor" destination="eAz-tN-gv1" id="bEG-18-ONS"/>
+                        <outlet property="curveShadowOffsetX" destination="vun-6O-RWm" id="hh9-nc-g4w"/>
+                        <outlet property="curveShadowOffsetY" destination="DB4-aL-5Pr" id="7Wb-Je-mzZ"/>
+                        <outlet property="curveShadowOpacity" destination="226-09-wn7" id="ejc-q5-PMo"/>
+                        <outlet property="curveShadowRadius" destination="oLT-I6-kzm" id="5XJ-Pj-ZMd"/>
+                        <outlet property="curveStrokeColor" destination="GtU-Ln-b9N" id="TUW-a3-0Xf"/>
+                        <outlet property="curveWid" destination="sOc-G5-A1b" id="d2J-Gh-ZhN"/>
+                        <outlet property="curveWidth" destination="V2L-9t-x5W" id="43N-dW-nK8"/>
+                        <outlet property="curveX" destination="YVm-we-s7f" id="Xp4-0I-BXF"/>
+                        <outlet property="curveY" destination="nm1-io-l7e" id="3aH-h8-boy"/>
                         <outlet property="filterUI" destination="Dt8-Zp-RN6" id="veJ-X8-88X"/>
                         <outlet property="frameUI" destination="tZ4-A6-VtG" id="4lN-9p-2t2"/>
                         <outlet property="locationX" destination="WHP-Tp-i3C" id="MRs-M7-y5E"/>

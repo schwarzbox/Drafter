@@ -17,7 +17,7 @@ class ControlFrame: CALayer {
     var dotRadius: CGFloat = setup.dotRadius
     var dotMag: CGFloat = 0
     var lineWidth: CGFloat = setup.lineWidth
-    let lines = [1, 3, 5, 7]
+    let frameHandles = [1, 3, 5, 7]
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -152,10 +152,10 @@ class ControlFrame: CALayer {
         var fillColor = setup.fillColor
         var strokeColor = setup.strokeColor
         var gradIndex = 0
-        var rounded = self.dotRadius
+        var rounded: CGFloat = 0
 
         for i in 0..<pnt.count {
-            if self.lines.contains(i) {
+            if self.frameHandles.contains(i) {
                 var dx: CGFloat = 0
                 var dy: CGFloat = 0
                 var width = self.frame.width - self.dotSize
@@ -175,6 +175,9 @@ class ControlFrame: CALayer {
                              strokeColor: NSColor.clear,
                              fillColor: NSColor.clear)
                 continue
+            }
+            if i==pnt.count-7 {
+                rounded = self.dotRadius
             }
             if i==pnt.count-6 {
                 fillColor = setup.strokeColor
@@ -271,10 +274,10 @@ class ControlFrame: CALayer {
     func collideControlDot(pos: CGPoint) -> Dot? {
         let mpos = CGPoint(x: pos.x - self.frame.minX,
                            y: pos.y - self.frame.minY)
-        for layer in self.sublayers! {
+        for layer in self.sublayers ?? [] {
             if let dot = layer as? Dot {
                 var circular = true
-                if self.lines.contains(dot.tag ?? -1) {
+                if self.frameHandles.contains(dot.tag ?? -1) {
                     circular = false
                 }
                 if dot.collide(pos: mpos, radius: self.dotSize,
