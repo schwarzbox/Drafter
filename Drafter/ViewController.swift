@@ -21,10 +21,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var textUI: TextTool!
     @IBOutlet weak var actionUI: NSStackView!
 
-    @IBOutlet weak var basicUI: NSStackView!
-    @IBOutlet weak var strokeUI: NSStackView!
     @IBOutlet weak var colorUI: NSStackView!
-    @IBOutlet weak var filterUI: NSStackView!
 
     @IBOutlet weak var zoomSketch: NSSlider!
     @IBOutlet weak var zoomDefaultSketch: NSPopUpButton!
@@ -41,8 +38,8 @@ class ViewController: NSViewController {
     @IBOutlet weak var curveDashGap: NSStackView!
     @IBOutlet weak var curveDashGapLabel: NSStackView!
 
-    @IBOutlet weak var curveOpacityStroke: ActionSlider!
-    @IBOutlet weak var curveOpacityFill: ActionSlider!
+    @IBOutlet weak var curveStrokeOpacity: ActionSlider!
+    @IBOutlet weak var curveFillOpacity: ActionSlider!
 
     @IBOutlet weak var curveStrokeColor: ColorPanel!
     @IBOutlet weak var curveFillColor: ColorPanel!
@@ -65,6 +62,8 @@ class ViewController: NSViewController {
     @IBOutlet weak var curveBlur: ActionSlider!
     @IBOutlet weak var curveFilterOpacity: ActionSlider!
 
+    var alphaSliders: [ActionSlider] = []
+    var colorPanels: [ColorPanel] = []
     var textFields: [NSTextField] = []
     var colorPanel: ColorPanel?
     var savePanel: NSSavePanel?
@@ -173,21 +172,27 @@ class ViewController: NSViewController {
         curveRotate.minValue = setup.minRotate
         curveRotate.maxValue = setup.maxRotate
 
+        colorPanels = [curveStrokeColor, curveFillColor,
+                       curveShadowColor, curveGradStart,
+                       curveGradMiddle, curveGradFinal]
+
+        alphaSliders = [curveStrokeOpacity, curveFillOpacity,
+                        curveShadowOpacity, curveGradStOpacity,
+                        curveGradMidOpacity, curveGradFinOpacity,
+                        curveFilterOpacity]
+
         self.setupStroke()
-        self.setupStrokeFillColor()
+        self.setupColors()
+        self.setupAlpha()
         self.setupShadow()
-        self.setupGradientColors()
 
         curveBlur.minValue = setup.minBlur
         curveBlur.maxValue = setup.maxBlur
 
-        curveFilterOpacity.doubleValue = Double(setup.filterOpacity)
-        curveFilterOpacity.maxValue = 1
+        ColorPanel.setupSharedColorPanel()
 
         self.setupSketchView()
         textUI!.setupTextTool()
-
-        ColorPanel.setupSharedColorPanel()
 
         self.findAllTextFields(root: self.view)
 
@@ -224,26 +229,22 @@ class ViewController: NSViewController {
          }
     }
 
-    func setupStrokeFillColor() {
-        curveStrokeColor.fillColor = setup.strokeColor
-        curveFillColor.fillColor = setup.fillColor
+    func setupColors() {
+        for (i, panel) in self.colorPanels.enumerated() {
+            panel.fillColor = setup.colors[i]
+        }
+    }
 
-        curveStrokeColor.stringValue = setup.strokeColor.hexStr
-        curveFillColor.stringValue = setup.fillColor.hexStr
-
-        curveOpacityStroke.maxValue = Double(setup.alpha[0])
-        curveOpacityFill.maxValue = Double(setup.alpha[1])
-        curveOpacityStroke.doubleValue = curveOpacityStroke.maxValue
-        curveOpacityFill.doubleValue = curveOpacityFill.maxValue
+    func setupAlpha() {
+        for (i, slider) in self.alphaSliders.enumerated() {
+            slider.maxValue = 1
+            slider.minValue = 0
+            slider.doubleValue = Double(setup.alpha[i])
+        }
     }
 
     func setupShadow() {
-        curveShadowColor.fillColor = setup.shadowColor
-        curveShadowColor.stringValue = setup.shadowColor.hexStr
-
         curveShadowRadius.maxValue = setup.maxShadowRadius
-        curveShadowOpacity.maxValue = 1
-
         curveShadowOffsetX.minValue = -setup.maxShadowOffsetX
         curveShadowOffsetY.minValue = -setup.maxShadowOffsetY
         curveShadowOffsetX.maxValue = setup.maxShadowOffsetX
@@ -251,27 +252,9 @@ class ViewController: NSViewController {
 
         let shadow = setup.shadow.map {(fl) in Double(fl)}
         curveShadowRadius.doubleValue = shadow[0]
-        curveShadowOpacity.doubleValue = shadow[1]
-        curveShadowOffsetX.doubleValue = shadow[2]
-        curveShadowOffsetY.doubleValue = shadow[3]
+        curveShadowOffsetX.doubleValue = shadow[1]
+        curveShadowOffsetY.doubleValue = shadow[2]
     }
-
-    func setupGradientColors() {
-        curveGradStart.fillColor = setup.gradientColor[0]
-        curveGradMiddle.fillColor = setup.gradientColor[1]
-        curveGradFinal.fillColor = setup.gradientColor[2]
-
-        curveGradStart.stringValue = setup.gradientColor[0].hexStr
-        curveGradMiddle.stringValue = setup.gradientColor[1].hexStr
-        curveGradFinal.stringValue = setup.gradientColor[2].hexStr
-
-        curveGradStOpacity.doubleValue = Double(setup.gradientOpacity[0])
-        curveGradStOpacity.maxValue = 1
-        curveGradMidOpacity.doubleValue = Double(setup.gradientOpacity[1])
-        curveGradMidOpacity.maxValue = 1
-        curveGradFinOpacity.doubleValue = Double(setup.gradientOpacity[2])
-        curveGradFinOpacity.maxValue = 1
-     }
 
     func setupSketchView() {
         sketchView.parent = self
@@ -282,27 +265,15 @@ class ViewController: NSViewController {
         sketchView.toolUI = toolUI
         sketchView.frameUI = frameUI
         sketchView.textUI = textUI
-        sketchView.colorUI = colorUI
 
         sketchView.curveWidth = curveWidth
-        sketchView.curveOpacityStroke = curveOpacityStroke
-        sketchView.curveOpacityFill = curveOpacityFill
 
-        sketchView.curveStrokeColor = curveStrokeColor
-        sketchView.curveFillColor = curveFillColor
-        sketchView.curveShadowColor = curveShadowColor
         sketchView.curveShadowRadius = curveShadowRadius
-        sketchView.curveShadowOpacity = curveShadowOpacity
-
         sketchView.curveShadowOffsetX = curveShadowOffsetX
         sketchView.curveShadowOffsetY = curveShadowOffsetY
-        sketchView.curveGradStart = curveGradStart
-        sketchView.curveGradMiddle = curveGradMiddle
-        sketchView.curveGradFinal = curveGradFinal
 
-        sketchView.curveGradStOpacity = curveGradStOpacity
-        sketchView.curveGradMidOpacity = curveGradMidOpacity
-        sketchView.curveGradFinOpacity = curveGradFinOpacity
+        sketchView.alphaSliders = alphaSliders
+        sketchView.colorPanels = colorPanels
     }
 
 //    MARK Obserevers func
@@ -347,98 +318,88 @@ class ViewController: NSViewController {
         }
     }
 
-    func hideUnusedView(_ bool: Bool) {
-        for index in 0..<basicUI.subviews.count {
-            if let stack = basicUI.subviews[index] as? NSStackView {
-                if index != 3 && index != 4 {
-                    stack.isHidden = bool
+    func showUnusedViews(_ bool: Bool, from: Int = 2) {
+        for index in from..<actionUI.subviews.count {
+            let subs = actionUI.subviews[index].subviews
+            if index==2 {
+                for i in 0..<subs.count {
+                    if let stack = subs[i] as? NSStackView {
+                        if i != 3 && i != 4 {
+                            stack.isEnabled(all: bool)
+                        }
+                    }
+                }
+            } else {
+                for view in subs {
+                    if let stack = view as? NSStackView {
+                        stack.isEnabled(all: bool)
+                    }
                 }
             }
         }
-        for view in [strokeUI, colorUI, filterUI] {
-            view?.isHidden = bool
+        if let sharedPanel = self.colorPanel, !bool {
+            sharedPanel.closeSharedColorPanel()
         }
     }
 
     @objc func updateSliders() {
         let view = sketchView!
         if let curve = view.selectedCurve, !curve.lock {
-//            self.hideUnusedView(false)
 
-            self.curveX.doubleValue = Double(curve.path.bounds.midX)
-            self.curveY.doubleValue = Double(curve.path.bounds.midY)
-            self.curveWid.doubleValue = Double(curve.path.bounds.width)
-            self.curveHei.doubleValue = Double(curve.path.bounds.height)
-
+            let bounds = view.groups.count>1
+                ? curve.groupRect(curves: view.groups, includeStroke: false)
+                : curve.groupRect(curves: curve.groups, includeStroke: false)
+            self.curveX.doubleValue = Double(bounds.midX)
+            self.curveY.doubleValue = Double(bounds.midY)
+            self.curveWid.doubleValue = Double(bounds.width)
+            self.curveHei.doubleValue = Double(bounds.height)
             self.curveRotate.doubleValue = Double(curve.angle)
 
-            let opacity = curve.alpha.map {(fl) in Double(fl)}
-            self.curveOpacityStroke.doubleValue = opacity[0]
-            self.curveOpacityFill.doubleValue = opacity[1]
+            defer {self.updateSketchUIButtons(curve: curve)}
+
+            if curve.groups.count==1 && view.groups.count <= 1 {
+                self.showUnusedViews(true)
+            } else {
+                self.showUnusedViews(false, from: 3)
+                return
+            }
+
             self.curveWidth.doubleValue = Double(curve.lineWidth)
-
-            self.curveStrokeColor.fillColor = curve.strokeColor
-            self.curveFillColor.fillColor = curve.fillColor
-            self.curveShadowColor.fillColor = curve.shadowColor
-
-            let shadow = curve.shadow.map {(fl) in Double(fl)}
-            self.curveShadowRadius.doubleValue = shadow[0]
-            self.curveShadowOpacity.doubleValue = shadow[1]
-            self.curveShadowOffsetX.doubleValue = shadow[2]
-            self.curveShadowOffsetY.doubleValue = shadow[3]
-
-            self.curveGradStart.fillColor = curve.gradientColor[0]
-            self.curveGradMiddle.fillColor = curve.gradientColor[1]
-            self.curveGradFinal.fillColor = curve.gradientColor[2]
-
-            let gradOpacity = curve.gradientOpacity.map {(fl) in Double(fl)}
-            self.curveGradStOpacity.doubleValue = gradOpacity[0]
-            self.curveGradMidOpacity.doubleValue = gradOpacity[1]
-            self.curveGradFinOpacity.doubleValue = gradOpacity[2]
-
-            self.curveStrokeColor.stringValue = curve.strokeColor.hexStr
-            self.curveFillColor.stringValue = curve.fillColor.hexStr
-            self.curveShadowColor.stringValue = curve.shadowColor.hexStr
-
-            self.curveGradStart.stringValue = curve.gradientColor[0].hexStr
-            self.curveGradMiddle.stringValue = curve.gradientColor[1].hexStr
-            self.curveGradFinal.stringValue = curve.gradientColor[2].hexStr
-
             self.curveCap.selectedSegment = curve.cap
             self.curveJoin.selectedSegment = curve.join
 
             for i in 0..<curve.dash.count {
-                let value = Double(truncating: curve.dash[i])
-                if let slider = curveDashGap.subviews[i] as? NSSlider {
-                    slider.doubleValue = value
-                }
-                if let label = curveDashGapLabel.subviews[i] as? NSTextField {
-                    label.doubleValue = value
-                }
+                 let value = Double(truncating: curve.dash[i])
+                 if let slider = curveDashGap.subviews[i] as? NSSlider {
+                     slider.doubleValue = value
+                 }
+                 if let label = curveDashGapLabel.subviews[i] as? NSTextField {
+                     label.doubleValue = value
+                 }
+            }
+
+            for (i, color) in curve.colors.enumerated() {
+                self.colorPanels[i].fillColor = color
+            }
+
+            for (i, alpha) in curve.alpha.enumerated() {
+                self.alphaSliders[i].doubleValue = Double(alpha)
             }
 
             if let clrPan = self.colorPanel,
                 let sharedClrPan = clrPan.sharedColorPanel {
-                let colors = [
-                    curveStrokeColor,
-                    curveFillColor,
-                    curveShadowColor,
-                    curveGradStart,
-                    curveGradMiddle,
-                    curveGradFinal
-                ]
-                if let view = colors[clrPan.colorTag] {
-                    sharedClrPan.color = view.fillColor
-                }
-
-                self.curveBlur.doubleValue = Double(curve.blur)
-                self.curveFilterOpacity.doubleValue = Double(curve.filterOpacity)
+                let view = self.colorPanels[clrPan.colorTag]
+                sharedClrPan.color = view.fillColor
             }
-            self.updateSketchUIButtons(curve: curve)
 
+            let shadow = curve.shadow.map {(fl) in Double(fl)}
+            self.curveShadowRadius.doubleValue = shadow[0]
+            self.curveShadowOffsetX.doubleValue = shadow[1]
+            self.curveShadowOffsetY.doubleValue = shadow[2]
+
+            self.curveBlur.doubleValue = Double(curve.blur)
         } else {
-//            self.hideUnusedView(true)
-
+            self.showUnusedViews(false)
             self.curveWid.doubleValue = Double(view.sketchPath.bounds.width)
             self.curveHei.doubleValue = Double(view.sketchPath.bounds.height)
         }
@@ -489,10 +450,11 @@ class ViewController: NSViewController {
 //    MARK: Tools Actions
     @IBAction func setTool(_ sender: NSButton) {
         sketchView!.setTool(tag: sender.tag)
+        self.showUnusedViews(true)
     }
 
     func getTagValue(sender: Any,
-                     limit: (_ :Double) -> Double = {v in v})
+                     limit: (_ :Double) -> Double = {x in x})
         -> (tag: Int, value: Double) {
         var tag: Int = 0
         var doubleValue: Double = 0
@@ -606,21 +568,8 @@ class ViewController: NSViewController {
 //    MARK: ColorPanel actions
     @IBAction func openColorPanel(_ sender: ColorBox) {
         let tag = sender.tag
-        switch tag {
-        case 0:
-            self.colorPanel = curveStrokeColor
-        case 1:
-            self.colorPanel = curveFillColor
-        case 2:
-            self.colorPanel = curveShadowColor
-        case 3:
-            self.colorPanel = curveGradStart
-        case 4:
-            self.colorPanel = curveGradMiddle
-        case 5:
-            self.colorPanel = curveGradFinal
-        default:
-            break
+        if tag < self.colorPanels.count {
+             self.colorPanel = self.colorPanels[tag]
         }
 
         if sender.state == .off {
@@ -642,16 +591,14 @@ class ViewController: NSViewController {
     }
 
 //    MARK: Opacity actions
-    @IBAction func opacityCurve(_ sender: Any) {
+    @IBAction func alphaCurve(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(
             sender: sender, limit: {x in x > 1 ? 1 : x < 0 ? 0 : x})
-        if val.tag==0 {
-            curveOpacityStroke.doubleValue = val.value
-        } else if val.tag==1 {
-            curveOpacityFill.doubleValue = val.value
+        if val.tag < self.alphaSliders.count {
+            self.alphaSliders[val.tag].doubleValue = val.value
         }
-        view.opacityCurve(tag: val.tag, value: val.value)
+        view.alphaCurve(tag: val.tag, value: val.value)
         self.restoreControlFrame(view: view)
     }
 
@@ -664,30 +611,12 @@ class ViewController: NSViewController {
             lim = lim < 0 ? 0 : lim
             curveShadowRadius.doubleValue = lim
         case 1:
-            lim = lim > 1 ? 1 : lim < 0 ? 0 : lim
-            curveShadowOpacity.doubleValue = lim
-        case 2:
             curveShadowOffsetX.doubleValue = lim
-        case 3:
+        case 2:
             curveShadowOffsetY.doubleValue = lim
         default: break
         }
         view.shadowCurve(tag: val.tag, value: lim)
-        self.restoreControlFrame(view: view)
-    }
-
-    @IBAction func opacityGradientCurve(_ sender: Any) {
-        let view = sketchView!
-        let val = self.getTagValue(
-            sender: sender, limit: {x in x > 1 ? 1 : x < 0 ? 0 : x})
-        if val.tag == 0 {
-            curveGradStOpacity.doubleValue = val.value
-        } else if val.tag == 1 {
-            curveGradMidOpacity.doubleValue = val.value
-        } else if val.tag == 2 {
-            curveGradFinOpacity.doubleValue = val.value
-        }
-        view.opacityGradientCurve(tag: val.tag, value: val.value)
         self.restoreControlFrame(view: view)
     }
 
@@ -697,15 +626,6 @@ class ViewController: NSViewController {
             sender: sender, limit: {x in x < 0 ? 0 : x})
         curveBlur.doubleValue = val.value
         view.blurCurve(value: val.value)
-        self.restoreControlFrame(view: view)
-    }
-
-    @IBAction func opacityFilter(_ sender: Any) {
-        let view = sketchView!
-        let val = self.getTagValue(
-            sender: sender, limit: {x in x > 1 ? 1 : x < 0 ? 0 : x})
-        curveFilterOpacity.doubleValue = val.value
-        view.opacityFilterCurve(value: val.value)
         self.restoreControlFrame(view: view)
     }
 
@@ -732,7 +652,7 @@ class ViewController: NSViewController {
 
 //    MARK: Menu actions
     @IBAction func copy(_ sender: NSMenuItem) {
-        sketchView!.copyCurve()
+        sketchView!.copyCurve(from: sketchView!.selectedCurve)
     }
 
     @IBAction func paste(_ sender: NSMenuItem) {
@@ -746,7 +666,7 @@ class ViewController: NSViewController {
     }
 
     @IBAction func cut(_ sender: NSMenuItem) {
-        sketchView!.copyCurve()
+        sketchView!.copyCurve(from: sketchView!.selectedCurve)
         sketchView!.deleteCurve()
     }
 
@@ -854,15 +774,14 @@ class ViewController: NSViewController {
             }
 
             if let curve = view.selectedCurve {
-                curve.alpha = [CGFloat](repeating: 0, count: 2)
-                curve.shadow = [CGFloat](repeating: 0, count: 4)
+                curve.alpha = [CGFloat](repeating: 0, count: 7)
+                curve.shadow = [CGFloat](repeating: 0, count: 3)
                 curve.imageLayer.contents = image
-                curve.imageLayer.bounds = curve.path.bounds
+                curve.imageLayer.bounds = curve.canvas.bounds
                 curve.imageLayer.position = curve.canvas.position
                 self.updateSliders()
             }
         }
-
     }
 
     func openSvg(filePath: URL) {

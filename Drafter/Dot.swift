@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+
 class Dot: CALayer {
     var tag: Int?
     var excluded: Bool = false

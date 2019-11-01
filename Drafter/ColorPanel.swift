@@ -21,12 +21,7 @@ class ColorPanel: NSStackView {
     var fillColor: NSColor = setup.fillColor {
         willSet {
             box.fillColor = newValue
-        }
-    }
-
-    var stringValue: String = setup.fillColor.hexStr {
-        willSet {
-            field.stringValue = newValue
+            field.stringValue = newValue.hexStr
         }
     }
 
@@ -76,7 +71,6 @@ class ColorPanel: NSStackView {
     }
 
     func setColor(color: NSColor) -> NSColor {
-        self.stringValue = color.hexStr
         self.fillColor = color
         return color
     }
@@ -84,7 +78,6 @@ class ColorPanel: NSStackView {
     func setHexColor(hex: String) -> NSColor {
         let color = NSColor.init(
             hex: Int(hex, radix: 16) ?? 0xFFFFFF)
-        self.stringValue = color.hexStr
         self.fillColor = color
         return color
     }

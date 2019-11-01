@@ -10,7 +10,6 @@ import Cocoa
 
 class ControlFrame: CALayer {
     var parent: SketchPad?
-    var groupFrame: GroupFrame?
     var ctrlPad: CGFloat = setup.dotSize * 4
     var ctrlPad50: CGFloat = setup.dotSize * 2
     var dotSize: CGFloat = setup.dotSize
@@ -23,25 +22,14 @@ class ControlFrame: CALayer {
         super.init(coder: aDecoder)
     }
 
-    init(parent: SketchPad) {
-        super.init()
-        self.parent = parent
-        self.sublayers = []
-        if let layer = self.parent!.layer {
-            layer.addSublayer(self)
-        }
-    }
-
     init(parent: SketchPad, curve: Curve) {
         super.init()
         self.parent = parent
         self.sublayers = []
-        let line50 = curve.lineWidth/2
 
-        self.frame = CGRect(x: curve.path.bounds.minX - line50,
-                            y: curve.path.bounds.minY - line50,
-                            width: curve.path.bounds.width + curve.lineWidth,
-                            height: curve.path.bounds.height + curve.lineWidth)
+        self.frame = parent.groups.count>1
+            ? curve.groupRect(curves: parent.groups)
+            : curve.groupRect(curves: curve.groups)
 
         self.dotSize = parent.dotSize
         self.dotRadius = parent.dotRadius
@@ -88,39 +76,38 @@ class ControlFrame: CALayer {
             gradientDirStart, gradientDirFinal,
             gradientLoc[0], gradientLoc[1], gradientLoc[2]
         ]
-
-        self.initShapes(curve: curve, gradientLoc: gradientLoc,
-                        gradientDirStart: gradientDirStart,
-                        gradientDirFinal: gradientDirFinal)
-
-        self.initDots(parent: parent, curve: curve, pnt: points)
-
-        self.initRoundedCornerDots(parent: parent, curve: curve,
-                                      numDots: points.count)
-
-        let curves = parent.groups[curve.group]
-
-        if curves.count>1 {
-            groupFrame = GroupFrame(parent: parent, curves: curves)
+        defer {
+            self.initDots(parent: parent, curve: curve, pnt: points)
+            parent.layer?.addSublayer(self)
         }
-        parent.layer?.addSublayer(self)
+        self.initRotate()
+
+        guard curve.groups.count == 1 else { return }
+        guard parent.groups.count <= 1 else { return }
+
+        self.initGradient(curve: curve, gradientLoc: gradientLoc,
+                          gradientDirStart: gradientDirStart,
+                          gradientDirFinal: gradientDirFinal)
+        self.initRoundedCornerDots(parent: parent, curve: curve,
+                                   numDots: points.count)
     }
 
-    deinit {
-        self.groupFrame?.removeFromSuperlayer()
-        self.groupFrame = nil
-    }
-
-    func initShapes(curve: Curve, gradientLoc: [CGPoint],
-                    gradientDirStart: CGPoint,
-                    gradientDirFinal: CGPoint) {
+    func initRotate() {
         let path = NSBezierPath()
-        // rotate handle
         path.move(to: CGPoint(x: self.bounds.maxX, y: self.bounds.midY))
         path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad,
                               y: self.bounds.midY))
-        // gradient on
-        path.move(to: CGPoint(x: self.bounds.minX, y: self.bounds.minY))
+        self.makeShape(path: path, strokeColor: setup.fillColor,
+                       lineWidth: self.lineWidth)
+    }
+
+    func initGradient(curve: Curve, gradientLoc: [CGPoint],
+                      gradientDirStart: CGPoint,
+                      gradientDirFinal: CGPoint) {
+        let path = NSBezierPath()
+
+        path.move(to: CGPoint(x: self.bounds.minX,
+                              y: self.bounds.minY))
         path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad50,
                               y: self.bounds.minY))
         self.makeShape(path: path, strokeColor: setup.fillColor,
@@ -146,12 +133,13 @@ class ControlFrame: CALayer {
                            lineWidth: self.lineWidth,
                            dashPattern: setup.controlDashPattern)
         }
+
     }
 
     func initDots(parent: SketchPad, curve: Curve, pnt: [CGPoint]) {
         var fillColor = setup.fillColor
         var strokeColor = setup.strokeColor
-        var gradIndex = 0
+        var gradIndex = 3
         var rounded: CGFloat = 0
 
         for i in 0..<pnt.count {
@@ -179,6 +167,10 @@ class ControlFrame: CALayer {
             if i==pnt.count-7 {
                 rounded = self.dotRadius
             }
+            if (curve.groups.count>1 || parent.groups.count>1) &&
+                i==pnt.count-6 {
+                break
+            }
             if i==pnt.count-6 {
                 fillColor = setup.strokeColor
                 strokeColor = setup.fillColor
@@ -189,7 +181,7 @@ class ControlFrame: CALayer {
             }
 
             if i==pnt.count-3 || i==pnt.count-2 || i==pnt.count-1 {
-                fillColor = curve.gradientColor[gradIndex]
+                fillColor = curve.colors[gradIndex]
                 strokeColor = setup.strokeColor
                 gradIndex += 1
             }

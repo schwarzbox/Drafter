@@ -222,13 +222,30 @@ extension NSStackView {
         }
     }
 
-    func isEnable(tag: Int = -1, all: Bool = false) {
+    func setEnabled(tag: Int = -1, bool: Bool) {
+        if tag > 0, self.subviews.count > tag,
+            let control = self.subviews[tag] as? NSControl {
+            control.isEnabled = bool
+        }
+    }
+
+    func isEnabled(tag: Int = -1, all: Bool = false) {
         for view in self.subviews {
-            if let button = view as? NSButton {
-                if  button.tag == tag || all {
-                    button.isEnabled = true
+            if let control = view as? NSControl {
+                if control.tag == tag || all {
+                    control.isEnabled = true
                 } else {
-                    button.isEnabled = false
+                    control.isEnabled = false
+                }
+
+            } else if let box = view as? NSBox {
+                if box.subviews.count>1,
+                    let clrBox = box.subviews[1] as? ColorBox {
+                    if clrBox.tag == tag || all {
+                        clrBox.isEnabled = true
+                    } else {
+                        clrBox.isEnabled = false
+                    }
                 }
             }
         }
@@ -244,6 +261,35 @@ extension NSTextField {
                 self.stringValue = String(round(doubleValue * 100) / 100)
             }
         }
+    }
+}
+
+extension CGPoint {
+    func atan2Rad(other: CGPoint) -> CGFloat {
+        let wid = self.x - other.x
+        let hei = self.y - other.y
+        return atan2(hei, wid)
+    }
+
+    func unitVector(other: CGPoint) -> CGPoint {
+        let wid = self.x - other.x
+        let hei = self.y - other.y
+        let hyp = hypot(wid, hei)
+        if hyp == 0 {
+            return CGPoint(x: 0, y: 0)
+        }
+        return CGPoint(x: wid/hyp, y: hei/hyp)
+    }
+
+    func sameLine(cp1: CGPoint, cp2: CGPoint,
+                  limit: CGFloat = 0.01) -> Bool {
+        let unit1 = cp1.unitVector(other: self)
+        let unit2 = cp2.unitVector(other: self)
+        if abs(unit1.x) - abs(unit2.x) < limit &&
+            abs(unit1.y) - abs(unit2.y) < limit {
+            return true
+        }
+        return false
     }
 }
 

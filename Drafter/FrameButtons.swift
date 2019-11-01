@@ -29,15 +29,19 @@ class FrameButtons: NSStackView {
         }
 
         if let group = self.subviews[5] as? NSButton {
-            group.state = curve.group > 0 ? .on : .off
+            group.state = curve.groups.count > 1 ? .on : .off
         }
 
         if curve.edit {
-            self.isEnable(tag: 4)
+            self.isEnabled(tag: 4)
         } else if curve.lock {
-            self.isEnable(tag: 6)
+            self.isEnabled(tag: 6)
         } else {
-            self.isEnable(all: true)
+            self.isEnabled(all: true)
+        }
+
+        if curve.groups.count>1 {
+            self.setEnabled(tag: 4, bool: false)
         }
     }
 

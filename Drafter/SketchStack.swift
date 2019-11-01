@@ -27,7 +27,7 @@ class SketchStack: NSStackView {
         return self.moveToZero(curve: curve, action: {
              if let img = curve.canvas.cgImage() {
                  return NSImage(cgImage: img,
-                                size: setup.stackSketchButtonSize)
+                                size: setup.stackButtonSize)
              }
             return nil
         })
@@ -56,7 +56,7 @@ class SketchStack: NSStackView {
             button.tag = index
             button.imageScaling = .scaleProportionallyDown
             button.setButtonType(.onOff)
-            button.setFrameSize(setup.stackSketchButtonSize)
+            button.setFrameSize(setup.stackButtonSize)
             button.state = .on
         }
 

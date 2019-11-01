@@ -6,7 +6,6 @@
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 //
 
-import Foundation
 import Cocoa
 
 class ControlPoint {

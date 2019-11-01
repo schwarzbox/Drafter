@@ -21,6 +21,7 @@ class Ruler: CAShapeLayer {
     var dotSize: CGFloat = setup.dotRadius
     var solidPath = NSBezierPath()
     var alphaPath = NSBezierPath()
+    var alphaLayer = CAShapeLayer()
 
     override init(layer: Any) {
         super.init(layer: layer)
@@ -42,17 +43,21 @@ class Ruler: CAShapeLayer {
             path: NSBezierPath(),
             strokeColor: setup.controlColor.sRGB(alpha: 0.5),
             actions: setup.disabledActions)
+
+         if let alphaLayer = self.sublayers?[0] as? CAShapeLayer {
+            self.alphaLayer = alphaLayer
+        }
     }
 
     func createRulers(points: [CGPoint], curves: [Curve],
                       curvePoints: [CGPoint] = [],
-                      exclude: Curve?, ctrl: Bool = false)
+                      exclude: [Curve] = [], ctrl: Bool = false)
         -> (delta: CGPoint, pnt: [String: (pos: CGPoint?,
                                             dist: CGFloat)]) {
 
         self.dotSize = self.parent!.dotRadius
         self.lineWidth = self.parent!.lineWidth
-        self.clearRulers()
+        self.alphaLayer.lineWidth = self.lineWidth
 
         var minDistX: CGFloat = CGFloat(MAXFLOAT)
         var minDistY: CGFloat = CGFloat(MAXFLOAT)
@@ -82,8 +87,7 @@ class Ruler: CAShapeLayer {
         return snap
     }
 
-    func updateRulers() {
-        self.removeFromSuperlayer()
+    func updateWithPath() {
         self.parent?.layer?.addSublayer(self)
     }
 
@@ -91,6 +95,8 @@ class Ruler: CAShapeLayer {
         self.removeFromSuperlayer()
         self.solidPath.removeAllPoints()
         self.alphaPath.removeAllPoints()
+        self.path = nil
+        self.alphaLayer.path = nil
     }
 
     func deltaRulers(rulerPoints: [String: RulerPoint?])
@@ -130,26 +136,27 @@ class Ruler: CAShapeLayer {
     }
 
     func findRulersToCurve(
-        points: [CGPoint], curves: [Curve], exclude: Curve? = nil,
+        points: [CGPoint], curves: [Curve], exclude: [Curve],
         minDistX: inout CGFloat,
         minDistY: inout CGFloat) -> [String: RulerPoint?] {
         var rulerPoints: [String: RulerPoint?] = [:]
         var rulerPointX: RulerPoint?
         var rulerPointY: RulerPoint?
+
         for cur in curves {
-            if let ex = exclude, ex == cur {
+            if exclude.contains(cur) {
                 continue
             }
-
             for pnt in points {
-                for curPnt in cur.boundsPoints {
+                let boundsPnt = cur.boundsPoints(curves: cur.groups)
+                for curPnt in boundsPnt {
                     if pnt.x <= curPnt.x+setup.rulersDelta &&
                         pnt.x >= curPnt.x-setup.rulersDelta {
 
                         let (minTarY, maxTarY) = self.findMinMax(
                             sel: pnt.y, tar: curPnt.y,
-                            min: cur.boundsPoints[0].y,
-                            max: cur.boundsPoints[2].y)
+                            min: boundsPnt[0].y,
+                            max: boundsPnt[2].y)
 
                         var minSelY = pnt.y
                         var maxSelY = pnt.y
@@ -174,8 +181,8 @@ class Ruler: CAShapeLayer {
                         pnt.y >= curPnt.y-setup.rulersDelta {
                         let (minTarX, maxTarX) = self.findMinMax(
                             sel: pnt.x, tar: curPnt.x,
-                            min: cur.boundsPoints[0].x,
-                            max: cur.boundsPoints[2].x)
+                            min: boundsPnt[0].x,
+                            max: boundsPnt[2].x)
 
                         var minSelX = pnt.x
                         var maxSelX = pnt.x
@@ -272,14 +279,17 @@ class Ruler: CAShapeLayer {
 
     func appendCustomRule(move: CGPoint, line: CGPoint) {
         self.solidPath.move(to: move)
+        self.solidPath.addPin(pos: move, size: self.dotSize)
         self.solidPath.line(to: line)
+        self.solidPath.addPin(pos: line, size: self.dotSize/2)
         self.solidPath.close()
         self.path = self.solidPath.cgPath
     }
 
     func showRulers(rulerPoints: [String: RulerPoint?],
                     ctrl: Bool = false) {
-
+        self.solidPath.removeAllPoints()
+        self.alphaPath.removeAllPoints()
         for (_, point) in rulerPoints {
             guard let pnt = point else { continue }
             let distX = abs(pnt.move.x - pnt.line.x)
@@ -309,11 +319,7 @@ class Ruler: CAShapeLayer {
             solidPath.addPin(pos: pnt.line, size: self.dotSize)
             solidPath.close()
         }
-
-        self.path = solidPath.cgPath
-        if let alphaLayer = self.sublayers?[0] as? CAShapeLayer {
-            alphaLayer.path = alphaPath.cgPath
-            alphaLayer.lineWidth = self.lineWidth
-        }
+        self.path = self.solidPath.cgPath
+        self.alphaLayer.path = self.alphaPath.cgPath
     }
 }

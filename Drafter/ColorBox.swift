@@ -30,13 +30,15 @@ class ColorBox: NSControl {
     }
 
     override func mouseDown(with event: NSEvent) {
-        if self.state == .off {
-            self.state = .on
-        } else {
-            self.state = .off
-        }
-        if let action = self.action {
-            NSApp.sendAction(action, to: self.target, from: self)
+        if self.isEnabled {
+            if self.state == .off {
+                self.state = .on
+            } else {
+                self.state = .off
+            }
+            if let action = self.action {
+                NSApp.sendAction(action, to: self.target, from: self)
+            }
         }
     }
 

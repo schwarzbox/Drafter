@@ -722,7 +722,7 @@ CA
                                 <rect key="frame" x="254" y="424" width="48" height="14"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" focusRingType="none" alignment="right" title="0" usesSingleLineMode="YES" id="S78-Uf-pJ3">
-                                    <font key="font" metaFont="message" size="11"/>
+                                    <font key="font" metaFont="label" size="11"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <allowedInputSourceLocales>
@@ -734,7 +734,7 @@ CA
                                 <rect key="frame" x="254" y="368" width="48" height="14"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" focusRingType="none" alignment="left" title="0" usesSingleLineMode="YES" id="XjF-X4-03k">
-                                    <font key="font" metaFont="message" size="11"/>
+                                    <font key="font" metaFont="label" size="11"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <allowedInputSourceLocales>
@@ -1173,7 +1173,7 @@ CA
                                 </scroller>
                             </scrollView>
                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hb4-rr-j5H" userLabel="ActionUI">
-                                <rect key="frame" x="894" y="71" width="130" height="627"/>
+                                <rect key="frame" x="894" y="141" width="130" height="627"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tt1-Nb-GLs" userLabel="ZoomUI">
                                         <rect key="frame" x="0.0" y="611" width="130" height="16"/>
@@ -1185,7 +1185,7 @@ CA
                                                     <constraint firstAttribute="width" constant="14" id="Haw-l9-7AD"/>
                                                 </constraints>
                                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="⚲" usesSingleLineMode="YES" id="f9p-AG-FYm" userLabel="Label">
-                                                    <font key="font" metaFont="message" size="11"/>
+                                                    <font key="font" metaFont="label" size="11"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                     <allowedInputSourceLocales>
@@ -1205,7 +1205,7 @@ CA
                                                 </connections>
                                             </slider>
                                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WfQ-tr-m6g" userLabel="Default">
-                                                <rect key="frame" x="80" y="-1" width="51" height="16"/>
+                                                <rect key="frame" x="80" y="0.0" width="51" height="16"/>
                                                 <popUpButtonCell key="cell" type="push" title="100" bezelStyle="rounded" alignment="center" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="K4m-Np-TAF" id="bQ9-oP-ET9">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="miniSystem"/>
@@ -1261,7 +1261,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="UZz-Pd-Vwr"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="x" usesSingleLineMode="YES" id="eWD-ok-leU" userLabel="Label">
-                                                            <font key="font" metaFont="message" size="11"/>
+                                                            <font key="font" metaFont="label" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1324,7 +1324,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="Nfp-Tu-1fV"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="y" usesSingleLineMode="YES" id="5mz-u2-Y1g" userLabel="Label">
-                                                            <font key="font" metaFont="message" size="11"/>
+                                                            <font key="font" metaFont="label" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1513,7 +1513,7 @@ CA
                                                             <constraint firstAttribute="width" constant="14" id="klp-de-q41"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="↺" usesSingleLineMode="YES" id="ABR-hK-3fO" userLabel="Label">
-                                                            <font key="font" metaFont="message" size="11"/>
+                                                            <font key="font" metaFont="label" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1660,7 +1660,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="gag-nL-Aen"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="▣" usesSingleLineMode="YES" id="ge9-CH-Lcu" userLabel="Label">
-                                                            <font key="font" metaFont="message" size="11"/>
+                                                            <font key="font" metaFont="label" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1946,8 +1946,8 @@ CA
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="80" id="p2s-MQ-GKJ"/>
                                                         </constraints>
-                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Stroke" usesSingleLineMode="YES" id="e3Q-vu-6up" userLabel="Label">
-                                                            <font key="font" metaFont="message" size="11"/>
+                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Stroke" usesSingleLineMode="YES" id="e3Q-vu-6up" userLabel="Label">
+                                                            <font key="font" metaFont="label" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="unemphasizedSelectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -2019,7 +2019,7 @@ CA
                                                         </constraints>
                                                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="yHs-7g-LBR"/>
                                                         <connections>
-                                                            <action selector="opacityCurve:" target="XfG-lQ-9wD" id="vww-DE-qRT"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="vww-DE-qRT"/>
                                                         </connections>
                                                     </slider>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WS9-yv-tv3" userLabel="AlphaLabel">
@@ -2037,7 +2037,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                         <connections>
-                                                            <action selector="opacityCurve:" target="XfG-lQ-9wD" id="KKc-rW-RJv"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="KKc-rW-RJv"/>
                                                         </connections>
                                                     </textField>
                                                 </subviews>
@@ -2064,7 +2064,7 @@ CA
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="80" id="dlv-RO-4Kd"/>
                                                         </constraints>
-                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Fill" usesSingleLineMode="YES" id="7rU-6M-UeL" userLabel="Label">
+                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Fill" usesSingleLineMode="YES" id="7rU-6M-UeL" userLabel="Label">
                                                             <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="unemphasizedSelectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2137,7 +2137,7 @@ CA
                                                         </constraints>
                                                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="JP7-oM-KK3"/>
                                                         <connections>
-                                                            <action selector="opacityCurve:" target="XfG-lQ-9wD" id="Kvt-Gp-MUn"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="Kvt-Gp-MUn"/>
                                                         </connections>
                                                     </slider>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="1" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3ha-J6-MKT" userLabel="AlphaLabel">
@@ -2155,7 +2155,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                         <connections>
-                                                            <action selector="opacityCurve:" target="XfG-lQ-9wD" id="5wr-5X-bQE"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="5wr-5X-bQE"/>
                                                         </connections>
                                                     </textField>
                                                 </subviews>
@@ -2190,7 +2190,7 @@ CA
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="80" id="5nS-0M-v40"/>
                                                         </constraints>
-                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Shadow" usesSingleLineMode="YES" id="EPw-1K-C9v" userLabel="Label">
+                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Shadow" usesSingleLineMode="YES" id="EPw-1K-C9v" userLabel="Label">
                                                             <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2255,7 +2255,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <slider verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="mdq-6Q-8wn" userLabel="AlphaSlider">
+                                                    <slider verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="mdq-6Q-8wn" userLabel="AlphaSlider">
                                                         <rect key="frame" x="16" y="-1" width="64" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="64" id="Bib-rR-k5b"/>
@@ -2263,10 +2263,10 @@ CA
                                                         </constraints>
                                                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="MHd-4D-HwW"/>
                                                         <connections>
-                                                            <action selector="setShadow:" target="XfG-lQ-9wD" id="o3K-DT-hkp"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="qN2-89-XgD"/>
                                                         </connections>
                                                     </slider>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="1" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Gh-zL-HD5" userLabel="AlphaLabel">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="2" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Gh-zL-HD5" userLabel="AlphaLabel">
                                                         <rect key="frame" x="82" y="0.0" width="46" height="18"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="46" id="EAk-Q3-GCk"/>
@@ -2281,7 +2281,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                         <connections>
-                                                            <action selector="setShadow:" target="XfG-lQ-9wD" id="COb-NQ-LSr"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="XWH-Iv-ddf"/>
                                                         </connections>
                                                     </textField>
                                                 </subviews>
@@ -2381,7 +2381,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <slider verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="tyT-In-lGL" userLabel="XSlider">
+                                                    <slider verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="tyT-In-lGL" userLabel="XSlider">
                                                         <rect key="frame" x="16" y="-1" width="64" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="AHh-ir-9np"/>
@@ -2392,7 +2392,7 @@ CA
                                                             <action selector="setShadow:" target="XfG-lQ-9wD" id="3Fn-GA-Nf6"/>
                                                         </connections>
                                                     </slider>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="2" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5rx-hV-RJH" userLabel="XLabel">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="1" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5rx-hV-RJH" userLabel="XLabel">
                                                         <rect key="frame" x="82" y="0.0" width="46" height="18"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="3x3-Rb-DEf"/>
@@ -2444,7 +2444,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <slider verticalHuggingPriority="750" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="qPp-QE-MN6" userLabel="YSlider">
+                                                    <slider verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="qPp-QE-MN6" userLabel="YSlider">
                                                         <rect key="frame" x="16" y="-1" width="64" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="64" id="N0c-8t-892"/>
@@ -2455,7 +2455,7 @@ CA
                                                             <action selector="setShadow:" target="XfG-lQ-9wD" id="GvW-4k-rKI"/>
                                                         </connections>
                                                     </slider>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="3" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ABH-PB-vdv" userLabel="YLabel">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="2" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ABH-PB-vdv" userLabel="YLabel">
                                                         <rect key="frame" x="82" y="0.0" width="46" height="18"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="46" id="Rcw-qa-13W"/>
@@ -2505,7 +2505,7 @@ CA
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="80" id="wno-xs-1Ey"/>
                                                         </constraints>
-                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Start" usesSingleLineMode="YES" id="0tw-p3-b8d" userLabel="Label">
+                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Start" usesSingleLineMode="YES" id="0tw-p3-b8d" userLabel="Label">
                                                             <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="unemphasizedSelectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2570,7 +2570,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="xp7-PQ-WcA" userLabel="AlphaGradientSlider">
+                                                    <slider verticalHuggingPriority="750" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="xp7-PQ-WcA" userLabel="AlphaGradientSlider">
                                                         <rect key="frame" x="16" y="-1" width="64" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="75t-XL-b68"/>
@@ -2578,10 +2578,10 @@ CA
                                                         </constraints>
                                                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="JBF-MR-cFB"/>
                                                         <connections>
-                                                            <action selector="opacityGradientCurve:" target="XfG-lQ-9wD" id="hbI-Dh-gUn"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="ot5-kF-QNT"/>
                                                         </connections>
                                                     </slider>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jg8-EK-sY4" userLabel="AlphaGradientLabel">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="3" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jg8-EK-sY4" userLabel="AlphaGradientLabel">
                                                         <rect key="frame" x="82" y="0.0" width="46" height="18"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="SSy-mY-PJX"/>
@@ -2596,7 +2596,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                         <connections>
-                                                            <action selector="opacityGradientCurve:" target="XfG-lQ-9wD" id="ue6-AE-atZ"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="9ak-lX-U2d"/>
                                                         </connections>
                                                     </textField>
                                                 </subviews>
@@ -2623,7 +2623,7 @@ CA
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="80" id="qJR-Es-LS6"/>
                                                         </constraints>
-                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Middle" usesSingleLineMode="YES" id="hzf-fG-Dm5" userLabel="Label">
+                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Middle" usesSingleLineMode="YES" id="hzf-fG-Dm5" userLabel="Label">
                                                             <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="unemphasizedSelectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2688,7 +2688,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <slider verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="cc2-J6-k2T" userLabel="AlphaGradientSlider">
+                                                    <slider verticalHuggingPriority="750" tag="4" translatesAutoresizingMaskIntoConstraints="NO" id="cc2-J6-k2T" userLabel="AlphaGradientSlider">
                                                         <rect key="frame" x="16" y="-1" width="64" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="64" id="YX5-3l-HAC"/>
@@ -2696,10 +2696,10 @@ CA
                                                         </constraints>
                                                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="hDw-r9-DU7"/>
                                                         <connections>
-                                                            <action selector="opacityGradientCurve:" target="XfG-lQ-9wD" id="ZOl-Eo-djF"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="9ay-1J-Zny"/>
                                                         </connections>
                                                     </slider>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="1" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="m8q-c6-7VM" userLabel="AlphaGradientLabel">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="4" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="m8q-c6-7VM" userLabel="AlphaGradientLabel">
                                                         <rect key="frame" x="82" y="0.0" width="46" height="18"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="6mx-jp-kYp"/>
@@ -2714,7 +2714,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                         <connections>
-                                                            <action selector="opacityGradientCurve:" target="XfG-lQ-9wD" id="Ika-uE-0XT"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="DJs-uf-PDh"/>
                                                         </connections>
                                                     </textField>
                                                 </subviews>
@@ -2741,7 +2741,7 @@ CA
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="80" id="LPx-m3-vYb"/>
                                                         </constraints>
-                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Final" usesSingleLineMode="YES" id="WnX-CH-m22" userLabel="Label">
+                                                        <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Final" usesSingleLineMode="YES" id="WnX-CH-m22" userLabel="Label">
                                                             <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="unemphasizedSelectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -2806,7 +2806,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <slider verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="1E3-aF-a4L" userLabel="AlphaGradientSlider">
+                                                    <slider verticalHuggingPriority="750" tag="5" translatesAutoresizingMaskIntoConstraints="NO" id="1E3-aF-a4L" userLabel="AlphaGradientSlider">
                                                         <rect key="frame" x="16" y="-1" width="64" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="PfY-9E-dxL"/>
@@ -2814,10 +2814,10 @@ CA
                                                         </constraints>
                                                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="1" doubleValue="1" tickMarkPosition="above" sliderType="linear" id="xul-49-66Q"/>
                                                         <connections>
-                                                            <action selector="opacityGradientCurve:" target="XfG-lQ-9wD" id="YUT-bj-qZk"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="s6o-1K-pba"/>
                                                         </connections>
                                                     </slider>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="2" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="L99-hr-NgA" userLabel="AlphaGradientLabel">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="5" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="L99-hr-NgA" userLabel="AlphaGradientLabel">
                                                         <rect key="frame" x="82" y="0.0" width="46" height="18"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="46" id="CoD-zT-4a0"/>
@@ -2832,7 +2832,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                         <connections>
-                                                            <action selector="opacityGradientCurve:" target="XfG-lQ-9wD" id="DpO-0f-N4j"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="jfr-9g-MSY"/>
                                                         </connections>
                                                     </textField>
                                                 </subviews>
@@ -3009,7 +3009,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Zn7-Tb-YDo" userLabel="FilterSlider">
+                                                    <slider verticalHuggingPriority="750" tag="6" translatesAutoresizingMaskIntoConstraints="NO" id="Zn7-Tb-YDo" userLabel="FilterSlider">
                                                         <rect key="frame" x="16" y="-1" width="64" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="W5I-jB-3OW"/>
@@ -3017,10 +3017,10 @@ CA
                                                         </constraints>
                                                         <sliderCell key="cell" controlSize="small" continuous="YES" state="on" alignment="left" maxValue="1" tickMarkPosition="above" sliderType="linear" id="d1m-dH-Uxo"/>
                                                         <connections>
-                                                            <action selector="opacityFilter:" target="XfG-lQ-9wD" id="cdm-tA-Dkf"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="FDB-po-lTL"/>
                                                         </connections>
                                                     </slider>
-                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gK9-BU-aZh" userLabel="FilterLabel">
+                                                    <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" tag="6" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gK9-BU-aZh" userLabel="FilterLabel">
                                                         <rect key="frame" x="82" y="0.0" width="46" height="18"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="46" id="h5y-0R-7XK"/>
@@ -3035,7 +3035,7 @@ CA
                                                             </allowedInputSourceLocales>
                                                         </textFieldCell>
                                                         <connections>
-                                                            <action selector="opacityFilter:" target="XfG-lQ-9wD" id="iJT-9a-7ob"/>
+                                                            <action selector="alphaCurve:" target="XfG-lQ-9wD" id="e0e-fa-Y3o"/>
                                                         </connections>
                                                     </textField>
                                                 </subviews>
@@ -3107,25 +3107,25 @@ CA
                             <constraint firstItem="8J2-pI-a7r" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="1dX-dI-E0F"/>
                             <constraint firstItem="O9R-EM-mHj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="7Qj-t1-5X2"/>
                             <constraint firstItem="3CV-76-icw" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="8Hi-4Z-7x9"/>
-                            <constraint firstItem="hb4-rr-j5H" firstAttribute="centerY" secondItem="m2S-Jp-Qdl" secondAttribute="centerY" id="K3A-AP-N0g"/>
                             <constraint firstItem="3CV-76-icw" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Oui-ex-Sau"/>
                             <constraint firstAttribute="bottom" secondItem="3CV-76-icw" secondAttribute="bottom" id="PR2-s8-zaG"/>
                             <constraint firstAttribute="trailing" secondItem="O9R-EM-mHj" secondAttribute="trailing" id="Pob-Ho-uZS"/>
                             <constraint firstItem="8J2-pI-a7r" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="bOW-3C-6TX"/>
                             <constraint firstAttribute="bottom" secondItem="O9R-EM-mHj" secondAttribute="bottom" id="dVA-sY-4r9"/>
+                            <constraint firstItem="hb4-rr-j5H" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="o5Q-ye-YJm"/>
                             <constraint firstAttribute="trailing" secondItem="hb4-rr-j5H" secondAttribute="trailing" id="rie-nJ-Jrm"/>
                             <constraint firstItem="O9R-EM-mHj" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="ukc-ce-9pE"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="actionUI" destination="hb4-rr-j5H" id="fPT-MN-lUG"/>
-                        <outlet property="basicUI" destination="5Em-2e-JeU" id="yuR-rz-2ez"/>
                         <outlet property="colorUI" destination="crj-eD-SYI" id="GE2-3Y-IIk"/>
                         <outlet property="curveBlur" destination="DLF-9B-oMc" id="RfE-UU-vhc"/>
                         <outlet property="curveCap" destination="CUY-UM-Qrn" id="C8W-G8-PCA"/>
                         <outlet property="curveDashGap" destination="4et-ub-QrO" id="rCc-Xv-EUO"/>
                         <outlet property="curveDashGapLabel" destination="Tzc-m4-TMu" id="OfZ-7j-Uxq"/>
                         <outlet property="curveFillColor" destination="bRj-IO-uih" id="kdp-Gn-0Vj"/>
+                        <outlet property="curveFillOpacity" destination="rV1-6R-Gf8" id="gAZ-ct-pp5"/>
                         <outlet property="curveFilterOpacity" destination="hEX-ml-IFK" id="WbH-Dc-SDO"/>
                         <outlet property="curveGradFinOpacity" destination="IDR-Sq-tdd" id="kBw-fy-hUL"/>
                         <outlet property="curveGradFinal" destination="OOy-nU-5GK" id="bLN-ME-30C"/>
@@ -3135,8 +3135,6 @@ CA
                         <outlet property="curveGradStart" destination="EXf-g8-Fl6" id="e0a-GO-p6M"/>
                         <outlet property="curveHei" destination="pGW-v8-alg" id="YxR-PH-1Ur"/>
                         <outlet property="curveJoin" destination="bcx-p5-59K" id="b4g-b7-bzM"/>
-                        <outlet property="curveOpacityFill" destination="rV1-6R-Gf8" id="gAZ-ct-pp5"/>
-                        <outlet property="curveOpacityStroke" destination="hV0-mx-U0Y" id="I4A-WY-rnh"/>
                         <outlet property="curveRotate" destination="AjF-c7-u8G" id="LO4-Ii-rRt"/>
                         <outlet property="curveShadowColor" destination="eAz-tN-gv1" id="bEG-18-ONS"/>
                         <outlet property="curveShadowOffsetX" destination="vun-6O-RWm" id="hh9-nc-g4w"/>
@@ -3144,17 +3142,16 @@ CA
                         <outlet property="curveShadowOpacity" destination="226-09-wn7" id="ejc-q5-PMo"/>
                         <outlet property="curveShadowRadius" destination="oLT-I6-kzm" id="5XJ-Pj-ZMd"/>
                         <outlet property="curveStrokeColor" destination="GtU-Ln-b9N" id="TUW-a3-0Xf"/>
+                        <outlet property="curveStrokeOpacity" destination="hV0-mx-U0Y" id="I4A-WY-rnh"/>
                         <outlet property="curveWid" destination="sOc-G5-A1b" id="d2J-Gh-ZhN"/>
                         <outlet property="curveWidth" destination="V2L-9t-x5W" id="43N-dW-nK8"/>
                         <outlet property="curveX" destination="YVm-we-s7f" id="Xp4-0I-BXF"/>
                         <outlet property="curveY" destination="nm1-io-l7e" id="3aH-h8-boy"/>
-                        <outlet property="filterUI" destination="Dt8-Zp-RN6" id="veJ-X8-88X"/>
                         <outlet property="frameUI" destination="tZ4-A6-VtG" id="4lN-9p-2t2"/>
                         <outlet property="locationX" destination="WHP-Tp-i3C" id="MRs-M7-y5E"/>
                         <outlet property="locationY" destination="Iiw-0f-p6q" id="aRL-2R-i6o"/>
                         <outlet property="sketchUI" destination="wM8-iu-rIZ" id="jvc-RF-p3g"/>
                         <outlet property="sketchView" destination="O9R-EM-mHj" id="l29-MB-uqb"/>
-                        <outlet property="strokeUI" destination="VsG-jT-1k6" id="ydV-mG-Bx0"/>
                         <outlet property="textUI" destination="xPr-66-BwF" id="OLm-6D-Te4"/>
                         <outlet property="toolUI" destination="8J2-pI-a7r" id="BE5-Yv-TSt"/>
                         <outlet property="zoomDefaultSketch" destination="WfQ-tr-m6g" id="ke5-Vz-rgJ"/>
