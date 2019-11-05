@@ -14,6 +14,14 @@ enum Tools: Int {
     static subscript(i: Int) -> Tools {
         Tools(rawValue: i) ?? .drag
     }
+    static func getName(tool: Tools) -> String {
+        switch tool {
+        case .drag: return "drag"
+        case .line, stylus: return "line"
+        case .text: return "text"
+        default: return "shape"
+        }
+    }
 }
 
 let toolsKeys: [String: Tools] =
@@ -75,7 +83,7 @@ struct Setup {
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 
-    let rulersDelta: CGFloat = 2
+    let rulersDelta: CGFloat = 1.1
     let rulersFontSize: CGFloat = 10
 
     let fontFamily: String = "Helvetica"

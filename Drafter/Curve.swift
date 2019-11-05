@@ -110,16 +110,22 @@ class Curve: Equatable {
 
     var points: [ControlPoint] = []
 
+    var frameAngle: CGFloat = 0
     var rounded: CGPoint?
     var gradient: Bool = false
     var fill: Bool = false
     var edit: Bool = false
     var lock: Bool = false
-    var awake: Bool = false
 
+    var name: String = "" {
+        didSet {
+            oldName = oldValue
+        }
+    }
+    var oldName: String = ""
     var controlDot: Dot?
     var controlFrame: ControlFrame?
-    var frameAngle: CGFloat = 0
+
     var groups: [Curve] = []
 
     init(parent: SketchPad,
@@ -187,6 +193,20 @@ class Curve: Equatable {
         // fix points position
         let range = [Int](0..<self.points.count)
         self.moveControlPoints(index: range, tags: [2])
+    }
+
+    func setGroups(curves: [Curve]) {
+        self.groups.append(contentsOf: curves)
+    }
+
+    func setName(name: String, curves: [Curve]) {
+       var count = 1
+       var newName = name + " " + String(count)
+       for cur in curves where cur.name == newName {
+           count+=1
+           newName = name + " " + String(count)
+       }
+        self.name = newName
     }
 
     func delete() {

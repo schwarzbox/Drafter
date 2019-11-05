@@ -312,8 +312,8 @@ extension CALayer {
                  return true
             }
         } else {
-            if pos.x > self.frame.minX && pos.x < self.frame.maxX  &&
-                pos.y > self.frame.minY && pos.y < self.frame.maxY {
+            if pos.x >= self.frame.minX-1 && pos.x <= self.frame.maxX+1  &&
+                pos.y >= self.frame.minY-1 && pos.y <= self.frame.maxY+1 {
                 return true
             }
         }
@@ -341,11 +341,9 @@ extension CALayer {
         return nil
     }
 
-    func cgImage() -> CGImage? {
-
-        let width = Int(self.bounds.width+1)
-        let height = Int(self.bounds.height+1)
-
+    func cgImage(pad: CGFloat) -> CGImage? {
+        let width = Int(max(self.bounds.width, self.bounds.height)+pad+1)
+        let height = Int(max(self.bounds.width, self.bounds.height)+pad+1)
         let canvas = CGContext(
             data: nil, width: width, height: height,
             bitsPerComponent: 8, bytesPerRow: 0,

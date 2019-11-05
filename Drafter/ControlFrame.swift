@@ -148,7 +148,7 @@ class ControlFrame: CALayer {
                 var dy: CGFloat = 0
                 var width = self.frame.width - self.dotSize
                 var height: CGFloat = self.dotRadius
-                let dt = self.dotMag / 2
+                let dt = self.dotMag/2
                 if i==1 || i==5 {
                     dx = i==1 ? dt : -dt
                     width = self.dotRadius
@@ -258,7 +258,6 @@ class ControlFrame: CALayer {
             options: options, owner: parent)
 
         parent.addTrackingArea(area)
-
         cp.tag = tag
         self.addSublayer(cp)
     }
@@ -282,15 +281,23 @@ class ControlFrame: CALayer {
     }
 
     func increaseDotSize(layer: Dot) {
-        if layer.tag == 9 {
+        switch layer.tag {
+        case 9:
             let size = self.dotSize + self.dotMag
-            layer.updateSize(width: size, height: size,
-                             lineWidth: self.lineWidth,
-                             circle: false)
+                       layer.updateSize(width: size, height: size,
+                                        lineWidth: self.lineWidth,
+                                        circle: false)
+        case 1, 5:
+            NSCursor.resizeLeftRight.set()
+        case 3, 7:
+            NSCursor.resizeUpDown.set()
+        default:
+            break
         }
     }
 
     func decreaseDotSize() {
+        NSCursor.arrow.set()
         for layer in self.sublayers ?? [] {
             if let dot = layer as? Dot, dot.tag == 9 {
                 let size = self.dotSize

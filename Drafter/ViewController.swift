@@ -8,10 +8,12 @@
 
 import Cocoa
 
-class ViewController: NSViewController {
+class ViewController: NSViewController,
+    NSTableViewDataSource, NSTableViewDelegate {
     var window: NSWindow!
     @IBOutlet weak var sketchView: SketchPad!
-    @IBOutlet weak var sketchUI: SketchStack!
+
+    @IBOutlet weak var sketchUI: NSTableView!
 
     @IBOutlet weak var locationX: NSTextField!
     @IBOutlet weak var locationY: NSTextField!
@@ -68,6 +70,8 @@ class ViewController: NSViewController {
     var colorPanel: ColorPanel?
     var savePanel: NSSavePanel?
 
+    var selectedSketch: Int = -1
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // mouse
@@ -89,13 +93,18 @@ class ViewController: NSViewController {
                 return $0
             }
         }
+        sketchUI.delegate = self
+        sketchUI.dataSource = self
+        sketchUI.refusesFirstResponder = true
+//        sketchUI.registerForDraggedTypes([.string])
     }
 
-//    MARK: Key
+//    MARK: Keys
     func eventTest(event: NSEvent) -> Bool {
         guard NSApplication.shared.keyWindow === self.window else {
             return false
         }
+
         if !event.modifierFlags.contains(.command),
             let resp = self.window.firstResponder,
             resp.isKind(of: NSWindow.self) {
@@ -261,7 +270,6 @@ class ViewController: NSViewController {
         sketchView.locationX = locationX
         sketchView.locationY = locationY
 
-        sketchView.sketchUI = sketchUI
         sketchView.toolUI = toolUI
         sketchView.frameUI = frameUI
         sketchView.textUI = textUI
@@ -288,7 +296,6 @@ class ViewController: NSViewController {
         nc.addObserver(self, selector: #selector(updateSliders),
                        name: Notification.Name("updateSliders"),
                        object: nil)
-
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
     }
 
@@ -313,9 +320,7 @@ class ViewController: NSViewController {
 
     @objc func updateSketchColor() {
         sketchView!.colorCurve()
-        if let curve = sketchView!.selectedCurve {
-            self.updateSketchUIButtons(curve: curve)
-        }
+        self.updateSelectedSketch()
     }
 
     func showUnusedViews(_ bool: Bool, from: Int = 2) {
@@ -344,6 +349,7 @@ class ViewController: NSViewController {
 
     @objc func updateSliders() {
         let view = sketchView!
+        defer {self.updateSelectedSketch()}
         if let curve = view.selectedCurve, !curve.lock {
 
             let bounds = view.groups.count>1
@@ -354,8 +360,6 @@ class ViewController: NSViewController {
             self.curveWid.doubleValue = Double(bounds.width)
             self.curveHei.doubleValue = Double(bounds.height)
             self.curveRotate.doubleValue = Double(curve.angle)
-
-            defer {self.updateSketchUIButtons(curve: curve)}
 
             if curve.groups.count==1 && view.groups.count <= 1 {
                 self.showUnusedViews(true)
@@ -405,10 +409,122 @@ class ViewController: NSViewController {
         }
     }
 
-    func updateSketchUIButtons(curve: Curve) {
-        if let index = sketchView!.curves.firstIndex(of: curve) {
-            sketchUI.updateImageButton(index: index, curve: curve)
+    func updateSelectedSketch() {
+        sketchUI.reloadData()
+        if let curve = sketchView!.selectedCurve,
+            let index = sketchView!.curves.firstIndex(of: curve) {
+            selectedSketch = index
+        } else {
+            selectedSketch = -1
         }
+    }
+
+//    MARK: sketchUI func
+    func moveToZero(curve: Curve, action: () -> NSImage?) -> NSImage? {
+        var image: NSImage?
+        let line50 = curve.lineWidth / 2
+        var oX = curve.canvas.bounds.minX - line50
+        var oY = curve.canvas.bounds.minY - line50
+        if curve.canvas.bounds.width > curve.canvas.bounds.height {
+            oY -= (curve.canvas.bounds.width-curve.canvas.bounds.height)/2
+        } else {
+            oX -= (curve.canvas.bounds.height-curve.canvas.bounds.width)/2
+        }
+        curve.applyTransform(oX: oX, oY: oY,
+           transform: {
+               curve.updateLayer()
+               image = action()
+        })
+        curve.updateLayer()
+        return image
+    }
+
+    func getImage(index: Int, curve: Curve) -> NSImage? {
+        let oldLineWidth = curve.lineWidth
+        let side = max(curve.canvas.bounds.width,
+                       curve.canvas.bounds.height)
+        let size = setup.stackButtonSize.width
+        let delta = size * (side/(size * 50))
+        curve.lineWidth *= delta
+        return self.moveToZero(curve: curve, action: {
+            if let img = curve.canvas.cgImage(pad: curve.lineWidth) {
+                curve.lineWidth = oldLineWidth
+                return NSImage(cgImage: img,
+                               size: setup.stackButtonSize)
+            }
+            curve.lineWidth = oldLineWidth
+            return nil})
+    }
+
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        return sketchView!.curves.count
+    }
+
+    func tableView(_ tableView: NSTableView,
+                   viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        var image: NSImage?
+        var text: String = ""
+        var cellID = NSUserInterfaceItemIdentifier.init("shapeID")
+
+        let view = sketchView!
+        guard row>=0 && row < view.curves.count else {
+            return nil
+        }
+        let curve = sketchView!.curves[row]
+        if tableColumn == tableView.tableColumns[0] {
+            if curve.canvas.isHidden {
+                curve.canvas.isHidden = false
+                image = self.getImage(index: row, curve: curve)
+                curve.canvas.isHidden = true
+            } else if curve.groups.count>1 {
+                let img = NSImage.iconViewTemplateName
+                image = NSImage.init(imageLiteralResourceName: img)
+            } else {
+                image = self.getImage(index: row, curve: curve)
+            }
+            text = curve.name
+            cellID = NSUserInterfaceItemIdentifier.init("shapeID")
+        }
+
+        if let cell = tableView.makeView(withIdentifier: cellID,
+                                         owner: nil) as? NSTableCellView {
+
+            cell.imageView?.image = image ?? nil
+
+            cell.textField?.tag = row
+            cell.textField?.stringValue = text
+            cell.textField?.backgroundColor = NSColor.clear
+            cell.textField?.textColor = NSColor.secondaryLabelColor
+            if row == selectedSketch {
+                cell.textField?.backgroundColor = setup.fillColor
+            }
+
+            if let visButton = cell.subviews[2] as? NSButton {
+                visButton.tag = row
+                visButton.isEnabled = curve.edit ? false : true
+                visButton.state = curve.canvas.isHidden ? .off : .on
+            }
+            if let lockButton = cell.subviews[3] as? NSButton {
+                lockButton.tag = row
+                lockButton.isEnabled = curve.edit ? false : true
+                lockButton.state = curve.lock ? .on : .off
+            }
+            return cell
+        }
+        return nil
+    }
+
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        selectedSketch = sketchUI.selectedRow
+        sketchView!.selectSketch(tag: selectedSketch)
+    }
+
+//    MARK: SketchUI Actions
+    @IBAction func visibleSketch(_ sender: NSButton) {
+        sketchView!.visibleSketch(sender: sender)
+    }
+    @IBAction func renameSketch(_ sender: NSTextField) {
+        sketchView!.curves[sender.tag].name = sender.stringValue
     }
 
 //    MARK: Zoom Actions
@@ -651,6 +767,20 @@ class ViewController: NSViewController {
     }
 
 //    MARK: Menu actions
+    @IBAction func undo(_ sender: NSMenuItem) {
+        print("undo")
+//        SketchView!.undoCurve()
+    }
+
+    @IBAction func redo(_ sender: NSMenuItem) {
+        print("redo")
+        //        SketchView!.redoCurve()
+    }
+    @IBAction func cut(_ sender: NSMenuItem) {
+        sketchView!.copyCurve(from: sketchView!.selectedCurve)
+        sketchView!.deleteCurve()
+    }
+
     @IBAction func copy(_ sender: NSMenuItem) {
         sketchView!.copyCurve(from: sketchView!.selectedCurve)
     }
@@ -665,19 +795,12 @@ class ViewController: NSViewController {
             y: deltaY + view.bounds.minY))
     }
 
-    @IBAction func cut(_ sender: NSMenuItem) {
-        sketchView!.copyCurve(from: sketchView!.selectedCurve)
-        sketchView!.deleteCurve()
+    @IBAction func group(_ sender: NSMenuItem) {
+        sketchView!.groupCurve(sender: sender)
     }
 
-    @IBAction func undo(_ sender: NSMenuItem) {
-        print("undo")
-//        SketchView!.undoCurve()
-    }
-
-    @IBAction func redo(_ sender: NSMenuItem) {
-        print("redo")
-        //        SketchView!.redoCurve()
+    @IBAction func ungroup(_ sender: NSMenuItem) {
+        sketchView!.groupCurve(sender: sender)
     }
 
     @IBAction func delete(_ sender: NSMenuItem) {
@@ -743,6 +866,8 @@ class ViewController: NSViewController {
                         let ext = filePath.pathExtension
                         if ext == "png" {
                             self.openPng(filePath: filePath)
+                        } else if ext == "drf" {
+                            self.openDrf(filePath: filePath)
                         } else if ext == "svg" {
                             self.openSvg(filePath: filePath)
                         }
@@ -786,6 +911,10 @@ class ViewController: NSViewController {
 
     func openSvg(filePath: URL) {
         print("open svg")
+    }
+
+    func openDrf(filePath: URL) {
+        print("open drf")
     }
 
     func saveSketch(url: URL, name: String, ext: String) {

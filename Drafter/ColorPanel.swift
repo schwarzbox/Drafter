@@ -87,11 +87,13 @@ class ColorPanel: NSStackView {
 
         if let text = sender as? NSTextField {
             color = self.setHexColor(hex: text.stringValue)
+            if text.tag == self.colorTag {
+                self.sharedColorPanel?.color = color
+            }
         } else if let panel = sender as? NSColorPanel {
             color = self.setColor(color: panel.color)
+            self.sharedColorPanel?.color = color
         }
-
-        self.sharedColorPanel?.color = color
 
         let nc = NotificationCenter.default
         nc.post(name: Notification.Name("updateSketchColor"),
