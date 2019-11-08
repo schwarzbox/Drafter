@@ -18,7 +18,7 @@ struct RulerPoint {
 
 class Ruler: CAShapeLayer {
     var parent: SketchPad?
-    var dotSize: CGFloat = setup.dotRadius
+    var dotSize: CGFloat = setEditor.dotRadius
     var solidPath = NSBezierPath()
     var alphaPath = NSBezierPath()
     var alphaLayer = CAShapeLayer()
@@ -33,16 +33,16 @@ class Ruler: CAShapeLayer {
     init(parent: SketchPad) {
         self.parent = parent
         super.init()
-        self.strokeColor = setup.controlColor.cgColor
+        self.strokeColor = setEditor.controlColor.cgColor
         self.fillColor = nil
 
         self.dotSize = parent.dotRadius
         self.lineWidth = parent.lineWidth
-        self.actions = setup.disabledActions
+        self.actions = setEditor.disabledActions
         self.makeShape(
             path: NSBezierPath(),
-            strokeColor: setup.controlColor.sRGB(alpha: 0.5),
-            actions: setup.disabledActions)
+            strokeColor: setEditor.controlColor.sRGB(alpha: 0.5),
+            actions: setEditor.disabledActions)
 
          if let alphaLayer = self.sublayers?[0] as? CAShapeLayer {
             self.alphaLayer = alphaLayer
@@ -116,14 +116,14 @@ class Ruler: CAShapeLayer {
             let dY = pnt.move.y - pnt.line.y
 
             result[key] = (pos: pnt.move, dist: 0)
-            if abs(dX) < setup.rulersDelta && abs(dX) >= deltaX {
+            if abs(dX) < setEditor.rulersDelta && abs(dX) >= deltaX {
                 if abs(dY) > result["y"]?.dist ?? 0 {
                     result["y"]?.dist = (abs(dY) * 10).rounded()/10
                 }
                 deltaX = abs(dX)
                 signX = dX>0 ? 1 : -1
             }
-            if abs(dY) < setup.rulersDelta && abs(dY) >= deltaY {
+            if abs(dY) < setEditor.rulersDelta && abs(dY) >= deltaY {
                 if abs(dX) > result["x"]?.dist ?? 0 {
                     result["x"]?.dist = (abs(dX) * 10).rounded()/10
                 }
@@ -150,8 +150,8 @@ class Ruler: CAShapeLayer {
             for pnt in points {
                 let boundsPnt = cur.boundsPoints(curves: cur.groups)
                 for curPnt in boundsPnt {
-                    if pnt.x <= curPnt.x+setup.rulersDelta &&
-                        pnt.x >= curPnt.x-setup.rulersDelta {
+                    if pnt.x <= curPnt.x+setEditor.rulersDelta &&
+                        pnt.x >= curPnt.x-setEditor.rulersDelta {
 
                         let (minTarY, maxTarY) = self.findMinMax(
                             sel: pnt.y, tar: curPnt.y,
@@ -177,8 +177,8 @@ class Ruler: CAShapeLayer {
                         }
                     }
 
-                    if pnt.y <= curPnt.y+setup.rulersDelta &&
-                        pnt.y >= curPnt.y-setup.rulersDelta {
+                    if pnt.y <= curPnt.y+setEditor.rulersDelta &&
+                        pnt.y >= curPnt.y-setEditor.rulersDelta {
                         let (minTarX, maxTarX) = self.findMinMax(
                             sel: pnt.x, tar: curPnt.x,
                             min: boundsPnt[0].x,
@@ -225,8 +225,8 @@ class Ruler: CAShapeLayer {
         var rulerPointX: RulerPoint?
         var rulerPointY: RulerPoint?
         for pnt in curvePoints {
-            if point.x <= pnt.x+setup.rulersDelta &&
-                point.x >= pnt.x-setup.rulersDelta {
+            if point.x <= pnt.x+setEditor.rulersDelta &&
+                point.x >= pnt.x-setEditor.rulersDelta {
                 let distY = abs(pnt.y - point.y)
                 if distY < minDistY {
                     minDistY = distY
@@ -237,8 +237,8 @@ class Ruler: CAShapeLayer {
                     maxLine: CGPoint(x: pnt.x, y: pnt.y))
                 }
             }
-            if point.y <= pnt.y+setup.rulersDelta &&
-                point.y >= pnt.y-setup.rulersDelta {
+            if point.y <= pnt.y+setEditor.rulersDelta &&
+                point.y >= pnt.y-setEditor.rulersDelta {
                 let distX = abs(pnt.x - point.x)
                 if distX < minDistX {
                     minDistX = distX
@@ -298,11 +298,11 @@ class Ruler: CAShapeLayer {
             var move = CGPoint(x: pnt.move.x, y: pnt.move.y)
             var maxMove = CGPoint(x: pnt.maxMove.x, y: pnt.maxMove.y)
             let maxLine =  CGPoint(x: pnt.maxLine.x, y: pnt.maxLine.y)
-            if distX <= setup.rulersDelta {
+            if distX <= setEditor.rulersDelta {
                 move.x = pnt.line.x
                 maxMove.x = pnt.line.x
             }
-            if distY <= setup.rulersDelta {
+            if distY <= setEditor.rulersDelta {
                 move.y = pnt.line.y
                 maxMove.y = pnt.line.y
             }

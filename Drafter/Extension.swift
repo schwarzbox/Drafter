@@ -95,7 +95,7 @@ extension NSBezierPath {
 
                 oldPoint = cPnt[0]
                 if self.rectPath(path,
-                                 pad: setup.dotSize).contains(pos) {
+                                 pad: setEditor.dotSize).contains(pos) {
                     return (index: i, points: cPnt)
                 }
             case .curveTo:
@@ -109,7 +109,7 @@ extension NSBezierPath {
                 }
                 oldPoint = cPnt[2]
                 if self.rectPath(path,
-                                 pad: setup.dotSize).contains(pos) {
+                                 pad: setEditor.dotSize).contains(pos) {
                     return (index: i, points: cPnt)
                 }
             case .closePath:
@@ -308,7 +308,7 @@ extension CALayer {
             let dx = pos.x - self.position.x
             let dy = pos.y - self.position.y
             let dist: CGFloat = dx*dx + dy*dy
-            if dist < (radius * radius) {
+            if dist < (radius * radius) + 1 {
                  return true
             }
         } else {
@@ -385,11 +385,11 @@ extension CALayer {
         txt.alignmentMode = .center
         txt.backgroundColor = backgroundColor?.cgColor
         txt.foregroundColor = foregroundColor?.cgColor
-        txt.actions = setup.disabledActions
+        txt.actions = setEditor.disabledActions
         let font = CTFontCreateWithName(
             NSFont.systemFont(
                 ofSize: 0, weight: .light).fontName as CFString, 0, nil)
-        txt.fontSize = setup.rulersFontSize
+        txt.fontSize = setEditor.rulersFontSize
         txt.font = font
         txt.string = text
 
@@ -464,7 +464,7 @@ extension NSSavePanel {
         self.directoryURL = FileManager.default.urls(
             for: .desktopDirectory, in: .userDomainMask).first!
 
-        self.allowedFileTypes = setup.fileTypes
+        self.allowedFileTypes = setEditor.fileTypes
         self.allowsOtherFileTypes = false
         self.isExtensionHidden = false
         self.canSelectHiddenExtension = true
@@ -482,7 +482,7 @@ extension NSSavePanel {
         let popup = NSPopUpButton()
         popup.autoenablesItems = false
 
-        for item in setup.fileTypes {
+        for item in setEditor.fileTypes {
             popup.addItem(withTitle: "\(item.uppercased())")
         }
 
@@ -513,7 +513,7 @@ extension NSSavePanel {
 
 extension NSOpenPanel {
     func setupPanel() {
-        self.allowedFileTypes = setup.fileTypes
+        self.allowedFileTypes = setEditor.fileTypes
         self.allowsMultipleSelection = false
         self.canChooseDirectories = false
         self.canCreateDirectories = false

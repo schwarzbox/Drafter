@@ -24,18 +24,18 @@ class Curve: Equatable {
     var layers: [CALayer] = []
 
     var angle: CGFloat = 0.0
-    var lineWidth = setup.lineWidth {
+    var lineWidth = setCurve.lineWidth {
         willSet(value) {
             self.canvas.lineWidth = value
             self.filterLayer.lineWidth = value
         }
     }
 
-    var cap: Int = setup.lineCap
-    var join: Int = setup.lineJoin
-    var dash: [NSNumber] = setup.lineDashPattern
+    var cap: Int = setCurve.lineCap
+    var join: Int = setCurve.lineJoin
+    var dash: [NSNumber] = setCurve.lineDashPattern
 
-    var colors: [NSColor] = setup.colors {
+    var colors: [NSColor] = setCurve.colors {
         willSet(value) {
             var gradColors: [CGColor] = []
             for (i, color) in value.enumerated() {
@@ -60,7 +60,7 @@ class Curve: Equatable {
         }
     }
 
-    var alpha: [CGFloat] = setup.alpha {
+    var alpha: [CGFloat] = setCurve.alpha {
         willSet(value) {
             self.canvas.strokeColor = self.canvas.strokeColor?.sRGB(
                 alpha: value[0])
@@ -80,7 +80,7 @@ class Curve: Equatable {
         }
     }
 
-    var shadow: [CGFloat] = setup.shadow {
+    var shadow: [CGFloat] = setCurve.shadow {
         willSet(value) {
             self.canvas.shadowRadius = value[0]
             self.canvas.shadowOffset = CGSize(width: value[1],
@@ -88,20 +88,20 @@ class Curve: Equatable {
         }
     }
 
-    var gradientDirection: [CGPoint] = setup.gradientDirection {
+    var gradientDirection: [CGPoint] = setCurve.gradientDirection {
         willSet(value) {
             self.gradientLayer.startPoint = value[0]
             self.gradientLayer.endPoint = value[1]
         }
     }
 
-    var gradientLocation: [NSNumber] = setup.gradientLocation {
+    var gradientLocation: [NSNumber] = setCurve.gradientLocation {
         willSet(value) {
             self.gradientLayer.locations = value
         }
     }
 
-    var blur: Double = setup.minBlur {
+    var blur: Double = setCurve.minBlur {
         willSet(value) {
             self.filterLayer.setValue(value,
                 forKeyPath: "filters.CIGaussianBlur.inputRadius")
@@ -119,7 +119,15 @@ class Curve: Equatable {
 
     var name: String = "" {
         didSet {
-            oldName = oldValue
+            if !oldValue.isEmpty {
+                oldName = oldValue
+            }
+        }
+        willSet {
+            if oldName.isEmpty {
+                oldName = newValue
+            }
+
         }
     }
     var oldName: String = ""
@@ -147,9 +155,9 @@ class Curve: Equatable {
                 self.filterLayer.filters?.append(filter)
             }
         }
-        self.canvas.actions = setup.disabledActions
+        self.canvas.actions = setEditor.disabledActions
         for i in 0..<self.layers.count {
-            self.layers[i].actions = setup.disabledActions
+            self.layers[i].actions = setEditor.disabledActions
             self.canvas.addSublayer(layers[i])
         }
         self.updateLayer()
@@ -306,7 +314,7 @@ class Curve: Equatable {
     }
 
     func insertPoint(pos: CGPoint, index: Int) -> ControlPoint {
-       var size = setup.dotSize
+       var size = setEditor.dotSize
        var dotRadius = size/2
        if let parent = self.parent {
            size = parent.dotSize
@@ -316,12 +324,12 @@ class Curve: Equatable {
                          width: size, height: size, rounded: dotRadius)
        let cp1 = Dot.init(x: pos.x, y: pos.y,
                           width: size, height: size, rounded: dotRadius,
-                          strokeColor: setup.fillColor,
-                          fillColor: setup.strokeColor)
+                          strokeColor: setEditor.fillColor,
+                          fillColor: setEditor.strokeColor)
        let cp2 = Dot.init(x: pos.x, y: pos.y,
                           width: size, height: size, rounded: dotRadius,
-                          strokeColor: setup.fillColor,
-                          fillColor: setup.strokeColor)
+                          strokeColor: setEditor.fillColor,
+                          fillColor: setEditor.strokeColor)
 
        let cp = ControlPoint.init(mp: mp, cp1: cp1, cp2: cp2)
        if index >= self.points.count {
@@ -346,7 +354,7 @@ class Curve: Equatable {
             }
 
             if self.path.rectPath(self.path,
-                                  pad: setup.dotRadius).contains(pos),
+                                  pad: setEditor.dotRadius).contains(pos),
                 let segment = self.path.findPath(pos: pos) {
 
                 let pnt = self.insertPoint(pos: pos,

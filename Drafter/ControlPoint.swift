@@ -36,12 +36,12 @@ class ControlPoint {
         for line in self.lines {
             line.isHidden = true
             line.fillColor = nil
-            line.strokeColor = setup.fillColor.cgColor
-            line.lineWidth = setup.lineWidth
-            line.actions = setup.disabledActions
+            line.strokeColor = setEditor.fillColor.cgColor
+            line.lineWidth = setEditor.lineWidth
+            line.actions = setEditor.disabledActions
             line.makeShape(path: NSBezierPath(),
-                           strokeColor: setup.strokeColor,
-                           dashPattern: setup.controlDashPattern,
+                           strokeColor: setEditor.strokeColor,
+                           dashPattern: setEditor.lineDashPattern,
                            actions: line.actions)
         }
     }
@@ -102,7 +102,8 @@ class ControlPoint {
                 parent.layer!.addSublayer(line)
             }
         }
-        self.updateLines(lineWidth: parent.lineWidth)
+        self.updateLines(lineWidth: parent.lineWidth,
+                         lineDashPattern: parent.lineDashPattern)
 
         for dot in self.dots {
             dot.updateSize(width: parent.dotSize,
@@ -130,7 +131,7 @@ class ControlPoint {
         }
     }
 
-    func updateLines(lineWidth: CGFloat? = nil) {
+    func updateLines(lineWidth: CGFloat? = nil, lineDashPattern: [NSNumber]? = nil) {
         for (index, shape) in self.lines.enumerated() {
             let path = NSBezierPath()
             path.move(to: self.dots[2].position)
@@ -143,6 +144,9 @@ class ControlPoint {
                 dashLayer.path = shape.path
                 if let wid = lineWidth {
                     dashLayer.lineWidth = wid
+                }
+                if let dash = lineDashPattern {
+                    dashLayer.lineDashPattern = dash
                 }
             }
         }

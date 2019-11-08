@@ -30,19 +30,6 @@ let toolsKeys: [String: Tools] =
      "a": .arc, "o": .oval, "s": .stylus, "c": .curve, "f": .text]
 
 struct SetupCurve {
-
-}
-
-struct Setup {
-    let minZoom: Double = 20
-    let maxZoom: Double = 640
-    let reduceZoom: CGFloat = 20
-
-    let screenWidth: Double = 640
-    let screenHeight: Double = 480
-    let maxScreenWidth: Double = 1600
-    let maxScreenHeight: Double = 1200
-
     let minResize: Double = 0.1
     let minRotate = -Double.pi
     let maxRotate = Double.pi
@@ -55,11 +42,14 @@ struct Setup {
     let minDash: Double = 0
     let maxDash: Double = 32
 
-    let alpha: [CGFloat] = [1.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0]
+    let alpha: [CGFloat] = [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     let colors: [NSColor] = [
         NSColor.white.sRGB(), NSColor.systemBlue.sRGB(),
         NSColor.black.sRGB(), NSColor.systemPink,
         NSColor.systemBlue, NSColor.systemPurple]
+
+    let strokeColor = NSColor.white.sRGB()
+    let fillColor = NSColor.systemBlue.sRGB()
 
     let shadow: [CGFloat] = [2.0, 8.0, 8.0]
     let maxShadowRadius: Double = 32
@@ -73,11 +63,27 @@ struct Setup {
     let minBlur: Double = 0
     let maxBlur: Double = 64
 
+    let fontFamily: String = "Helvetica"
+    let fontType: String = "Regular"
+    let fontSize: CGFloat = 18
+}
+
+struct SetupEditor {
+    let minZoom: Double = 20
+    let maxZoom: Double = 640
+    let reduceZoom: CGFloat = 20
+
+    let screenWidth: Double = 640
+    let screenHeight: Double = 480
+    let maxScreenWidth: Double = 1600
+    let maxScreenHeight: Double = 1200
+
+    let lineWidth: CGFloat = 1.0
     let strokeColor = NSColor.white.sRGB()
     let fillColor = NSColor.systemBlue.sRGB()
     let guiColor = NSColor.unemphasizedSelectedContentBackgroundColor.sRGB()
     let controlColor = NSColor.systemGreen.sRGB()
-    let controlDashPattern: [NSNumber] = [4, 4, 0, 0]
+    let lineDashPattern: [NSNumber] = [4, 4, 0, 0]
 
     let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
     let dotSize: CGFloat =  8
@@ -86,12 +92,8 @@ struct Setup {
     let rulersDelta: CGFloat = 1.1
     let rulersFontSize: CGFloat = 10
 
-    let fontFamily: String = "Helvetica"
-    let fontType: String = "Regular"
-    let fontSize: CGFloat = 18
-
     let filename: String = "untitled"
-    let fileTypes: [String] = ["png", "svg"]
+    let fileTypes: [String] = ["png", "drf", "svg"]
 
     let disabledActions = ["position": NSNull(),
                            "bounds": NSNull(),
@@ -104,4 +106,16 @@ struct Setup {
                            "shadowColor": NSNull()]
 }
 
-var setup = Setup()
+let curImageNESW = NSImage(byReferencingFile: "/System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Resources/northEastSouthWestResizeCursor.png")!
+let curImageNWSE = NSImage(byReferencingFile:  "/System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Resources/northWestSouthEastResizeCursor.png")!
+
+struct SetupCursor {
+    let cursorNESW: NSCursor = NSCursor.init(image: curImageNESW,
+                                             hotSpot: CGPoint(x: 8, y: 8))
+    let cursorNWSE: NSCursor = NSCursor.init(image: curImageNWSE,
+    hotSpot: CGPoint(x: 8, y: 8))
+}
+
+var setCursor = SetupCursor()
+var setEditor = SetupEditor()
+var setCurve = SetupCurve()

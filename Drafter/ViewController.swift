@@ -96,7 +96,7 @@ class ViewController: NSViewController,
         sketchUI.delegate = self
         sketchUI.dataSource = self
         sketchUI.refusesFirstResponder = true
-//        sketchUI.registerForDraggedTypes([.string])
+        sketchUI.registerForDraggedTypes([.string])
     }
 
 //    MARK: Keys
@@ -154,7 +154,7 @@ class ViewController: NSViewController,
         window = self.view.window!
 
         let textShadow = NSShadow()
-        textShadow.shadowColor = setup.guiColor
+        textShadow.shadowColor = setEditor.guiColor
         textShadow.shadowOffset = NSSize(width: 1, height: -1.5)
 
         locationX.shadow = textShadow
@@ -163,23 +163,23 @@ class ViewController: NSViewController,
         let ui = [toolUI, frameUI, actionUI]
         for view in ui {
             view?.layer = CALayer()
-            view?.layer?.backgroundColor = setup.guiColor.cgColor
+            view?.layer?.backgroundColor = setEditor.guiColor.cgColor
         }
 
         self.setupZoom()
 
-        curveX.maxValue = setup.screenWidth
-        curveY.maxValue = setup.screenHeight
-        curveX.minValue = -setup.screenWidth
-        curveY.minValue = -setup.screenHeight
-        curveWid.minValue = setup.minResize
-        curveHei.minValue = setup.minResize
-        curveWid.maxValue = setup.maxScreenWidth
-        curveHei.maxValue = setup.maxScreenHeight
-        curveWid.doubleValue = setup.screenWidth
-        curveHei.doubleValue = setup.screenHeight
-        curveRotate.minValue = setup.minRotate
-        curveRotate.maxValue = setup.maxRotate
+        curveX.maxValue = setEditor.screenWidth
+        curveY.maxValue = setEditor.screenHeight
+        curveX.minValue = -setEditor.screenWidth
+        curveY.minValue = -setEditor.screenHeight
+        curveWid.minValue = setCurve.minResize
+        curveHei.minValue = setCurve.minResize
+        curveWid.maxValue = setEditor.maxScreenWidth
+        curveHei.maxValue = setEditor.maxScreenHeight
+        curveWid.doubleValue = setEditor.screenWidth
+        curveHei.doubleValue = setEditor.screenHeight
+        curveRotate.minValue = setCurve.minRotate
+        curveRotate.maxValue = setCurve.maxRotate
 
         colorPanels = [curveStrokeColor, curveFillColor,
                        curveShadowColor, curveGradStart,
@@ -195,8 +195,8 @@ class ViewController: NSViewController,
         self.setupAlpha()
         self.setupShadow()
 
-        curveBlur.minValue = setup.minBlur
-        curveBlur.maxValue = setup.maxBlur
+        curveBlur.minValue = setCurve.minBlur
+        curveBlur.maxValue = setCurve.maxBlur
 
         ColorPanel.setupSharedColorPanel()
 
@@ -211,13 +211,13 @@ class ViewController: NSViewController,
     }
 
     func setupZoom() {
-        zoomSketch.minValue = setup.minZoom * 2
-        zoomSketch.maxValue = setup.maxZoom
+        zoomSketch.minValue = setEditor.minZoom * 2
+        zoomSketch.maxValue = setEditor.maxZoom
         zoomDefaultSketch.removeAllItems()
         var zoom: [String] = []
-        for step in stride(from: Int(setup.minZoom),
-                           to: Int(setup.maxZoom) + 1,
-                           by: Int(setup.minZoom)) {
+        for step in stride(from: Int(setEditor.minZoom),
+                           to: Int(setEditor.maxZoom) + 1,
+                           by: Int(setEditor.minZoom)) {
             zoom.append(String(step))
         }
         zoomDefaultSketch.addItems(withTitles: zoom)
@@ -227,20 +227,20 @@ class ViewController: NSViewController,
     }
 
     func setupStroke() {
-        curveWidth.doubleValue = Double(setup.lineWidth)
-        curveWidth.maxValue = Double(setup.maxLineWidth)
+        curveWidth.doubleValue = Double(setCurve.lineWidth)
+        curveWidth.maxValue = Double(setCurve.maxLineWidth)
 
          for view in curveDashGap.subviews {
              if let slider = view as? NSSlider {
-                 slider.minValue = setup.minDash
-                 slider.maxValue = setup.maxDash
+                 slider.minValue = setCurve.minDash
+                 slider.maxValue = setCurve.maxDash
              }
          }
     }
 
     func setupColors() {
         for (i, panel) in self.colorPanels.enumerated() {
-            panel.fillColor = setup.colors[i]
+            panel.fillColor = setCurve.colors[i]
         }
     }
 
@@ -248,18 +248,18 @@ class ViewController: NSViewController,
         for (i, slider) in self.alphaSliders.enumerated() {
             slider.maxValue = 1
             slider.minValue = 0
-            slider.doubleValue = Double(setup.alpha[i])
+            slider.doubleValue = Double(setCurve.alpha[i])
         }
     }
 
     func setupShadow() {
-        curveShadowRadius.maxValue = setup.maxShadowRadius
-        curveShadowOffsetX.minValue = -setup.maxShadowOffsetX
-        curveShadowOffsetY.minValue = -setup.maxShadowOffsetY
-        curveShadowOffsetX.maxValue = setup.maxShadowOffsetX
-        curveShadowOffsetY.maxValue = setup.maxShadowOffsetY
+        curveShadowRadius.maxValue = setCurve.maxShadowRadius
+        curveShadowOffsetX.minValue = -setCurve.maxShadowOffsetX
+        curveShadowOffsetY.minValue = -setCurve.maxShadowOffsetY
+        curveShadowOffsetX.maxValue = setCurve.maxShadowOffsetX
+        curveShadowOffsetY.maxValue = setCurve.maxShadowOffsetY
 
-        let shadow = setup.shadow.map {(fl) in Double(fl)}
+        let shadow = setCurve.shadow.map {(fl) in Double(fl)}
         curveShadowRadius.doubleValue = shadow[0]
         curveShadowOffsetX.doubleValue = shadow[1]
         curveShadowOffsetY.doubleValue = shadow[2]
@@ -443,14 +443,14 @@ class ViewController: NSViewController,
         let oldLineWidth = curve.lineWidth
         let side = max(curve.canvas.bounds.width,
                        curve.canvas.bounds.height)
-        let size = setup.stackButtonSize.width
+        let size = setEditor.stackButtonSize.width
         let delta = size * (side/(size * 50))
         curve.lineWidth *= delta
         return self.moveToZero(curve: curve, action: {
             if let img = curve.canvas.cgImage(pad: curve.lineWidth) {
                 curve.lineWidth = oldLineWidth
                 return NSImage(cgImage: img,
-                               size: setup.stackButtonSize)
+                               size: setEditor.stackButtonSize)
             }
             curve.lineWidth = oldLineWidth
             return nil})
@@ -459,6 +459,11 @@ class ViewController: NSViewController,
     func numberOfRows(in tableView: NSTableView) -> Int {
         return sketchView!.curves.count
     }
+
+    func tableViewSelectionDidChange(_ notification: Notification) {
+           selectedSketch = sketchUI.selectedRow
+           sketchView!.selectSketch(tag: selectedSketch)
+       }
 
     func tableView(_ tableView: NSTableView,
                    viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -488,7 +493,6 @@ class ViewController: NSViewController,
 
         if let cell = tableView.makeView(withIdentifier: cellID,
                                          owner: nil) as? NSTableCellView {
-
             cell.imageView?.image = image ?? nil
 
             cell.textField?.tag = row
@@ -496,7 +500,7 @@ class ViewController: NSViewController,
             cell.textField?.backgroundColor = NSColor.clear
             cell.textField?.textColor = NSColor.secondaryLabelColor
             if row == selectedSketch {
-                cell.textField?.backgroundColor = setup.fillColor
+                cell.textField?.backgroundColor = setEditor.fillColor
             }
 
             if let visButton = cell.subviews[2] as? NSButton {
@@ -514,10 +518,44 @@ class ViewController: NSViewController,
         return nil
     }
 
-    func tableViewSelectionDidChange(_ notification: Notification) {
-        selectedSketch = sketchUI.selectedRow
-        sketchView!.selectSketch(tag: selectedSketch)
-    }
+//    func tableView (
+//        _ tableView: NSTableView,
+//        pasteboardWriterForRow row: Int)
+//        -> NSPasteboardWriting? {
+//        return sketchView.curves[row].name as NSString
+//    }
+//
+//    func tableView(
+//        _ tableView: NSTableView,
+//        validateDrop info: NSDraggingInfo,
+//        proposedRow row: Int,
+//        proposedDropOperation dropOperation: NSTableView.DropOperation)
+//        -> NSDragOperation {
+//        guard dropOperation == .on else { return [] }
+//        return .move
+//    }
+//
+//    func tableView (
+//        _ tableView: NSTableView,
+//        acceptDrop info: NSDraggingInfo,
+//        row: Int,
+//        dropOperation: NSTableView.DropOperation) -> Bool {
+//
+//        guard let items = info.draggingPasteboard.pasteboardItems
+//            else { return false }
+//        let name = items[0].string(forType: .string)
+//
+//        for (ind, curve) in sketchView!.curves.enumerated()
+//            where curve.name==name {
+//            if row<sketchView!.curves.count {
+//                sketchView!.curves.swapAt(ind, row)
+//                sketchView!.layer?.sublayers?.swapAt(ind, row)
+//            }
+//            sketchUI.reloadData()
+//            break
+//        }
+//        return true
+//    }
 
 //    MARK: SketchUI Actions
     @IBAction func visibleSketch(_ sender: NSButton) {
@@ -531,10 +569,10 @@ class ViewController: NSViewController,
     @IBAction func zoomGesture(_ sender: NSMagnificationGestureRecognizer) {
         let view = sketchView!
         let zoomed = Double(view.zoomed)
-        let mag = Double(sender.magnification / setup.reduceZoom)
+        let mag = Double(sender.magnification / setEditor.reduceZoom)
         var zoom = (zoomed + mag) * 100
 
-        if zoom < setup.minZoom * 2 || zoom > setup.maxZoom {
+        if zoom < setEditor.minZoom * 2 || zoom > setEditor.maxZoom {
             zoom = zoomed * 100
         }
         view.zoomSketch(value: zoom)
@@ -623,7 +661,7 @@ class ViewController: NSViewController,
     @IBAction func resizeCurve(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(
-            sender: sender, limit: {x in x <= 0 ? setup.minResize : x})
+            sender: sender, limit: {x in x <= 0 ? setCurve.minResize : x})
         if val.tag == 0 {
             self.curveWid.doubleValue = val.value
         } else {
@@ -635,8 +673,8 @@ class ViewController: NSViewController,
 
     @IBAction func rotateCurve(_ sender: Any) {
         let view = sketchView!
-        let minR = setup.minRotate
-        let maxR = setup.maxRotate
+        let minR = setCurve.minRotate
+        let maxR = setCurve.maxRotate
         let val = self.getTagValue(
             sender: sender, limit: {x in x > maxR ? maxR : x < minR ? minR : x})
 
@@ -808,7 +846,7 @@ class ViewController: NSViewController,
     }
 
     func showFileName() {
-        let fileName = sketchView!.sketchName ?? setup.filename
+        let fileName = sketchView!.sketchName ?? setEditor.filename
         self.window!.title = fileName
     }
 
@@ -842,8 +880,8 @@ class ViewController: NSViewController,
 
         view.moveCurve(tag: 0, value: 0)
         view.moveCurve(tag: 1, value: 0)
-        view.resizeCurve(tag: 0, value: setup.screenWidth)
-        view.resizeCurve(tag: 1, value: setup.screenHeight)
+        view.resizeCurve(tag: 0, value: setEditor.screenWidth)
+        view.resizeCurve(tag: 1, value: setEditor.screenHeight)
 
         view.frameUI.isOn(on: -1)
         textUI.hide()
@@ -990,7 +1028,7 @@ class ViewController: NSViewController,
         savePanel = NSSavePanel()
         if let savePanel = savePanel {
 
-            let popup = savePanel.setupPanel(fileName: setup.filename)
+            let popup = savePanel.setupPanel(fileName: setEditor.filename)
             popup.target = self
             popup.action = #selector(self.setFileType)
 
@@ -1005,7 +1043,7 @@ class ViewController: NSViewController,
                         if let dot = indexDot {
                             trimName  = String(trimName.prefix(upTo: dot))
                         }
-                        if trimName != setup.filename {
+                        if trimName != setEditor.filename {
                             view.sketchName = trimName
                         } else {
                             view.sketchName = nil

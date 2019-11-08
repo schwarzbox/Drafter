@@ -20,11 +20,11 @@ class ColorBox: NSControl {
     func restore() {
         if self.state == .on {
             if let view = self.superview, let box = view as? NSBox {
-                box.borderColor = setup.strokeColor
+                box.borderColor = setEditor.strokeColor
             }
         } else {
             if let view = self.superview, let box = view as? NSBox {
-                box.borderColor = setup.guiColor
+                box.borderColor = setEditor.guiColor
             }
         }
     }

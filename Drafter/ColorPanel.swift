@@ -12,13 +12,13 @@ class ColorPanel: NSStackView {
     @IBOutlet weak var field: NSTextField!
     @IBOutlet weak var box: NSBox!
 
-    var borderColor: NSColor = setup.guiColor {
+    var borderColor: NSColor = setEditor.guiColor {
         willSet {
             box.borderColor = newValue
         }
     }
 
-    var fillColor: NSColor = setup.fillColor {
+    var fillColor: NSColor = setEditor.fillColor {
         willSet {
             box.fillColor = newValue
             field.stringValue = newValue.hexStr
@@ -42,7 +42,7 @@ class ColorPanel: NSStackView {
         }
         self.sharedColorPanel?.styleMask = .titled
 
-        self.sharedColorPanel?.backgroundColor = setup.guiColor
+        self.sharedColorPanel?.backgroundColor = setEditor.guiColor
         self.sharedColorPanel?.makeKeyAndOrderFront(self)
         self.sharedColorPanel?.setTarget(self)
         self.sharedColorPanel?.isContinuous = true

@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.73
+v0.75
 
 # Features
 
@@ -53,16 +53,14 @@ New (⌘N) Open (⌘O) - open .png  Save (⌘S), Save-As (⇧⌘S) - save to .pn
 
 Edit
 
-Cut (⌘X) - place selected shape to the buffer
+Undo (⌘Z), Redo (⇧⌘Z) - not implemented
 
-Copy (⌘C) - copy selected shape, Paste (⌘V) - paste shape to the mouse position
+Cut (⌘X) - place selected shape to the buffer, Copy (⌘C) - copy selected shape
+Paste (⌘V) - paste shape to the mouse position
+
+Group (⌘G), Ungroup (⇧⌘G) 
 
 Delete (Delete) - remove shape or control dot
-
-Undo (⌘Z) - not implemented
-
-Redo (⇧⌘Z) - not implemented
-
 
 Modifiers
 
@@ -88,8 +86,6 @@ Scroll canvas with two fingers
 
 
 # Future releases
-
-v0.76 Layers
 
 v0.77 Improve Text
 

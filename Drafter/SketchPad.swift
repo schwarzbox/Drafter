@@ -5,31 +5,31 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
-// setup tiers, new name editor,
+// post about groups
+// setup tiers
+// patron only post with mini tutor
 
-// patreon post features + post about changes
-// patroon only post with mini tutor
-
-// avatar git discord patreon
-
-// 0.75
-// movable layers in stack
-// send curve
-
-// setup refactor
+// 0.76
 // refactor clear edit curve path layers rulers
 // refactor update layers
+// selecttion frame
 
+// 0.77
+// update wid hei use with angle zero
+
+// combine create and edit curve
 // separate edit and create
 
 // edit curve on create, delete dots
-// opt for copy copy segment curve (check figma)
+// select dots and drag together
 
 // 0.78
-// transform text field
+// flatneess curve? mitter limits?
+// fillRule (union, mask)
 
+// 0.79
+// transform text field when type
 // add text immediately in the cursor position
-// text next line?
 // add control points to text
 
 // 0.8
@@ -50,12 +50,17 @@
 // rotate&resize image + gradient fixed
 
 // add?
-// flatneess curve mitter limits fillRule (union, mask)
-// flexible polygons?
+
+// flexible polygons star
 
 // add group to group
-// move segments?
+
+// editable text add text field and button to transform?
+// text next line?
 // allow move lineWidth inside outside
+// opt for copy when edit or creatte curve
+// sign edit sign lock
+// move segments?
 // show size of rect when create or resize?
 // rulers for hidden shapes?
 
@@ -100,10 +105,11 @@ class SketchPad: NSView {
     var controlPoint2: Dot?
     var controlPoints: [ControlPoint] = []
 
-    var dotSize: CGFloat = setup.dotSize
-    var dotRadius: CGFloat = setup.dotRadius
-    var dotMag: CGFloat = setup.dotRadius / 2
-    var lineWidth: CGFloat = setup.lineWidth
+    var dotSize: CGFloat = setEditor.dotSize
+    var dotRadius: CGFloat = setEditor.dotRadius
+    var dotMag: CGFloat = setEditor.dotRadius / 2
+    var lineWidth: CGFloat = setEditor.lineWidth
+    var lineDashPattern = setEditor.lineDashPattern
 
     var copiedCurve: Curve?
     var selectedCurve: Curve?
@@ -118,8 +124,8 @@ class SketchPad: NSView {
     var roundedCurve: CGPoint?
 
     var zoomed: CGFloat = 1.0
-    var zoomOrigin = CGPoint(x: setup.screenWidth/2,
-                             y: setup.screenHeight/2)
+    var zoomOrigin = CGPoint(x: setEditor.screenWidth/2,
+                             y: setEditor.screenHeight/2)
     var tool = Tools.drag
 
     override init(frame: NSRect) {
@@ -165,10 +171,10 @@ class SketchPad: NSView {
     func setupLayers() {
         self.wantsLayer = true
         let layers = [
-            self.editLayer: setup.fillColor.cgColor,
-            self.curveLayer: setup.controlColor.cgColor,
-            self.controlLayer: setup.fillColor.cgColor,
-            self.sketchLayer: setup.guiColor.cgColor]
+            self.editLayer: setEditor.fillColor.cgColor,
+            self.curveLayer: setEditor.controlColor.cgColor,
+            self.controlLayer: setEditor.fillColor.cgColor,
+            self.sketchLayer: setEditor.guiColor.cgColor]
 
         for (layer, color) in layers {
             layer.strokeColor = color
@@ -176,20 +182,20 @@ class SketchPad: NSView {
             layer.lineCap = .butt
             layer.lineJoin = .round
             layer.lineWidth = self.lineWidth
-            layer.actions = setup.disabledActions
+            layer.actions = setEditor.disabledActions
             if layer != self.sketchLayer {
                 layer.makeShape(path: NSBezierPath(),
-                            strokeColor: setup.strokeColor,
-                            dashPattern: setup.controlDashPattern,
+                            strokeColor: setEditor.strokeColor,
+                            dashPattern: self.lineDashPattern,
                             lineCap: .butt,
                             lineJoin: .round,
-                            actions: setup.disabledActions)
+                            actions: setEditor.disabledActions)
             }
         }
 
         let sketchBorder = NSRect(x: 0, y: 0,
-                            width: setup.screenWidth,
-                            height: setup.screenHeight)
+                            width: setEditor.screenWidth,
+                            height: setEditor.screenHeight)
         self.sketchPath = NSBezierPath(rect: sketchBorder)
     }
 
@@ -259,7 +265,7 @@ class SketchPad: NSView {
             }
 
             if curve.path.rectPath(
-                curve.path, pad: setup.dotRadius).contains(self.startPos),
+                curve.path, pad: setEditor.dotRadius).contains(self.startPos),
                 let segment = curve.path.findPath(pos: self.startPos) {
 
                 // add center
@@ -278,11 +284,11 @@ class SketchPad: NSView {
 
                 self.curvedPath = curve.path.insertCurve(
                     to: self.startPos, at: segment.index, with: segment.points)
-                let size50 = self.dotRadius/2
+                let size50 = self.dotSize/2
                 self.curvedPath.appendOval(in: CGRect(
                     x: self.startPos.x-size50,
                     y: self.startPos.y-size50,
-                    width: self.dotRadius, height: self.dotRadius))
+                    width: self.dotSize, height: self.dotSize))
 
             } else {
                 self.clearRulers()
@@ -443,8 +449,8 @@ class SketchPad: NSView {
                 self.useTool(createOval(
                     topLeft: self.startPos, bottomRight: finPos, shift: shift))
             case .stylus:
-                if abs(self.startPos.x - finPos.x) > setup.dotSize ||
-                    abs(self.startPos.y - finPos.y) > setup.dotSize {
+                if abs(self.startPos.x - finPos.x) > setEditor.dotSize ||
+                    abs(self.startPos.y - finPos.y) > setEditor.dotSize {
                     self.createStylusLine(topLeft: self.startPos,
                                           bottomRight: finPos)
                     self.startPos = finPos
@@ -563,6 +569,10 @@ class SketchPad: NSView {
             break
         }
 
+        for cur in self.groups {
+            self.curvedPath.append(cur.path)
+        }
+
         self.clearRulers()
 
         self.roundedCurve = nil
@@ -624,13 +634,13 @@ class SketchPad: NSView {
             fill: self.filledCurve, rounded: self.roundedCurve,
             angle: 0,
             lineWidth: CGFloat(lineWidth),
-            cap: setup.lineCap, join: setup.lineJoin,
-            dash: setup.lineDashPattern,
+            cap: setCurve.lineCap, join: setCurve.lineJoin,
+            dash: setCurve.lineDashPattern,
             alpha: alpha, shadow: shadowValues,
-            gradientDirection: setup.gradientDirection,
-            gradientLocation: setup.gradientLocation,
+            gradientDirection: setCurve.gradientDirection,
+            gradientLocation: setCurve.gradientLocation,
             colors: colors,
-            blur: setup.minBlur,
+            blur: setCurve.minBlur,
             points: self.controlPoints)
 
         let name = filledCurve
@@ -753,7 +763,7 @@ class SketchPad: NSView {
                 let x = (pos.x-self.bounds.minX) * self.zoomed
                 let y = (pos.y-self.bounds.minY) * self.zoomed
 
-                guard pnt.dist >= setup.rulersDelta || ctrl else {
+                guard pnt.dist >= setEditor.rulersDelta || ctrl else {
                     break
                 }
                 if key == "x" {
@@ -797,10 +807,19 @@ class SketchPad: NSView {
         self.translateOrigin(to: CGPoint(x: -originX,
                                          y: -originY))
 
-        self.dotSize = setup.dotSize/self.zoomed
+        self.clearPathLayer(layer: self.curveLayer, path: self.curvedPath)
+        self.dotSize = setEditor.dotSize/self.zoomed
         self.dotRadius = self.dotSize/2
         self.dotMag = self.dotRadius/2
-        self.lineWidth = setup.lineWidth/self.zoomed
+        self.lineWidth = setEditor.lineWidth/self.zoomed
+
+        let dash = Double(
+            truncating: setEditor.lineDashPattern[0])/Double(self.zoomed)
+        let gap = Double(
+            truncating: setEditor.lineDashPattern[1])/Double(self.zoomed)
+
+        self.lineDashPattern[0] = NSNumber(value: dash)
+        self.lineDashPattern[1] = NSNumber(value: gap)
 
         if let curve = self.selectedCurve {
             self.clearControls(curve: curve)
@@ -826,6 +845,7 @@ class SketchPad: NSView {
             if let dashLayer = layer.sublayers?.first as? CAShapeLayer {
                 dashLayer.path = layer.path
                 dashLayer.lineWidth = self.lineWidth
+                dashLayer.lineDashPattern = lineDashPattern
             }
             self.layer?.addSublayer(layer)
         }
@@ -837,9 +857,9 @@ class SketchPad: NSView {
     }
 
     func addDot(pos: CGPoint,
-                lineWidth: CGFloat = setup.lineWidth,
-                strokeColor: NSColor = setup.strokeColor,
-                fillColor: NSColor = setup.fillColor) -> Dot {
+                lineWidth: CGFloat = setEditor.lineWidth,
+                strokeColor: NSColor = setEditor.strokeColor,
+                fillColor: NSColor = setEditor.fillColor) -> Dot {
         return Dot.init(x: pos.x, y: pos.y,
                         width: self.dotSize, height: self.dotSize,
                         rounded: self.dotRadius, lineWidth: self.lineWidth,
@@ -851,11 +871,11 @@ class SketchPad: NSView {
         return ControlPoint(
             mp: addDot(pos: mp),
             cp1: addDot(pos: cp1,
-                        strokeColor: setup.fillColor,
-                        fillColor: setup.strokeColor),
+                        strokeColor: setEditor.fillColor,
+                        fillColor: setEditor.strokeColor),
             cp2: addDot(pos: cp2,
-                        strokeColor: setup.fillColor,
-                        fillColor: setup.strokeColor))
+                        strokeColor: setEditor.fillColor,
+                        fillColor: setEditor.strokeColor))
     }
 
     func addSegment(mp: Dot, cp1: Dot, cp2: Dot) {
@@ -1012,17 +1032,33 @@ class SketchPad: NSView {
             }
 
             if goal != index {
-//                let goalCurve = self.curves[goal]
-                self.curves.swapAt(goal, index)
-//                print(goal, index)
-                self.layer?.sublayers?.swapAt(goal, index)
+                var delta = 0
+                let goalCurve = self.curves[goal]
+                if goal < index {
+                    for (ind, cur) in self.curves.enumerated() where ind<goal {
+                        delta += cur.groups.count-1
+                    }
 
-//                for i in stride(from: goalCurve.groups.count-1, through: 0, by: -1) {
-//                    for j in 0..<curve.groups.count {
-//                        print(goal + i + j, index + i + j)
-//                        self.layer?.sublayers?.swapAt(goal + i + j, index + i + j)
-//                    }
-//                }
+                    for i in stride(from: goalCurve.groups.count-1,
+                                    through: 0, by: -1) {
+                        for j in 0..<curve.groups.count {
+                            self.layer?.sublayers?.swapAt(goal + delta + i + j,
+                                                          index + delta + i + j)
+                        }
+                    }
+                } else {
+                    for (ind, cur) in self.curves.enumerated() where ind<index {
+                        delta += cur.groups.count-1
+                    }
+                    for j in 0..<goalCurve.groups.count {
+                        for i in stride(from: curve.groups.count-1,
+                                        through: 0, by: -1) {
+                            self.layer?.sublayers?.swapAt(goal + delta + i + j,
+                                                          index + delta + i + j)
+                        }
+                    }
+                }
+                self.curves.swapAt(goal, index)
                 self.needsDisplay = true
                 self.updateSliders()
             }
@@ -1134,14 +1170,14 @@ class SketchPad: NSView {
         self.updateSliders()
     }
 
-
     func groupCurve(sender: Any) {
-        if let button  = sender as? NSButton {
-            if button.state == .on && self.groups.count > 1 {
+        if let button  = sender as? NSButton, button.state == .on {
+            if self.groups.count > 1 {
                 self.makeGroup()
             } else {
                 button.state = .off
             }
+
         } else if let menu = sender as? NSMenuItem, menu.tag == 0 {
             if self.groups.count > 1 {
                 self.makeGroup()
@@ -1150,13 +1186,23 @@ class SketchPad: NSView {
             if let curve = self.selectedCurve,
                 curve.groups.count > 1 {
                 self.deselectCurve(curve: curve)
-                for cur in curve.groups.dropFirst() {
+
+                for (ind, cur) in curve.groups.enumerated() {
+                    if ind == 0 {
+                        if let curInd = self.curves.firstIndex(of: curve) {
+                            self.curves.remove(at: curInd)
+                        }
+                    }
+                    cur.canvas.removeFromSuperlayer()
+                    self.layer?.addSublayer(cur.canvas)
                     self.addCurve(curve: cur)
                 }
                 curve.groups = [curve]
+
                 let name = String(
                     curve.oldName.split(separator: " ")[0])
                 curve.setName(name: name, curves: self.curves)
+                self.selectedCurve = curve
                 self.createControls(curve: curve)
                 self.frameUI.hide()
                 self.updateSliders()
@@ -1575,13 +1621,15 @@ class SketchPad: NSView {
 
         self.movePoint = self.addDot(pos: topLeft)
         self.layer?.addSublayer(self.movePoint!)
-        self.controlPoint1 = self.addDot(pos: topLeft,
-                                         strokeColor: setup.fillColor,
-                                         fillColor: setup.strokeColor)
+        self.controlPoint1 = self.addDot(
+            pos: topLeft,
+            strokeColor: setEditor.fillColor,
+            fillColor: setEditor.strokeColor)
         self.layer?.addSublayer(self.controlPoint1!)
-        self.controlPoint2 = self.addDot(pos: topLeft,
-                                         strokeColor: setup.fillColor,
-                                         fillColor: setup.strokeColor)
+        self.controlPoint2 = self.addDot(
+            pos: topLeft,
+            strokeColor: setEditor.fillColor,
+            fillColor: setEditor.strokeColor)
         self.layer?.addSublayer(self.controlPoint2!)
 
         self.clearPathLayer(layer: self.controlLayer, path: self.controlPath)
@@ -1621,22 +1669,20 @@ class SketchPad: NSView {
             self.deselectCurve(curve: curve)
             self.curves.remove(at: index)
             self.frameUI.isOn(on: -1)
-            self.needsDisplay = true
         }
     }
 
     func deleteCurve() {
+        self.clearCurvedPath()
+        self.clearRulers()
+
         if tool == .curve && self.movePoint != nil {
-            self.clearCurvedPath()
             return
         }
         if let curve = self.selectedCurve, !curve.lock {
             if curve.edit && curve.points.count > 2 {
-                self.clearCurvedPath()
                 curve.removePoint()
             } else {
-                self.clearPathLayer(layer: self.curveLayer,
-                                    path: self.curvedPath)
                 if self.groups.count>1 {
                     for cur in self.groups {
                         self.removeCurve(curve: cur)
@@ -1662,24 +1708,25 @@ class SketchPad: NSView {
                              points.append(copyPoint)
                         }
                     }
-                    groups.append(self.initCurve(
-                    path: path, fill: cur.fill, rounded: cur.rounded,
-                    angle: cur.angle,
-                    lineWidth: cur.lineWidth,
-                    cap: cur.cap, join: cur.join,
-                    dash: cur.dash,
-                    alpha: cur.alpha,
-                    shadow: cur.shadow,
-                    gradientDirection: cur.gradientDirection,
-                    gradientLocation: cur.gradientLocation,
-                    colors: cur.colors,
-                    blur: cur.blur,
-                    points: points))
+                    let clone = self.initCurve(
+                        path: path, fill: cur.fill, rounded: cur.rounded,
+                        angle: cur.angle,
+                        lineWidth: cur.lineWidth,
+                        cap: cur.cap, join: cur.join,
+                        dash: cur.dash,
+                        alpha: cur.alpha,
+                        shadow: cur.shadow,
+                        gradientDirection: cur.gradientDirection,
+                        gradientLocation: cur.gradientLocation,
+                        colors: cur.colors,
+                        blur: cur.blur,
+                        points: points)
+                    let name = String(cur.name.split(separator: " ")[0])
+                    clone.setName(name: name, curves: self.curves)
+                    groups.append(clone)
                 }
-
             }
-            let name = String(curve.name.split(separator: " ")[0])
-            groups[0].setName(name: name, curves: self.curves)
+            groups[0].oldName = curve.oldName
             groups[0].setGroups(curves: Array(groups.dropFirst()))
             self.copiedCurve = groups[0]
 
@@ -2018,7 +2065,9 @@ class SketchPad: NSView {
         let rotate = atan2(pos.y+dY-curve.path.bounds.midY,
                            pos.x+dX-curve.path.bounds.midX)
         var dt = CGFloat(rotate)-curve.frameAngle
-        dt = abs(dt)>0.2 ? dt.truncatingRemainder(dividingBy: 0.2) : dt
+        dt = abs(dt)>0.2
+            ? dt.truncatingRemainder(dividingBy: 0.2)
+            : dt
 
         self.rotateCurve(angle: Double(curve.angle+dt))
         curve.frameAngle = rotate

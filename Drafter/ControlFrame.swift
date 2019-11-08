@@ -10,12 +10,13 @@ import Cocoa
 
 class ControlFrame: CALayer {
     var parent: SketchPad?
-    var ctrlPad: CGFloat = setup.dotSize * 4
-    var ctrlPad50: CGFloat = setup.dotSize * 2
-    var dotSize: CGFloat = setup.dotSize
-    var dotRadius: CGFloat = setup.dotRadius
+    var ctrlPad: CGFloat = setEditor.dotSize * 4
+    var ctrlPad50: CGFloat = setEditor.dotSize * 2
+    var dotSize: CGFloat = setEditor.dotSize
+    var dotRadius: CGFloat = setEditor.dotRadius
     var dotMag: CGFloat = 0
-    var lineWidth: CGFloat = setup.lineWidth
+    var lineWidth: CGFloat = setEditor.lineWidth
+    var lineDashPattern = setEditor.lineDashPattern
     let frameHandles = [1, 3, 5, 7]
 
     required init?(coder aDecoder: NSCoder) {
@@ -36,11 +37,12 @@ class ControlFrame: CALayer {
         self.dotMag = parent.dotMag
         self.ctrlPad = self.dotSize * 4
         self.ctrlPad50 = self.dotSize * 2
+        self.lineDashPattern = parent.lineDashPattern
 
         self.lineWidth = parent.lineWidth
 
         self.borderWidth = self.lineWidth
-        self.borderColor = setup.fillColor.cgColor
+        self.borderColor = setEditor.fillColor.cgColor
 
         var gradientLoc: [CGPoint] = []
         for i in curve.gradientLocation {
@@ -97,7 +99,8 @@ class ControlFrame: CALayer {
         path.move(to: CGPoint(x: self.bounds.maxX, y: self.bounds.midY))
         path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad,
                               y: self.bounds.midY))
-        self.makeShape(path: path, strokeColor: setup.fillColor,
+        self.makeShape(path: path,
+                       strokeColor: setEditor.fillColor,
                        lineWidth: self.lineWidth)
     }
 
@@ -110,7 +113,8 @@ class ControlFrame: CALayer {
                               y: self.bounds.minY))
         path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad50,
                               y: self.bounds.minY))
-        self.makeShape(path: path, strokeColor: setup.fillColor,
+        self.makeShape(path: path,
+                       strokeColor: setEditor.fillColor,
                        lineWidth: self.lineWidth)
 
         if curve.gradient {
@@ -121,24 +125,25 @@ class ControlFrame: CALayer {
                 path.line(to: point)
             }
 
-            self.makeShape(path: path, strokeColor: setup.fillColor,
+            self.makeShape(path: path,
+                           strokeColor: setEditor.fillColor,
                            lineWidth: self.lineWidth)
 
             path.removeAllPoints()
             path.move(to: gradientDirStart)
             path.line(to: gradientDirFinal)
-            self.makeShape(path: path, strokeColor: setup.strokeColor,
+            self.makeShape(path: path, strokeColor: setEditor.strokeColor,
                            lineWidth: self.lineWidth)
-            self.makeShape(path: path, strokeColor: setup.fillColor,
+            self.makeShape(path: path, strokeColor: setEditor.fillColor,
                            lineWidth: self.lineWidth,
-                           dashPattern: setup.controlDashPattern)
+                           dashPattern: self.lineDashPattern)
         }
 
     }
 
     func initDots(parent: SketchPad, curve: Curve, pnt: [CGPoint]) {
-        var fillColor = setup.fillColor
-        var strokeColor = setup.strokeColor
+        var fillColor = setEditor.fillColor
+        var strokeColor = setEditor.strokeColor
         var gradIndex = 3
         var rounded: CGFloat = 0
 
@@ -146,13 +151,13 @@ class ControlFrame: CALayer {
             if self.frameHandles.contains(i) {
                 var dx: CGFloat = 0
                 var dy: CGFloat = 0
-                var width = self.frame.width - self.dotSize
+                var width = self.frame.width - self.dotSize - 2
                 var height: CGFloat = self.dotRadius
                 let dt = self.dotMag/2
                 if i==1 || i==5 {
                     dx = i==1 ? dt : -dt
                     width = self.dotRadius
-                    height = self.frame.height - self.dotSize
+                    height = self.frame.height - self.dotSize - 2
                 } else {
                     dy = i==3 ? -dt : dt
                 }
@@ -172,8 +177,8 @@ class ControlFrame: CALayer {
                 break
             }
             if i==pnt.count-6 {
-                fillColor = setup.strokeColor
-                strokeColor = setup.fillColor
+                fillColor = setEditor.strokeColor
+                strokeColor = setEditor.fillColor
                 rounded = self.dotRadius/2
             }
             if !curve.gradient && i==pnt.count-5 {
@@ -182,7 +187,7 @@ class ControlFrame: CALayer {
 
             if i==pnt.count-3 || i==pnt.count-2 || i==pnt.count-1 {
                 fillColor = curve.colors[gradIndex]
-                strokeColor = setup.strokeColor
+                strokeColor = setEditor.strokeColor
                 gradIndex += 1
             }
             self.makeDot(parent: parent, tag: i,
@@ -197,8 +202,8 @@ class ControlFrame: CALayer {
     func initRoundedCornerDots(parent: SketchPad,
                                curve: Curve, numDots: Int) {
         if let rounded = curve.rounded {
-            let fillColor = setup.strokeColor
-            let strokeColor = setup.fillColor
+            let fillColor = setEditor.strokeColor
+            let strokeColor = setEditor.fillColor
 
             let wid50 = self.bounds.width/2
             let hei50 = self.bounds.height/2
@@ -215,7 +220,8 @@ class ControlFrame: CALayer {
 
             path.move(to: CGPoint(x: self.bounds.maxX, y: roundedY.y))
             path.line(to: roundedY)
-            self.makeShape(path: path, strokeColor: setup.fillColor,
+            self.makeShape(path: path,
+                           strokeColor: setEditor.fillColor,
                            lineWidth: self.lineWidth)
 
             self.makeDot(parent: parent, tag: numDots,
@@ -237,11 +243,12 @@ class ControlFrame: CALayer {
     func makeDot(parent: SketchPad, tag: Int, x: CGFloat, y: CGFloat,
                  width: CGFloat, height: CGFloat,
                  anchor: CGPoint = CGPoint(x: 0.5, y: 0.5),
-                 rounded: CGFloat = 0, lineWidth: CGFloat = setup.lineWidth,
-                 strokeColor: NSColor = setup.strokeColor,
-                 fillColor: NSColor = setup.fillColor,
+                 rounded: CGFloat = 0,
+                 lineWidth: CGFloat = setEditor.lineWidth,
+                 strokeColor: NSColor = setEditor.strokeColor,
+                 fillColor: NSColor = setEditor.fillColor,
                  path: NSBezierPath = NSBezierPath(),
-                 dashPattern: [NSNumber] = setup.controlDashPattern) {
+                 dashPattern: [NSNumber] = setEditor.lineDashPattern) {
         let cp = Dot.init(x: x, y: y, width: width, height: height,
                           rounded: rounded, anchor: anchor,
                           lineWidth: lineWidth,
@@ -287,10 +294,10 @@ class ControlFrame: CALayer {
                        layer.updateSize(width: size, height: size,
                                         lineWidth: self.lineWidth,
                                         circle: false)
-        case 1, 5:
-            NSCursor.resizeLeftRight.set()
-        case 3, 7:
-            NSCursor.resizeUpDown.set()
+        case 0, 4: setCursor.cursorNESW.set()
+        case 1, 5: NSCursor.resizeLeftRight.set()
+        case 2, 6: setCursor.cursorNWSE.set()
+        case 3, 7: NSCursor.resizeUpDown.set()
         default:
             break
         }

@@ -13,21 +13,21 @@ class TextTool: NSStackView {
     @IBOutlet weak var popFontFamily: NSPopUpButton!
     @IBOutlet weak var popFontType: NSPopUpButton!
 
-    var fontFamily: String = setup.fontFamily
-    var fontType: String = setup.fontType
-    var fontSize: CGFloat = setup.fontSize
+    var fontFamily: String = setCurve.fontFamily
+    var fontType: String = setCurve.fontType
+    var fontSize: CGFloat = setCurve.fontSize
     var fontMembers = [[Any]]()
     var sharedFont: NSFont?
 
     func setupTextTool() {
         self.setupFontFamily()
-        self.popFontFamily.selectItem(withTitle: setup.fontFamily)
-        let titFam = self.popFontFamily.titleOfSelectedItem ?? setup.fontFamily
-        self.popFontFamily.setTitle(titFam)
+        self.popFontFamily.selectItem(withTitle: setCurve.fontFamily)
+        let fFam = self.popFontFamily.titleOfSelectedItem ?? setCurve.fontFamily
+        self.popFontFamily.setTitle(fFam)
         self.setupFontMembers()
         self.setupFontType()
-        self.popFontType.selectItem(withTitle: setup.fontType)
-        let titType = self.popFontType.titleOfSelectedItem ?? setup.fontType
+        self.popFontType.selectItem(withTitle: setCurve.fontType)
+        let titType = self.popFontType.titleOfSelectedItem ?? setCurve.fontType
         self.popFontType.setTitle(titType)
         self.setupFont()
 
@@ -89,8 +89,8 @@ class TextTool: NSStackView {
             self.setupFontMembers()
 
             self.setupFontType()
-            let titType = self.popFontType.selectedItem?.title ?? setup.fontType
-            self.fontType = titType
+            let fType = self.popFontType.selectedItem?.title ?? setCurve.fontType
+            self.fontType = fType
 
             self.setupFont()
             if let font = self.sharedFont {
