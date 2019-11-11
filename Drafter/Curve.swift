@@ -314,30 +314,27 @@ class Curve: Equatable {
     }
 
     func insertPoint(pos: CGPoint, index: Int) -> ControlPoint {
-       var size = setEditor.dotSize
-       var dotRadius = size/2
-       if let parent = self.parent {
-           size = parent.dotSize
-           dotRadius = parent.dotRadius
-       }
-       let mp = Dot.init(x: pos.x, y: pos.y,
+        let size = parent!.dotSize
+        let dotRadius = parent!.dotRadius
+
+        let mp = Dot.init(x: pos.x, y: pos.y,
                          width: size, height: size, rounded: dotRadius)
-       let cp1 = Dot.init(x: pos.x, y: pos.y,
+        let cp1 = Dot.init(x: pos.x, y: pos.y,
                           width: size, height: size, rounded: dotRadius,
                           strokeColor: setEditor.fillColor,
                           fillColor: setEditor.strokeColor)
-       let cp2 = Dot.init(x: pos.x, y: pos.y,
+        let cp2 = Dot.init(x: pos.x, y: pos.y,
                           width: size, height: size, rounded: dotRadius,
                           strokeColor: setEditor.fillColor,
                           fillColor: setEditor.strokeColor)
 
-       let cp = ControlPoint.init(mp: mp, cp1: cp1, cp2: cp2)
-       if index >= self.points.count {
-           self.points.append(cp)
-       } else {
-           self.points.insert(cp, at: index)
-       }
-       return cp
+        let cp = ControlPoint.init(mp: mp, cp1: cp1, cp2: cp2)
+        if index >= self.points.count {
+            self.points.append(cp)
+        } else {
+            self.points.insert(cp, at: index)
+        }
+        return cp
     }
 
     func selectPoint(pos: CGPoint) {

@@ -8,27 +8,6 @@
 
 import Cocoa
 
-enum Tools: Int {
-    case drag, line, triangle, rect, pent, hex
-    case arc, oval, stylus, curve, text
-    static subscript(i: Int) -> Tools {
-        Tools(rawValue: i) ?? .drag
-    }
-    static func getName(tool: Tools) -> String {
-        switch tool {
-        case .drag: return "drag"
-        case .line, stylus: return "line"
-        case .text: return "text"
-        default: return "shape"
-        }
-    }
-}
-
-let toolsKeys: [String: Tools] =
-    ["d": .drag, "l": .line, "t": .triangle, "r": .rect,
-     "p": .pent, "h": .hex,
-     "a": .arc, "o": .oval, "s": .stylus, "c": .curve, "f": .text]
-
 struct SetupCurve {
     let minResize: Double = 0.1
     let minRotate = -Double.pi
@@ -85,16 +64,17 @@ struct SetupEditor {
     let controlColor = NSColor.systemGreen.sRGB()
     let lineDashPattern: [NSNumber] = [4, 4, 0, 0]
 
-    let lockImg = NSImage.init(
-        imageLiteralResourceName: NSImage.lockLockedTemplateName)
-    let unlockImg = NSImage.init(
-        imageLiteralResourceName: NSImage.lockUnlockedTemplateName)
-    let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 
     let rulersDelta: CGFloat = 1.1
     let rulersFontSize: CGFloat = 10
+
+    let lockImg = NSImage.init(
+        imageLiteralResourceName: NSImage.lockLockedTemplateName)
+    let unlockImg = NSImage.init(
+        imageLiteralResourceName: NSImage.lockUnlockedTemplateName)
+    let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
 
     let filename: String = "untitled"
     let fileTypes: [String] = ["png", "drf", "svg"]

@@ -35,7 +35,7 @@ Built-in rulers
 
 Select (D), Line (L), Triangle (T), Rectangle (R) Pentagon(P), Hex(H), Arc (A), Oval (O), Stylus (S)
 
-Curve (C) - press ⚙ in pop-up menu to edit shape with control dots
+Vector (V) - press ⚙ in pop-up menu to edit shape with control dots
 
 Font (F) - type text in text field, hit Enter and create vector representation
 

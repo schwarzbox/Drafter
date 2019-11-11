@@ -117,8 +117,8 @@ class ViewController: NSViewController,
         if self.eventTest(event: event) {
             let view = sketchView!
             if let ch = event.charactersIgnoringModifiers,
-               let tool = toolsKeys[ch] {
-                view.setTool(tag: tool.rawValue)
+                let tool = toolsKeys[ch] {
+                view.tool = tool
                 return true
             } else if event.keyCode >= 123 && event.keyCode <= 126 {
                 var dt = CGPoint(x: 0, y: 0)
@@ -330,37 +330,11 @@ class ViewController: NSViewController,
         self.updateStack()
     }
 
-    func showUnusedViews(_ bool: Bool, from: Int = 2) {
-        for index in from..<actionUI.subviews.count {
-            let subs = actionUI.subviews[index].subviews
-            if index==2 {
-                for i in 0..<subs.count {
-                    if let stack = subs[i] as? NSStackView {
-                        if i != 3 && i != 4 {
-                            stack.isEnabled(all: bool)
-                        }
-                    }
-                }
-            } else {
-                for view in subs {
-                    if let stack = view as? NSStackView {
-                        stack.isEnabled(all: bool)
-                    }
-                }
-            }
-        }
-        if let sharedPanel = self.colorPanel, !bool {
-            sharedPanel.closeSharedColorPanel()
-        }
-    }
-
     @objc func updateSliders() {
         let view = sketchView!
         defer {self.updateStack()}
         if let curve = view.selectedCurve, !curve.lock {
 
-            let angle = curve.angle
-            view.rotateByAngle(curve: curve, angle: 0, clear: false)
             let bounds = view.groups.count>1
                ? curve.groupRect(curves: view.groups, includeStroke: false)
                : curve.groupRect(curves: curve.groups, includeStroke: false)
@@ -368,12 +342,12 @@ class ViewController: NSViewController,
             self.curveY.doubleValue = Double(bounds.midY)
             self.curveWid.doubleValue = Double(bounds.width)
             self.curveHei.doubleValue = Double(bounds.height)
-            view.rotateByAngle(curve: curve, angle: Double(angle), clear: false)
             self.curveRotate.doubleValue = Double(curve.angle)
 
             if curve.groups.count==1 && view.groups.count <= 1 {
                 self.showUnusedViews(true)
             } else {
+                self.showUnusedViews(true)
                 self.showUnusedViews(false, from: 3)
                 return
             }
@@ -426,6 +400,30 @@ class ViewController: NSViewController,
             selectedSketch = index
         } else {
             selectedSketch = -1
+        }
+    }
+
+    func showUnusedViews(_ bool: Bool, from: Int = 2) {
+        for index in from..<actionUI.subviews.count {
+            let subs = actionUI.subviews[index].subviews
+            if index==2 {
+                for i in 0..<subs.count {
+                    if let stack = subs[i] as? NSStackView {
+                        if i != 3 && i != 4 {
+                            stack.isEnabled(all: bool)
+                        }
+                    }
+                }
+            } else {
+                for view in subs {
+                    if let stack = view as? NSStackView {
+                        stack.isEnabled(all: bool)
+                    }
+                }
+            }
+        }
+        if let sharedPanel = self.colorPanel, !bool {
+            sharedPanel.closeSharedColorPanel()
         }
     }
 
@@ -533,45 +531,6 @@ class ViewController: NSViewController,
         }
         return nil
     }
-
-//    func tableView (
-//        _ tableView: NSTableView,
-//        pasteboardWriterForRow row: Int)
-//        -> NSPasteboardWriting? {
-//        return sketchView.curves[row].name as NSString
-//    }
-//
-//    func tableView(
-//        _ tableView: NSTableView,
-//        validateDrop info: NSDraggingInfo,
-//        proposedRow row: Int,
-//        proposedDropOperation dropOperation: NSTableView.DropOperation)
-//        -> NSDragOperation {
-//        guard dropOperation == .on else { return [] }
-//        return .move
-//    }
-//
-//    func tableView (
-//        _ tableView: NSTableView,
-//        acceptDrop info: NSDraggingInfo,
-//        row: Int,
-//        dropOperation: NSTableView.DropOperation) -> Bool {
-//
-//        guard let items = info.draggingPasteboard.pasteboardItems
-//            else { return false }
-//        let name = items[0].string(forType: .string)
-//
-//        for (ind, curve) in sketchView!.curves.enumerated()
-//            where curve.name==name {
-//            if row<sketchView!.curves.count {
-//                sketchView!.curves.swapAt(ind, row)
-//                sketchView!.layer?.sublayers?.swapAt(ind, row)
-//            }
-//            sketchUI.reloadData()
-//            break
-//        }
-//        return true
-//    }
 
 //    MARK: SketchUI Actions
     @IBAction func visibleSketch(_ sender: NSButton) {
@@ -947,8 +906,9 @@ class ViewController: NSViewController,
                 let bottomRight = CGPoint(
                     x: view.sketchPath.bounds.midX + wid/2,
                     y: view.sketchPath.bounds.midY + hei/2)
-                view.useTool(view.createRectangle(topLeft: topLeft,
-                                                  bottomRight: bottomRight))
+                if let rect = tools[3] as? Rectangle {
+                    rect.action(topLeft: topLeft, bottomRight: bottomRight)
+                }
                 view.newCurve()
                 if let curve = view.selectedCurve {
                     view.createControls(curve: curve)
