@@ -12,10 +12,22 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
+        print("applicationDidFinishLaunching")
+    }
+
+//    func applicationDidUpdate(_ notification: Notification) {
+//        print("applicationDidUpdate")
+//    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        print("applicationDidBecomeActive")
+    }
+
+    func applicationDidChangeScreenParameters(_ notification: Notification) {
+        print("applicationDidChangeScreenParameters")
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+        print("applicationWillTerminate")
     }
 }

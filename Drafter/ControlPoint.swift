@@ -131,7 +131,8 @@ class ControlPoint {
         }
     }
 
-    func updateLines(lineWidth: CGFloat? = nil, lineDashPattern: [NSNumber]? = nil) {
+    func updateLines(lineWidth: CGFloat? = nil,
+                     lineDashPattern: [NSNumber]? = nil) {
         for (index, shape) in self.lines.enumerated() {
             let path = NSBezierPath()
             path.move(to: self.dots[2].position)

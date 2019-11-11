@@ -120,7 +120,6 @@ class ViewController: NSViewController,
                let tool = toolsKeys[ch] {
                 view.setTool(tag: tool.rawValue)
                 return true
-
             } else if event.keyCode >= 123 && event.keyCode <= 126 {
                 var dt = CGPoint(x: 0, y: 0)
                 switch event.keyCode {
@@ -132,6 +131,11 @@ class ViewController: NSViewController,
                 }
                 view.dragCurve(deltaX: dt.x, deltaY: dt.y, ctrl: true)
                 return true
+            } else if event.keyCode == 53 {
+                if let curve = view.selectedCurve, curve.edit {
+                    view.editFinished(curve: curve)
+                    return true
+                }
             }
         }
         return false
@@ -296,6 +300,9 @@ class ViewController: NSViewController,
         nc.addObserver(self, selector: #selector(updateSliders),
                        name: Notification.Name("updateSliders"),
                        object: nil)
+        nc.addObserver(self, selector: #selector(updateStack),
+                       name: Notification.Name("updateStack"),
+                       object: nil)
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
     }
 
@@ -320,7 +327,7 @@ class ViewController: NSViewController,
 
     @objc func updateSketchColor() {
         sketchView!.colorCurve()
-        self.updateSelectedSketch()
+        self.updateStack()
     }
 
     func showUnusedViews(_ bool: Bool, from: Int = 2) {
@@ -349,16 +356,19 @@ class ViewController: NSViewController,
 
     @objc func updateSliders() {
         let view = sketchView!
-        defer {self.updateSelectedSketch()}
+        defer {self.updateStack()}
         if let curve = view.selectedCurve, !curve.lock {
 
+            let angle = curve.angle
+            view.rotateByAngle(curve: curve, angle: 0, clear: false)
             let bounds = view.groups.count>1
-                ? curve.groupRect(curves: view.groups, includeStroke: false)
-                : curve.groupRect(curves: curve.groups, includeStroke: false)
+               ? curve.groupRect(curves: view.groups, includeStroke: false)
+               : curve.groupRect(curves: curve.groups, includeStroke: false)
             self.curveX.doubleValue = Double(bounds.midX)
             self.curveY.doubleValue = Double(bounds.midY)
             self.curveWid.doubleValue = Double(bounds.width)
             self.curveHei.doubleValue = Double(bounds.height)
+            view.rotateByAngle(curve: curve, angle: Double(angle), clear: false)
             self.curveRotate.doubleValue = Double(curve.angle)
 
             if curve.groups.count==1 && view.groups.count <= 1 {
@@ -409,7 +419,7 @@ class ViewController: NSViewController,
         }
     }
 
-    func updateSelectedSketch() {
+    @objc func updateStack() {
         sketchUI.reloadData()
         if let curve = sketchView!.selectedCurve,
             let index = sketchView!.curves.firstIndex(of: curve) {
@@ -511,7 +521,13 @@ class ViewController: NSViewController,
             if let lockButton = cell.subviews[3] as? NSButton {
                 lockButton.tag = row
                 lockButton.isEnabled = curve.edit ? false : true
-                lockButton.state = curve.lock ? .on : .off
+                if curve.lock {
+                    lockButton.image = setEditor.lockImg
+                    lockButton.state = .on
+                } else {
+                    lockButton.image = setEditor.unlockImg
+                    lockButton.state = .off
+                }
             }
             return cell
         }
@@ -631,6 +647,9 @@ class ViewController: NSViewController,
             if let curve = view.selectedCurve, curve.controlFrame==nil,
                 !curve.lock {
                 view.createControls(curve: curve)
+            }
+            for cur in view.groups {
+                view.curvedPath.append(cur.path)
             }
         }
     }
@@ -974,6 +993,8 @@ class ViewController: NSViewController,
                     print("error save \(ext)")
                 }
             }
+        } else if ext == "drf" {
+            print("save drf")
         } else if ext == "svg" {
             print("save svg")
         }

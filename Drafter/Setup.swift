@@ -85,6 +85,10 @@ struct SetupEditor {
     let controlColor = NSColor.systemGreen.sRGB()
     let lineDashPattern: [NSNumber] = [4, 4, 0, 0]
 
+    let lockImg = NSImage.init(
+        imageLiteralResourceName: NSImage.lockLockedTemplateName)
+    let unlockImg = NSImage.init(
+        imageLiteralResourceName: NSImage.lockUnlockedTemplateName)
     let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4

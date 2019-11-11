@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.75
+v0.76
 
 # Features
 
@@ -41,17 +41,15 @@ Font (F) - type text in text field, hit Enter and create vector representation
 
 # Combos
 
-Common
+- Common
 
 Close (⌘W), Quit (⌘Q) - not implemented safe exit
 
-
-Files
+- Files
 
 New (⌘N) Open (⌘O) - open .png  Save (⌘S), Save-As (⇧⌘S) - save to .png
 
-
-Edit
+- Edit
 
 Undo (⌘Z), Redo (⇧⌘Z) - not implemented
 
@@ -62,7 +60,7 @@ Group (⌘G), Ungroup (⇧⌘G)
 
 Delete (Delete) - remove shape or control dot
 
-Modifiers
+- Modifiers
 
 Create shape with ⇧(Shift) to make width and height equal
 
@@ -78,7 +76,7 @@ Use ⌥(Option) for edit control dots separately
 
 Use ⇧(Shift) for straight lines and diagonals with Line and Curve
 
-Canvas
+- Canvas
 
 Magnification gesture. Two fingers zoom
 
@@ -89,12 +87,14 @@ Scroll canvas with two fingers
 
 v0.77 Improve Text
 
-v0.8 Filters
+v0.8 Undo Redo
 
-v0.9 Undo Redo
+v0.9 .drf
 
-v1.0 .svg
+v1.0 Filters
 
-Bugs:  SaveBlur
+v1.5 .svg
+
+Bugs:  SaveBlur Rotate image Rearrange Stack
 
 
