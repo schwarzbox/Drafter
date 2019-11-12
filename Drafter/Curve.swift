@@ -328,7 +328,7 @@ class Curve: Equatable {
                           strokeColor: setEditor.fillColor,
                           fillColor: setEditor.strokeColor)
 
-        let cp = ControlPoint.init(mp: mp, cp1: cp1, cp2: cp2)
+        let cp = ControlPoint.init(cp1: cp1, cp2: cp2, mp: mp)
         if index >= self.points.count {
             self.points.append(cp)
         } else {

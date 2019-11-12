@@ -20,10 +20,25 @@ class ControlPoint {
     var cp1Area: NSTrackingArea?
     var cp2Area: NSTrackingArea?
 
-    init(mp: Dot, cp1: Dot, cp2: Dot) {
-        self.mp=mp
+    init(cp1: Dot, cp2: Dot, mp: Dot) {
         self.cp1=cp1
         self.cp2=cp2
+        self.mp=mp
+
+        self.setDots()
+        self.setLines()
+    }
+    
+    convenience init(_ parent: SketchPad,
+                     cp1: CGPoint, cp2: CGPoint, mp: CGPoint) {
+        self.init(
+            cp1: Dot.init(parent, pos: cp1, strokeColor: setEditor.fillColor, fillColor: setEditor.strokeColor),
+            cp2: Dot.init(parent, pos: cp2, strokeColor: setEditor.fillColor, fillColor: setEditor.strokeColor),
+            mp: Dot.init(parent, pos: mp)
+        )
+    }
+
+    func setDots() {
         self.dots = [self.cp1, self.cp2, self.mp]
         for (i, dot) in self.dots.enumerated() {
             dot.tag = i
@@ -31,7 +46,9 @@ class ControlPoint {
                 dot.isHidden = true
             }
         }
+    }
 
+    func setLines() {
         self.lines = [self.line1, self.line2]
         for line in self.lines {
             line.isHidden = true
@@ -46,11 +63,22 @@ class ControlPoint {
         }
     }
 
+    func stringPoint() -> String {
+        var stringPoint: String = ""
+        for dot in self.dots {
+            let x = Double(dot.frame.midX)
+            let y = Double(dot.frame.midY)
+            let str = String(x) + " " + String(y) + " "
+            stringPoint += str
+        }
+        return String(stringPoint.dropLast())
+    }
+
     func copy() -> ControlPoint? {
         if let mp = self.mp.copy() as? Dot,
             let cp1 = self.cp1.copy() as? Dot,
             let cp2 = self.cp2.copy() as? Dot {
-            return ControlPoint.init(mp: mp, cp1: cp1, cp2: cp2)
+            return ControlPoint.init(cp1: cp1, cp2: cp2, mp: mp)
         }
         return nil
     }

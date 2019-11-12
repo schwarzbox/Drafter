@@ -32,28 +32,13 @@ protocol Drawable {
 
 class Tool: Drawable {
     static var parent: SketchPad?
-    func addDot(pos: CGPoint,
-                lineWidth: CGFloat = setEditor.lineWidth,
-                strokeColor: NSColor = setEditor.strokeColor,
-                fillColor: NSColor = setEditor.fillColor) -> Dot {
-        return Dot.init(x: pos.x, y: pos.y,
-                        width: Tool.parent!.dotSize,
-                        height: Tool.parent!.dotSize,
-                        rounded: Tool.parent!.dotRadius,
-                        lineWidth: Tool.parent!.lineWidth,
-                        strokeColor: strokeColor, fillColor: fillColor)
-    }
-
-    func addControlPoint(mp: CGPoint,
-                         cp1: CGPoint, cp2: CGPoint) -> ControlPoint {
-        return ControlPoint(
-            mp: addDot(pos: mp),
-            cp1: addDot(pos: cp1,
-                        strokeColor: setEditor.fillColor,
-                        fillColor: setEditor.strokeColor),
-            cp2: addDot(pos: cp2,
-                        strokeColor: setEditor.fillColor,
-                        fillColor: setEditor.strokeColor))
+    func useTool(_ action: @autoclosure () -> Void) {
+         Tool.parent!.editedPath = NSBezierPath()
+         action()
+         if Tool.parent!.filledCurve {
+             Tool.parent!.editedPath.close()
+         }
+         Tool.parent!.editDone = true
     }
 
     func flipSize(topLeft: CGPoint,
@@ -66,29 +51,26 @@ class Tool: Drawable {
         Tool.parent!.editedPath.move(to: points[0])
         for i in 0..<points.count {
             let pnt = points[i]
-            Self.parent!.controlPoints.append(
-                self.addControlPoint(mp: pnt, cp1: pnt, cp2: pnt))
+            Tool.parent!.controlPoints.append(
+                ControlPoint(Tool.parent!,
+                             cp1: pnt, cp2: pnt, mp: pnt))
             if i == points.count-1 {
-                Self.parent!.editedPath.curve(to: points[0],
+                Tool.parent!.editedPath.curve(to: points[0],
                                       controlPoint1: points[0],
                                       controlPoint2: points[0])
             } else {
-                Self.parent!.editedPath.curve(to: points[i+1],
+                Tool.parent!.editedPath.curve(to: points[i+1],
                                       controlPoint1: points[i+1],
                                       controlPoint2: points[i+1])
             }
         }
     }
 
-    func useTool(_ action: @autoclosure () -> Void) {
-         Tool.parent!.editedPath = NSBezierPath()
-         action()
-         if Tool.parent!.filledCurve {
-             Tool.parent!.editedPath.close()
-         }
-         Tool.parent!.editDone = true
-     }
+    var mpPoints: [CGPoint] {
+        return [Tool.parent!.startPos]
+    }
 
+    // MARK: Protocol
     var name: String {"shape"}
 
     func create(ctrl: Bool, shift: Bool, opt: Bool,
@@ -131,8 +113,6 @@ class Tool: Drawable {
         }
     }
     func drag(shift: Bool, ctrl: Bool) {
-        let mpPoints: [CGPoint] = [Tool.parent!.startPos]
-
         let snap = Tool.parent!.snapToRulers(
             points: [Tool.parent!.finPos],
             curves: Tool.parent!.curves,
@@ -174,7 +154,7 @@ class Drag: Tool {
             x: topLeft.x, y: topLeft.y,
             width: size.wid, height: size.hei))
         Tool.parent!.groups.removeAll()
-        for cur in Tool.parent!.curves {
+        for cur in Tool.parent!.curves where cur.groups.count == 1 {
            let curves = cur.groupRect(curves: cur.groups)
            if Tool.parent!.curvedPath.bounds.contains(curves) &&
                !Tool.parent!.groups.contains(cur) {
@@ -226,10 +206,10 @@ class Line: Tool {
         Tool.parent!.editedPath.move(to: bottomRight)
 
         Tool.parent!.controlPoints = [
-            self.addControlPoint(mp: topLeft,
-                                 cp1: topLeft, cp2: topLeft),
-            self.addControlPoint(mp: bottomRight,
-                                 cp1: bottomRight, cp2: bottomRight)]
+            ControlPoint(Tool.parent!, cp1: topLeft, cp2: topLeft,
+                         mp: topLeft),
+            ControlPoint(Tool.parent!, cp1: bottomRight, cp2: bottomRight,
+                                 mp: bottomRight)]
     }
     override func create(ctrl: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
@@ -239,15 +219,17 @@ class Line: Tool {
     }
 
     override func drag(shift: Bool, ctrl: Bool) {
+        let par = Tool.parent!
         if shift {
-            Tool.parent!.finPos = Tool.parent!.shiftAngle(
-                topLeft: Tool.parent!.startPos,
-                bottomRight: Tool.parent!.finPos)
+            par.finPos = par.shiftAngle(topLeft: par.startPos,
+                                        bottomRight: par.finPos)
         }
+
         super.drag(shift: shift, ctrl: ctrl)
+
         if shift {
-            Tool.parent!.rulers.appendCustomRule(move: Tool.parent!.startPos,
-                                                 line: Tool.parent!.finPos)
+            par.rulers.appendCustomRule(move: par.startPos,
+                                        line: par.finPos)
         }
     }
 }
@@ -353,9 +335,9 @@ class Rectangle: Tool {
         for i in 0..<points.count {
             let pnt = points[i]
             Tool.parent!.controlPoints.append(
-                self.addControlPoint(mp: pnt, cp1: pnt, cp2: pnt))
+                ControlPoint(Tool.parent!, cp1: pnt, cp2: pnt, mp: pnt))
             Tool.parent!.controlPoints.append(
-                self.addControlPoint(mp: pnt, cp1: pnt, cp2: pnt))
+                ControlPoint(Tool.parent!, cp1: pnt, cp2: pnt, mp: pnt))
 
             Tool.parent!.editedPath.curve(to: pnt,
                                   controlPoint1: pnt, controlPoint2: pnt)
@@ -437,24 +419,20 @@ class Arc: Tool {
         let lst = points.count-1
         if lst > 0 {
             Tool.parent!.controlPoints = [
-                self.addControlPoint(mp: points[lst][2],
-                                     cp1: points[lst][2],
-                                     cp2: points[lst][2]),
-                self.addControlPoint(mp: points[0][2],
-                                     cp1: points[1][0],
-                                     cp2: points[0][2])]
+                ControlPoint(Tool.parent!, cp1: points[lst][2],
+                             cp2: points[lst][2], mp: points[lst][2]),
+                ControlPoint(Tool.parent!, cp1: points[1][0],
+                             cp2: points[0][2], mp: points[0][2])]
         }
         if lst > 1 {
             for i in 1..<lst-1 {
                 Tool.parent!.controlPoints.append(
-                    self.addControlPoint(mp: points[i][2],
-                                         cp1: points[i+1][0],
-                                         cp2: points[i][1]))
+                    ControlPoint(Tool.parent!, cp1: points[i+1][0],
+                                 cp2: points[i][1], mp: points[i][2]))
             }
             Tool.parent!.controlPoints.append(
-                self.addControlPoint(mp: points[lst-1][2],
-                                     cp1: points[lst-1][2],
-                                     cp2: points[lst-1][1]))
+                ControlPoint(Tool.parent!, cp1: points[lst-1][2],
+                             cp2: points[lst-1][1], mp: points[lst-1][2]))
         }
     }
 
@@ -489,18 +467,14 @@ class Oval: Tool {
         let points = Tool.parent!.editedPath.findPoints(.curveTo)
         if points.count == 4 {
             Tool.parent!.controlPoints = [
-                self.addControlPoint(mp: points[3][2],
-                                     cp1: points[0][0],
-                                     cp2: points[3][1]),
-                self.addControlPoint(mp: points[0][2],
-                                     cp1: points[1][0],
-                                     cp2: points[0][1]),
-                self.addControlPoint(mp: points[1][2],
-                                     cp1: points[2][0],
-                                     cp2: points[1][1]),
-                self.addControlPoint(mp: points[2][2],
-                                     cp1: points[3][0],
-                                     cp2: points[2][1])]
+                ControlPoint(Tool.parent!, cp1: points[0][0],
+                             cp2: points[3][1], mp: points[3][2]),
+                ControlPoint(Tool.parent!, cp1: points[1][0],
+                             cp2: points[0][1], mp: points[0][2]),
+                ControlPoint(Tool.parent!, cp1: points[2][0],
+                             cp2: points[1][1], mp: points[1][2]),
+                ControlPoint(Tool.parent!, cp1: points[3][0],
+                             cp2: points[2][1], mp: points[2][2])]
         }
     }
     override func create(ctrl: Bool, shift: Bool, opt: Bool,
@@ -519,9 +493,8 @@ class Stylus: Tool {
                               controlPoint2: bottomRight)
 
         Tool.parent!.controlPoints.append(
-            self.addControlPoint(mp: bottomRight,
-                                 cp1: bottomRight,
-                                 cp2: bottomRight))
+            ControlPoint(Tool.parent!, cp1: bottomRight,
+                         cp2: bottomRight, mp: bottomRight))
     }
 
     override func create(ctrl: Bool, shift: Bool, opt: Bool,
@@ -542,9 +515,8 @@ class Stylus: Tool {
         Tool.parent!.editedPath.removeAllPoints()
         Tool.parent!.editedPath.move(to: Tool.parent!.startPos)
         Tool.parent!.controlPoints.append(
-           self.addControlPoint(mp: Tool.parent!.startPos,
-                                cp1: Tool.parent!.startPos,
-                                cp2: Tool.parent!.startPos))
+            ControlPoint(Tool.parent!, cp1: Tool.parent!.startPos,
+                        cp2: Tool.parent!.startPos, mp: Tool.parent!.startPos))
     }
 
     override func up(editDone: Bool) {
@@ -558,45 +530,44 @@ class Stylus: Tool {
     }
 }
 
-class Vector: Tool {
+class Vector: Line {
     func action(topLeft: CGPoint) {
-        if let mp = Tool.parent!.movePoint,
-            let cp1 = Tool.parent!.controlPoint1,
-            let cp2 = Tool.parent!.controlPoint2 {
-            Tool.parent!.moveCurvedPath(move: mp.position, to: topLeft,
-                                cp1: cp1.position, cp2: topLeft)
-            Tool.parent!.addSegment(mp: mp, cp1: cp1, cp2: cp2)
+        let par = Tool.parent!
+        if let mp = par.movePoint,
+            let cp1 = par.controlPoint1,
+            let cp2 = par.controlPoint2 {
+            par.moveCurvedPath(move: mp.position, to: topLeft,
+                               cp1: cp1.position, cp2: topLeft)
+            par.addSegment(mp: mp, cp1: cp1, cp2: cp2)
         }
 
-        Tool.parent!.movePoint = self.addDot(pos: topLeft)
-        Tool.parent!.layer?.addSublayer(Tool.parent!.movePoint!)
-        Tool.parent!.controlPoint1 = self.addDot(
-            pos: topLeft,
-            strokeColor: setEditor.fillColor,
-            fillColor: setEditor.strokeColor)
-        Tool.parent!.layer?.addSublayer(Tool.parent!.controlPoint1!)
-        Tool.parent!.controlPoint2 = self.addDot(
-            pos: topLeft,
-            strokeColor: setEditor.fillColor,
-            fillColor: setEditor.strokeColor)
-        Tool.parent!.layer?.addSublayer(Tool.parent!.controlPoint2!)
+        par.movePoint = Dot(par, pos: topLeft)
+        par.layer?.addSublayer(par.movePoint!)
+        par.controlPoint1 = Dot(par, pos: topLeft,
+                                strokeColor: setEditor.fillColor,
+                                fillColor: setEditor.strokeColor)
+            par.layer?.addSublayer(par.controlPoint1!)
+        par.controlPoint2 = Dot(par, pos: topLeft,
+                                strokeColor: setEditor.fillColor,
+                                fillColor: setEditor.strokeColor)
+        par.layer?.addSublayer(Tool.parent!.controlPoint2!)
 
-        Tool.parent!.clearPathLayer(layer: Tool.parent!.controlLayer,
-                                    path: Tool.parent!.controlPath)
+        par.clearPathLayer(layer: par.controlLayer,
+                           path: par.controlPath)
 
-        if let mp = Tool.parent!.movePoint {
+        if let mp = par.movePoint {
             let options: NSTrackingArea.Options = [
                 .mouseEnteredAndExited, .activeInActiveApp]
             let area = NSTrackingArea(rect: NSRect(x: mp.frame.minX,
                                                    y: mp.frame.minY,
                                                    width: mp.frame.width,
                                                    height: mp.frame.height),
-                                      options: options, owner: Tool.parent!)
-            Tool.parent!.addTrackingArea(area)
+                                      options: options, owner: par)
+            par.addTrackingArea(area)
         }
 
-        if Tool.parent!.editedPath.elementCount==0 {
-            Tool.parent!.editedPath.move(to: topLeft)
+        if par.editedPath.elementCount==0 {
+            par.editedPath.move(to: topLeft)
         }
     }
     override func create(ctrl: Bool, shift: Bool, opt: Bool,
@@ -607,35 +578,17 @@ class Vector: Tool {
                                     opt: opt)
     }
 
-    override func drag(shift: Bool, ctrl: Bool) {
-        var mpPoints: [CGPoint] = [Tool.parent!.startPos]
+    override var mpPoints: [CGPoint] {
+        let par = Tool.parent!
+        var points: [CGPoint] = [par.startPos]
 
-        if let mp = Tool.parent!.movePoint {
-           mpPoints.append(mp.position)
+        if let mp = par.movePoint {
+           points.append(mp.position)
         }
-        for cp in Tool.parent!.controlPoints {
-           mpPoints.append(cp.mp.position)
+        for cp in par.controlPoints {
+            points.append(cp.mp.position)
         }
-
-        let snap = Tool.parent!.snapToRulers(
-            points: [Tool.parent!.finPos],
-            curves: Tool.parent!.curves,
-            curvePoints: mpPoints, ctrl: ctrl)
-        Tool.parent!.finPos.x -= snap.x
-        Tool.parent!.finPos.y -= snap.y
-
-       if shift {
-           Tool.parent!.finPos = Tool.parent!.shiftAngle(
-               topLeft: Tool.parent!.startPos,
-               bottomRight: Tool.parent!.finPos)
-       }
-
-       super.drag(shift: shift, ctrl: ctrl)
-
-       if shift {
-           Tool.parent!.rulers.appendCustomRule(move: Tool.parent!.startPos,
-                                                line: Tool.parent!.finPos)
-       }
+        return points
     }
 
     override func down(shift: Bool) {

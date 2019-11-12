@@ -163,6 +163,15 @@ extension NSBezierPath {
         return path
     }
 
+    func addPin(pos: CGPoint, size: CGFloat) {
+        self.move(to: pos)
+        let size50 = size/2
+        let moveRect = NSRect(x: pos.x - size50, y: pos.y - size50,
+                              width: size, height: size)
+        self.appendOval(in: moveRect)
+        self.move(to: pos)
+    }
+
     func printPath() {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         for i in 0 ..< self.elementCount {
@@ -182,13 +191,59 @@ extension NSBezierPath {
         }
     }
 
-    func addPin(pos: CGPoint, size: CGFloat) {
-        self.move(to: pos)
-        let size50 = size/2
-        let moveRect = NSRect(x: pos.x - size50, y: pos.y - size50,
-                              width: size, height: size)
-        self.appendOval(in: moveRect)
-        self.move(to: pos)
+    func pathToString() -> String {
+        var stringPath: String = ""
+        var cPnt = [CGPoint](repeating: .zero, count: 3)
+        for i in 0 ..< self.elementCount {
+            let type = self.element(at: i, associatedPoints: &cPnt)
+            let toStr: [String] = cPnt.map{
+                String(Double($0.x)) + " " + String(Double($0.y)) }
+            let finStr = toStr.joined(separator: " ")
+            switch type {
+            case .moveTo:
+                stringPath += "moveTo "
+            case .lineTo:
+                stringPath += "lineTo "
+            case .curveTo:
+                stringPath += "curveTo "
+            case .closePath:
+                stringPath += "closePath "
+            default:
+                break
+            }
+            stringPath += (finStr + "|")
+        }
+        return stringPath
+    }
+
+    func stringToPath(str: String) -> NSBezierPath {
+        let path = NSBezierPath()
+        var cPnt: [CGPoint] = []
+        for line in str.split(separator: "|") {
+            let space = line.firstIndex(of: " ")
+            if let sp = space {
+                let str = line.suffix(from: sp).dropFirst().split(separator: " ")
+                let floats = str.map{CGFloat(Double($0) ?? 0.0)}
+                cPnt = []
+                for i in stride(from: 0, to: floats.count, by: 2) {
+                    cPnt.append(CGPoint(x: floats[i], y: floats[i+1]))
+                }
+                switch line.prefix(upTo: sp) {
+                case "moveTo":
+                    path.move(to: cPnt[0])
+                case "lineTo":
+                    path.line(to: cPnt[0])
+                case "curveTo":
+                    path.curve(to: cPnt[2], controlPoint1: cPnt[0], controlPoint2: cPnt[1])
+                case "closePath":
+                    path.close()
+                default:
+                   break
+                }
+            }
+        }
+
+        return path
     }
 }
 

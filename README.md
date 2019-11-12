@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.76
+v0.77
 
 # Features
 
@@ -14,11 +14,12 @@ All tools in canvas. No hidden menus with many tabs.
 
 ![Screenshot](screenshot/screenshot1.png)
 
-Use preview when edit curve. Use standart keys to transform curves (⌘(Cmd), ⌥(Option), ⇧(Shift) & Delete)
+Use preview when edit shape. 
+Use standart keys to transform shapes (⌘(Cmd), ⌥(Option), ⇧(Shift) & Delete)
 
 ![Screenshot](screenshot/screenshot2.png)
 
-Permanent gradient. Every shape has gradient layer.  Setup alpha & color and you done
+Every shape has gradient layer.  Setup alpha & color and you done
 
 ![Screenshot](screenshot/screenshot3.png)
 
@@ -43,11 +44,13 @@ Font (F) - type text in text field, hit Enter and create vector representation
 
 - Common
 
-Close (⌘W), Quit (⌘Q) - not implemented safe exit
+Close (⌘W), Quit (⌘Q) -  safe exit
 
 - Files
 
-New (⌘N) Open (⌘O) - open .png  Save (⌘S), Save-As (⇧⌘S) - save to .png
+New (⌘N) Open (⌘O) - open *.drf or *.png  
+
+Save (⌘S), Save-As (⇧⌘S) - save to *.drf or *.png
 
 - Edit
 
@@ -74,7 +77,7 @@ Drag mouse with  ⌘(Cmd) key to edit control dot
 
 Use ⌥(Option) for edit control dots separately
 
-Use ⇧(Shift) for straight lines and diagonals with Line and Curve
+Use ⇧(Shift) for straight lines and diagonals with Line and Vector
 
 - Canvas
 
@@ -85,11 +88,11 @@ Scroll canvas with two fingers
 
 # Future releases
 
-v0.77 Improve Text
+v 0.79 Vector Union Mask
 
-v0.8 Undo Redo
+v0.8 Improve Text
 
-v0.9 .drf
+v0.9 Undo Redo
 
 v1.0 Filters
 

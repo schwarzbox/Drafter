@@ -5,6 +5,55 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
+// post about groups
+// setup tiers
+// patron only post with mini tutor
+
+// 0.78
+// edit curve on create, delete dots
+// select dots and drag together (move segments)
+
+// combine create and edit curve or separate edit and create mode
+
+// 0.79
+// fillRule (union, mask)
+// flatneess curve? mitter limits?
+
+// 0.8
+// transform text field when type
+// add text immediately in the cursor position
+// add control points to text
+
+// 0.9
+// Undo Redo
+
+// 1.0
+// Filters
+
+// 1.5
+// save svg
+// open svg
+
+// 2.0
+// Bugs
+// sizes
+// rotate&resize image + gradient fixed
+// save blur
+// save png to drf in bundle as zip
+// arrange stack
+
+
+// add?
+// flexible polygons
+// star
+
+// add group to group (show groups members)
+// show size of rect when create or resize?
+
+// editable text add text field and button to transform?
+// text next line?
+// allow move lineWidth inside outside
+
 import Cocoa
 
 class SketchPad: NSView {
@@ -67,7 +116,7 @@ class SketchPad: NSView {
     var zoomed: CGFloat = 1.0
     var zoomOrigin = CGPoint(x: setEditor.screenWidth/2,
                              y: setEditor.screenHeight/2)
-    
+
     var tool: Tool = tools[0]
 
     override init(frame: NSRect) {
@@ -93,6 +142,15 @@ class SketchPad: NSView {
         // filters
         self.layerUsesCoreImageFilters = true
     }
+
+//    override func updateLayer() { }
+//    override func makeBackingLayer() -> CALayer { }
+//    override func draw(_ dirtyRect: NSRect) {
+//        super.draw(dirtyRect)
+        // fill background
+//        NSColor.white.setStroke()
+//        __NSFrameRect(dirtyRect)
+//    }
 
     override func viewWillDraw() {
         self.updateWithPath(layer: self.editLayer, path: self.editedPath)
@@ -328,7 +386,7 @@ class SketchPad: NSView {
             self.finalSegment(fin: {mp, cp1, cp2 in
                 self.editedPath.move(to: mp.position)
                 self.controlPoints.append(
-                    ControlPoint(mp: mp, cp1: cp1, cp2: cp2))
+                    ControlPoint(cp1: cp1, cp2: cp2, mp: mp))
             })
 
         } else if self.movePoint != nil, self.closedCurve {
@@ -412,7 +470,7 @@ class SketchPad: NSView {
 
         let curve = self.initCurve(path: path,
             fill: self.filledCurve, rounded: self.roundedCurve,
-            angle: 0,
+            angle: CGFloat(setCurve.angle),
             lineWidth: CGFloat(lineWidth),
             cap: setCurve.lineCap, join: setCurve.lineJoin,
             dash: setCurve.lineDashPattern,
@@ -423,9 +481,7 @@ class SketchPad: NSView {
             blur: setCurve.minBlur,
             points: self.controlPoints)
 
-        let name = filledCurve
-            ? self.tool.name
-            : "line"
+        let name = filledCurve ? self.tool.name : "line"
         curve.setName(name: name, curves: self.curves)
         self.layer?.addSublayer(curve.canvas)
         self.addCurve(curve: curve)
@@ -668,7 +724,7 @@ class SketchPad: NSView {
                               controlPoint1: cPnt[0],
                               controlPoint2: cPnt[1])
 
-        self.controlPoints.append(ControlPoint(mp: mp, cp1: cp1, cp2: cp2))
+        self.controlPoints.append(ControlPoint(cp1: cp1, cp2: cp2, mp: mp))
     }
 
     func finalSegment(fin: (_ mp: Dot, _ cp1: Dot, _ cp2: Dot) -> Void ) {
@@ -1496,6 +1552,9 @@ class SketchPad: NSView {
             if !cur.edit {
                 cur.clearPoints()
             }
+            // rotate image
+//            let rotateImage = CGAffineTransform(rotationAngle: curve.angle)
+//            curve.imageLayer.setAffineTransform(rotateImage)
         }
     }
 
@@ -1661,9 +1720,36 @@ class SketchPad: NSView {
         if let imageRep = bitmapImageRepForCachingDisplay(
             in: self.sketchPath.bounds) {
             self.cacheDisplay(in: self.sketchPath.bounds, to: imageRep)
+//            let context = NSGraphicsContext(bitmapImageRep: imageRep)!
+//            let cgCtx = context.cgContext
+//            cgCtx.clear(self.sketchBorder.bounds)
+//            var index = 0
+//            if let layer = self.layer, let sublayers = layer.sublayers {
+//                for sublayer in sublayers {
+//                    let curve = self.curves[index]
+//                    if curve.blur > 0, let cgImg = sublayer.cgImage() {
+//
+//                        let ciImg = CIImage(cgImage: cgImg)
+//                        let filter = CIFilter(name: "CIGaussianBlur")
+//                        filter?.setValue(ciImg,
+//                                         forKey: kCIInputImageKey)
+//                        filter?.setValue(curve.blur,
+//                                         forKey: kCIInputRadiusKey)
+//                        if let output = filter?.outputImage {
+//                            if let cgImage = self.cgImageFrom(
+//                                ciImage: output) {
+//                                cgCtx.draw(cgImage, in: sublayer.bounds)
+//                            }
+//                        }
+//                    } else {
+//                        sublayer.render(in: cgCtx)
+//                    }
+//                    index += 1
+//                }
                 return imageRep.representation(
                     using: fileType, properties: properties)!
             }
+//        }
         return nil
     }
 }

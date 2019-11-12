@@ -45,6 +45,17 @@ class Dot: CALayer {
 
         self.isHidden = hidden
     }
+
+    convenience init (_ parent: SketchPad, pos: CGPoint,
+                      strokeColor: NSColor = setEditor.strokeColor,
+                      fillColor: NSColor = setEditor.fillColor) {
+        self.init(x: pos.x, y: pos.y,
+            width: parent.dotSize,
+            height: parent.dotSize,
+            rounded: parent.dotRadius,
+            lineWidth: parent.lineWidth,
+            strokeColor: strokeColor, fillColor: fillColor)
+    }
     // need for change position
     override init(layer: Any) {
         super.init(layer: layer)

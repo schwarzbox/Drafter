@@ -15,19 +15,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("applicationDidFinishLaunching")
     }
 
-//    func applicationDidUpdate(_ notification: Notification) {
-//        print("applicationDidUpdate")
-//    }
-
     func applicationDidBecomeActive(_ notification: Notification) {
         print("applicationDidBecomeActive")
     }
 
-    func applicationDidChangeScreenParameters(_ notification: Notification) {
-        print("applicationDidChangeScreenParameters")
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+
+        if setGlobal.saved {
+            let nc = NotificationCenter.default
+            nc.post(name: Notification.Name(
+                "shouldTerminate"), object: nil)
+            return .terminateLater
+        }
+        return .terminateNow
     }
 
-    func applicationWillTerminate(_ aNotification: Notification) {
-        print("applicationWillTerminate")
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return true
     }
 }

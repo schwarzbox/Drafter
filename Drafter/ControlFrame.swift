@@ -151,13 +151,14 @@ class ControlFrame: CALayer {
             if self.frameHandles.contains(i) {
                 var dx: CGFloat = 0
                 var dy: CGFloat = 0
-                var width = self.frame.width - self.dotSize - 2
+                let pad = self.dotSize * 2
+                var width = self.frame.width - pad
                 var height: CGFloat = self.dotRadius
                 let dt = self.dotMag/2
                 if i==1 || i==5 {
                     dx = i==1 ? dt : -dt
                     width = self.dotRadius
-                    height = self.frame.height - self.dotSize - 2
+                    height = self.frame.height - pad
                 } else {
                     dy = i==3 ? -dt : dt
                 }
