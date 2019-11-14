@@ -18,7 +18,7 @@ let toolsKeys: [String: Tool] = [
     "d": tools[0], "l": tools[1], "t": tools[2],
     "r": tools[3], "p": tools[4], "h": tools[5],
     "a": tools[6], "o": tools[7],
-    "s": tools[8], "c": tools[9], "f": tools[10]]
+    "s": tools[8], "v": tools[9], "f": tools[10]]
 
 protocol Drawable {
     var name: String { get }
@@ -485,9 +485,9 @@ class Oval: Tool {
     }
 }
 
-class Stylus: Tool {
+class Stylus: Line {
     override var name: String {"line"}
-    func action(topLeft: CGPoint, bottomRight: CGPoint) {
+    override func action(topLeft: CGPoint, bottomRight: CGPoint) {
         Tool.parent!.editedPath.curve(to: bottomRight,
                               controlPoint1: bottomRight,
                               controlPoint2: bottomRight)
@@ -531,6 +531,7 @@ class Stylus: Tool {
 }
 
 class Vector: Line {
+    override var name: String {"shape"}
     func action(topLeft: CGPoint) {
         let par = Tool.parent!
         if let mp = par.movePoint,

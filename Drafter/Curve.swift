@@ -208,12 +208,13 @@ class Curve: Equatable {
     }
 
     func setName(name: String, curves: [Curve]) {
-       var count = 1
-       var newName = name + " " + String(count)
-       for cur in curves where cur.name == newName {
-           count+=1
-           newName = name + " " + String(count)
-       }
+        var count = 1
+        var newName = name + " " + String(count)
+        let names = curves.map {$0.name}
+        while names.contains(newName) {
+            count+=1
+            newName = name + " " + String(count)
+        }
         self.name = newName
     }
 

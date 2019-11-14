@@ -70,6 +70,10 @@ class ViewController: NSViewController,
     var colorPanel: ColorPanel?
     var savePanel: NSSavePanel?
 
+    var history: [[Curve]] = [[]]
+    var indexHistory: Int = 0
+//    var maxHistory: Int = 60
+
     var selectedSketch: Int = -1
 
     override func viewDidLoad() {
@@ -307,6 +311,10 @@ class ViewController: NSViewController,
         nc.addObserver(self, selector: #selector(safeQuit),
                        name: Notification.Name("shouldTerminate"),
                        object: nil)
+        nc.addObserver(self, selector: #selector(saveHistory),
+                       name: Notification.Name("saveHistory"),
+                       object: nil)
+
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
     }
 
@@ -510,14 +518,19 @@ class ViewController: NSViewController,
 
         if let cell = tableView.makeView(withIdentifier: cellID,
                                          owner: nil) as? NSTableCellView {
-            cell.imageView?.image = image ?? nil
-
             cell.textField?.tag = row
             cell.textField?.stringValue = text
             cell.textField?.backgroundColor = NSColor.clear
             cell.textField?.textColor = NSColor.secondaryLabelColor
+
             if row == selectedSketch {
                 cell.textField?.backgroundColor = setEditor.fillColor
+            }
+
+            if let editButton = cell.subviews[0] as? NSButton {
+                editButton.tag = row
+                editButton.image = image ?? nil
+                editButton.isEnabled = curve.edit ? false : true
             }
 
             if let visButton = cell.subviews[2] as? NSButton {
@@ -541,51 +554,63 @@ class ViewController: NSViewController,
         return nil
     }
 
-//    func tableView (
-//        _ tableView: NSTableView,
-//        pasteboardWriterForRow row: Int)
-//        -> NSPasteboardWriting? {
-//        return sketchView.curves[row].name as NSString
-//    }
-//
-//    func tableView(
-//        _ tableView: NSTableView,
-//        validateDrop info: NSDraggingInfo,
-//        proposedRow row: Int,
-//        proposedDropOperation dropOperation: NSTableView.DropOperation)
-//        -> NSDragOperation {
-//        guard dropOperation == .on else { return [] }
-//        return .move
-//    }
-//
-//    func tableView (
-//        _ tableView: NSTableView,
-//        acceptDrop info: NSDraggingInfo,
-//        row: Int,
-//        dropOperation: NSTableView.DropOperation) -> Bool {
-//
-//        guard let items = info.draggingPasteboard.pasteboardItems
-//            else { return false }
-//        let name = items[0].string(forType: .string)
-//
-//        for (ind, curve) in sketchView!.curves.enumerated()
-//            where curve.name==name {
-//            if row<sketchView!.curves.count {
-//                sketchView!.curves.swapAt(ind, row)
-//                sketchView!.layer?.sublayers?.swapAt(ind, row)
-//            }
-//            sketchUI.reloadData()
-//            break
-//        }
-//        return true
-//    }
+    func tableView (
+        _ tableView: NSTableView,
+        pasteboardWriterForRow row: Int)
+        -> NSPasteboardWriting? {
+        return String(row) as NSString
+    }
+
+    func tableView(
+        _ tableView: NSTableView,
+        validateDrop info: NSDraggingInfo,
+        proposedRow row: Int,
+        proposedDropOperation dropOperation: NSTableView.DropOperation)
+        -> NSDragOperation {
+        guard dropOperation == .on else { return [] }
+        return .move
+    }
+
+    func tableView (
+        _ tableView: NSTableView,
+        acceptDrop info: NSDraggingInfo,
+        row: Int,
+        dropOperation: NSTableView.DropOperation) -> Bool {
+        let view = sketchView!
+        guard let items = info.draggingPasteboard.pasteboardItems
+            else { return false }
+        let index = Int(items[0].string(forType: .string) ?? "0") ?? 0
+
+        let curve = view.curves[index]
+        let tag = index>row ? 0 : 1
+        let dist = abs(row-index)
+        for _ in 0..<dist {
+            view.sendCurve(curve: curve, tag: tag)
+        }
+        sketchUI.reloadData()
+
+        return true
+    }
 
 //    MARK: SketchUI Actions
+    @IBAction func editSketch(_ sender: NSButton) {
+        if sender.tag<sketchUI.subviews.count {
+            if let row = sketchUI.subviews[sender.tag] as? NSTableRowView,
+                let cell = row.subviews.last as? NSTableCellView {
+                if let textField = cell.subviews[1] as? NSTextField {
+                    textField.selectText(textField)
+                }
+            }
+        }
+    }
+
     @IBAction func visibleSketch(_ sender: NSButton) {
         sketchView!.visibleSketch(sender: sender)
     }
+
     @IBAction func renameSketch(_ sender: NSTextField) {
         sketchView!.curves[sender.tag].name = sender.stringValue
+        sketchUI.reloadData()
     }
 
 //    MARK: Zoom Actions
@@ -658,6 +683,7 @@ class ViewController: NSViewController,
             for cur in view.groups {
                 view.curvedPath.append(cur.path)
             }
+            self.saveHistory()
         }
     }
 
@@ -811,7 +837,9 @@ class ViewController: NSViewController,
 
 //    MARK: Buttons actions
     @IBAction func sendCurve(_ sender: NSButton) {
-        sketchView!.sendCurve(tag: sender.tag)
+        if let curve = sketchView!.selectedCurve {
+            sketchView!.sendCurve(curve: curve, tag: sender.tag)
+        }
     }
 
     @IBAction func flipCurve(_ sender: NSButton) {
@@ -830,16 +858,75 @@ class ViewController: NSViewController,
         sketchView!.lockCurve(sender: sender)
     }
 
+//    MARK: History
+    @objc func saveHistory() {
+        let view = sketchView!
+        self.history.replaceSubrange(
+        self.indexHistory+1..<self.history.count, with: [])
+
+        self.history.append(view.copyAll())
+        self.indexHistory = self.history.count-1
+        print(self.history)
+        print(self.indexHistory, self.history.count)
+        self.undoManager?.registerUndo(
+            withTarget: self,
+            selector: #selector(self.undo),
+            object: view.curves)
+    }
+
 //    MARK: Menu actions
     @IBAction func undo(_ sender: NSMenuItem) {
-        print("undo")
-//        SketchView!.undoCurve()
+        let view = sketchView!
+
+        if let curve = view.selectedCurve {
+            curve.clearControlFrame()
+            curve.clearPoints()
+            view.selectedCurve = nil
+        }
+        view.groups = []
+        view.removeAllCurves()
+
+        if self.indexHistory-1 >= 0 {
+            self.indexHistory-=1
+        }
+        view.curves = self.history[self.indexHistory]
+        view.addAll()
+
+        print("undo", self.indexHistory, self.history.count)
+
+        self.updateStack()
+
+        self.undoManager?.registerUndo(
+            withTarget: self,
+            selector: #selector(self.redo),
+            object: view.curves)
     }
 
     @IBAction func redo(_ sender: NSMenuItem) {
-        print("redo")
-        //        SketchView!.redoCurve()
+        let view = sketchView!
+
+        if let curve = view.selectedCurve {
+            curve.clearControlFrame()
+            curve.clearPoints()
+            view.selectedCurve = nil
+        }
+        view.groups = []
+        view.removeAllCurves()
+
+        if self.indexHistory+1 < self.history.count {
+            self.indexHistory+=1
+        }
+        view.curves = self.history[self.indexHistory]
+        view.addAll()
+        print("redo", self.indexHistory, self.history.count)
+        self.updateStack()
+
+        self.undoManager?.registerUndo(
+            withTarget: self,
+            selector: #selector(self.undo),
+            object: view.curves)
     }
+
     @IBAction func cut(_ sender: NSMenuItem) {
         sketchView!.copyCurve(from: sketchView!.selectedCurve)
         sketchView!.deleteCurve()
@@ -865,6 +952,24 @@ class ViewController: NSViewController,
 
     @IBAction func ungroup(_ sender: NSMenuItem) {
         sketchView!.groupCurve(sender: sender)
+    }
+
+    @IBAction override func selectAll(_ sender: Any?) {
+        let view = sketchView!
+        if let resp = self.window.firstResponder,
+            resp.isKind(of: NSWindow.self) {
+            view.groups = view.curves
+            if let curve = view.selectedCurve {
+                view.clearControls(curve: curve)
+            }
+            if view.groups.count>0 {
+                view.selectedCurve = view.groups[0]
+                view.createControls(curve: view.groups[0])
+            }
+            view.showGroup()
+        } else {
+            super.selectAll(sender)
+        }
     }
 
     @IBAction func delete(_ sender: NSMenuItem) {
@@ -899,12 +1004,8 @@ class ViewController: NSViewController,
         view.sketchName = nil
         view.sketchExt = nil
 
-        for curve in view.curves {
-            curve.delete()
-        }
-        view.curves.removeAll()
+        view.removeAllCurves()
 
-        view.frameUI.isOn(on: -1)
         textUI.hide()
         self.updateSliders()
         setGlobal.saved = false

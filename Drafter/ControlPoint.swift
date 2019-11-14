@@ -28,12 +28,16 @@ class ControlPoint {
         self.setDots()
         self.setLines()
     }
-    
+
     convenience init(_ parent: SketchPad,
                      cp1: CGPoint, cp2: CGPoint, mp: CGPoint) {
         self.init(
-            cp1: Dot.init(parent, pos: cp1, strokeColor: setEditor.fillColor, fillColor: setEditor.strokeColor),
-            cp2: Dot.init(parent, pos: cp2, strokeColor: setEditor.fillColor, fillColor: setEditor.strokeColor),
+            cp1: Dot.init(parent, pos: cp1,
+                          strokeColor: setEditor.fillColor,
+                          fillColor: setEditor.strokeColor),
+            cp2: Dot.init(parent, pos: cp2,
+                          strokeColor: setEditor.fillColor,
+                          fillColor: setEditor.strokeColor),
             mp: Dot.init(parent, pos: mp)
         )
     }

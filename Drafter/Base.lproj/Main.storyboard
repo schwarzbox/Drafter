@@ -124,9 +124,9 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Edit" id="W48-6f-4Dl">
                                     <items>
-                                        <menuItem title="Undo" keyEquivalent="z" id="dRJ-4n-Yzg">
+                                        <menuItem title="Undo" keyEquivalent="z" id="OwE-sZ-NLX" userLabel="Undo">
                                             <connections>
-                                                <action selector="undo:" target="Ady-hI-5gd" id="M6e-cu-g7V"/>
+                                                <action selector="undo:" target="Ady-hI-5gd" id="iAw-wB-mzV"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Redo" keyEquivalent="Z" id="6dh-zS-Vam">
@@ -319,25 +319,6 @@ CA
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="capitalizeWord:" target="Ady-hI-5gd" id="26H-TL-nsh"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
-                                        </menuItem>
-                                        <menuItem title="Speech" id="xrE-MZ-jX0">
-                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Speech" id="3rS-ZA-NoH">
-                                                <items>
-                                                    <menuItem title="Start Speaking" id="Ynk-f8-cLZ">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="startSpeaking:" target="Ady-hI-5gd" id="654-Ng-kyl"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Stop Speaking" id="Oyz-dy-DGm">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="stopSpeaking:" target="Ady-hI-5gd" id="dX8-6p-jy9"/>
                                                         </connections>
                                                     </menuItem>
                                                 </items>
@@ -732,7 +713,7 @@ CA
                                 <rect key="frame" x="254" y="424" width="48" height="14"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" focusRingType="none" alignment="right" title="0" usesSingleLineMode="YES" id="S78-Uf-pJ3">
-                                    <font key="font" metaFont="controlContent" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <allowedInputSourceLocales>
@@ -744,7 +725,7 @@ CA
                                 <rect key="frame" x="254" y="368" width="48" height="14"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" allowsUndo="NO" sendsActionOnEndEditing="YES" focusRingType="none" alignment="left" title="0" usesSingleLineMode="YES" id="XjF-X4-03k">
-                                    <font key="font" metaFont="controlContent" size="11"/>
+                                    <font key="font" metaFont="message" size="11"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <allowedInputSourceLocales>
@@ -780,7 +761,7 @@ CA
                                                 </constraints>
                                                 <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="GR2-Tq-Jbd" id="Gtf-Bp-WBT">
                                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                    <font key="font" metaFont="label" size="9"/>
+                                                    <font key="font" metaFont="menu" size="9"/>
                                                     <menu key="menu" id="IwX-ZG-9J0">
                                                         <items>
                                                             <menuItem title="Item 1" state="on" hidden="YES" id="GR2-Tq-Jbd"/>
@@ -800,7 +781,7 @@ CA
                                                 </constraints>
                                                 <popUpButtonCell key="cell" type="push" title="Item 1" bezelStyle="rounded" alignment="left" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="UKj-0N-h3K" id="H5N-uG-WuL">
                                                     <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                    <font key="font" metaFont="label" size="9"/>
+                                                    <font key="font" metaFont="menu" size="9"/>
                                                     <menu key="menu" id="bhZ-VL-gcQ">
                                                         <items>
                                                             <menuItem title="Item 1" state="on" hidden="YES" id="UKj-0N-h3K"/>
@@ -877,7 +858,7 @@ CA
                                         </constraints>
                                         <buttonCell key="cell" type="square" title="H" alternateTitle="hflip" bezelStyle="shadowlessSquare" alignment="center" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="yvj-hj-sbz">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                            <font key="font" metaFont="label" size="9"/>
+                                            <font key="font" metaFont="menu" size="9"/>
                                         </buttonCell>
                                         <connections>
                                             <action selector="flipCurve:" target="XfG-lQ-9wD" id="PRA-w6-ZtC"/>
@@ -891,7 +872,7 @@ CA
                                         </constraints>
                                         <buttonCell key="cell" type="square" title="V" alternateTitle="vflip" bezelStyle="shadowlessSquare" alignment="center" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="wkk-4h-IdQ">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                            <font key="font" metaFont="label" size="9"/>
+                                            <font key="font" metaFont="menu" size="9"/>
                                         </buttonCell>
                                         <connections>
                                             <action selector="flipCurve:" target="XfG-lQ-9wD" id="c0q-8A-OEb"/>
@@ -1159,7 +1140,7 @@ CA
                                             <tableColumns>
                                                 <tableColumn editable="NO" width="128" minWidth="40" maxWidth="1000" id="yq2-i8-Afj">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Shapes">
-                                                        <font key="font" metaFont="controlContent" size="11"/>
+                                                        <font key="font" metaFont="message" size="11"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                     </tableHeaderCell>
@@ -1174,16 +1155,22 @@ CA
                                                             <rect key="frame" x="0.0" y="1" width="128" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <imageView focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="obL-5x-n85">
+                                                                <button verticalHuggingPriority="750" springLoaded="YES" id="DfV-cr-co4">
                                                                     <rect key="frame" x="1" y="0.0" width="17" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" focusRingType="none" alignment="left" imageScaling="proportionallyUpOrDown" image="NSActionTemplate" id="8aC-UY-Fym"/>
-                                                                </imageView>
+                                                                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSActionTemplate" imagePosition="only" alignment="center" refusesFirstResponder="YES" imageScaling="proportionallyDown" inset="2" id="TyG-qO-yU6">
+                                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                        <font key="font" metaFont="message" size="11"/>
+                                                                    </buttonCell>
+                                                                    <connections>
+                                                                        <action selector="editSketch:" target="XfG-lQ-9wD" id="hEg-bZ-grE"/>
+                                                                    </connections>
+                                                                </button>
                                                                 <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C39-f9-qTe">
                                                                     <rect key="frame" x="19" y="0.0" width="72" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" focusRingType="none" drawsBackground="YES" usesSingleLineMode="YES" id="0uF-pY-FnY">
-                                                                        <font key="font" metaFont="controlContent" size="11"/>
+                                                                        <font key="font" metaFont="message" size="11"/>
                                                                         <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
                                                                         <color key="backgroundColor" name="systemBlueColor" catalog="System" colorSpace="catalog"/>
                                                                         <allowedInputSourceLocales>
@@ -1199,7 +1186,7 @@ CA
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSQuickLookTemplate" imagePosition="overlaps" alignment="center" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="jfG-jG-OIr">
                                                                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                                                        <font key="font" metaFont="controlContent" size="11"/>
+                                                                        <font key="font" metaFont="message" size="11"/>
                                                                     </buttonCell>
                                                                     <connections>
                                                                         <action selector="visibleSketch:" target="XfG-lQ-9wD" id="lFt-Ko-MbY"/>
@@ -1210,7 +1197,7 @@ CA
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSLockUnlockedTemplate" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="59n-Fh-cqc">
                                                                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
-                                                                        <font key="font" metaFont="controlContent" size="11"/>
+                                                                        <font key="font" metaFont="message" size="11"/>
                                                                     </buttonCell>
                                                                     <connections>
                                                                         <action selector="lockCurve:" target="XfG-lQ-9wD" id="vct-GV-yxM"/>
@@ -1218,7 +1205,6 @@ CA
                                                                 </button>
                                                             </subviews>
                                                             <connections>
-                                                                <outlet property="imageView" destination="obL-5x-n85" id="the-5n-lxG"/>
                                                                 <outlet property="textField" destination="C39-f9-qTe" id="hM7-Oo-Ns5"/>
                                                             </connections>
                                                         </tableCellView>
@@ -1254,7 +1240,7 @@ CA
                                                     <constraint firstAttribute="width" constant="14" id="Haw-l9-7AD"/>
                                                 </constraints>
                                                 <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="⚲" usesSingleLineMode="YES" id="f9p-AG-FYm" userLabel="Label">
-                                                    <font key="font" metaFont="controlContent" size="11"/>
+                                                    <font key="font" metaFont="message" size="11"/>
                                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                     <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                     <allowedInputSourceLocales>
@@ -1277,7 +1263,7 @@ CA
                                                 <rect key="frame" x="80" y="0.0" width="51" height="16"/>
                                                 <popUpButtonCell key="cell" type="push" title="100" bezelStyle="rounded" alignment="center" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="K4m-Np-TAF" id="bQ9-oP-ET9">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                    <font key="font" metaFont="label" size="9"/>
+                                                    <font key="font" metaFont="menu" size="9"/>
                                                     <menu key="menu" id="HYV-Po-7fi">
                                                         <items>
                                                             <menuItem title="100" state="on" hidden="YES" id="K4m-Np-TAF"/>
@@ -1330,7 +1316,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="UZz-Pd-Vwr"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="x" usesSingleLineMode="YES" id="eWD-ok-leU" userLabel="Label">
-                                                            <font key="font" metaFont="controlContent" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1393,7 +1379,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="Nfp-Tu-1fV"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="y" usesSingleLineMode="YES" id="5mz-u2-Y1g" userLabel="Label">
-                                                            <font key="font" metaFont="controlContent" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1582,7 +1568,7 @@ CA
                                                             <constraint firstAttribute="width" constant="14" id="klp-de-q41"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="↺" usesSingleLineMode="YES" id="ABR-hK-3fO" userLabel="Label">
-                                                            <font key="font" metaFont="controlContent" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1641,7 +1627,7 @@ CA
                                                     <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hkv-8O-iiD" userLabel="LCR">
                                                         <rect key="frame" x="0.0" y="15" width="130" height="16"/>
                                                         <segmentedCell key="cell" controlSize="mini" borderStyle="border" alignment="left" style="capsule" trackingMode="momentary" id="4gZ-mh-NgJ">
-                                                            <font key="font" metaFont="label" size="9"/>
+                                                            <font key="font" metaFont="menu" size="9"/>
                                                             <segments>
                                                                 <segment label="⊢" width="41"/>
                                                                 <segment label="⟛" width="41" tag="1"/>
@@ -1655,7 +1641,7 @@ CA
                                                     <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2lg-FN-NNT" userLabel="UCD">
                                                         <rect key="frame" x="0.0" y="-1" width="130" height="16"/>
                                                         <segmentedCell key="cell" controlSize="mini" borderStyle="border" alignment="left" style="capsule" trackingMode="momentary" id="MxJ-ht-hmR">
-                                                            <font key="font" metaFont="label" size="9"/>
+                                                            <font key="font" metaFont="menu" size="9"/>
                                                             <segments>
                                                                 <segment label="⊤" width="41"/>
                                                                 <segment label="⫩" width="41" tag="1"/>
@@ -1729,7 +1715,7 @@ CA
                                                             <constraint firstAttribute="height" constant="18" id="gag-nL-Aen"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" enabled="NO" allowsUndo="NO" focusRingType="none" alignment="center" placeholderString="▣" usesSingleLineMode="YES" id="ge9-CH-Lcu" userLabel="Label">
-                                                            <font key="font" metaFont="controlContent" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="systemGrayColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>
@@ -1788,7 +1774,7 @@ CA
                                                     <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CUY-UM-Qrn" userLabel="Cap">
                                                         <rect key="frame" x="0.0" y="-1" width="62" height="16"/>
                                                         <segmentedCell key="cell" controlSize="mini" borderStyle="border" alignment="left" segmentDistribution="fillEqually" style="capsule" trackingMode="selectOne" id="9DN-Ma-cCg">
-                                                            <font key="font" metaFont="label" size="9"/>
+                                                            <font key="font" metaFont="menu" size="9"/>
                                                             <segments>
                                                                 <segment label="■" width="18" selected="YES"/>
                                                                 <segment label="□" width="18" tag="1"/>
@@ -1802,7 +1788,7 @@ CA
                                                     <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bcx-p5-59K" userLabel="Join">
                                                         <rect key="frame" x="68" y="-1" width="62" height="16"/>
                                                         <segmentedCell key="cell" controlSize="mini" borderStyle="border" alignment="left" style="capsule" trackingMode="selectOne" id="GNz-jE-XMT">
-                                                            <font key="font" metaFont="label" size="9"/>
+                                                            <font key="font" metaFont="menu" size="9"/>
                                                             <segments>
                                                                 <segment label="■" width="18" selected="YES"/>
                                                                 <segment label="▲" width="18" tag="1"/>
@@ -2016,7 +2002,7 @@ CA
                                                             <constraint firstAttribute="width" constant="80" id="p2s-MQ-GKJ"/>
                                                         </constraints>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="border" focusRingType="none" alignment="left" placeholderString="Stroke" usesSingleLineMode="YES" id="e3Q-vu-6up" userLabel="Label">
-                                                            <font key="font" metaFont="controlContent" size="11"/>
+                                                            <font key="font" metaFont="message" size="11"/>
                                                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="backgroundColor" name="unemphasizedSelectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             <allowedInputSourceLocales>

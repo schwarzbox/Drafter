@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.77
+v0.78
 
 # Features
 
@@ -92,12 +92,13 @@ v 0.79 Vector Union Mask
 
 v0.8 Improve Text
 
-v0.9 Undo Redo
+v0.9 Filters
 
-v1.0 Filters
+v1.0
+Bugs:  SaveBlur, Rotate image, Fix sizes, Save .png with .drf 
 
 v1.5 .svg
 
-Bugs:  SaveBlur Rotate image Rearrange Stack
+
 
 

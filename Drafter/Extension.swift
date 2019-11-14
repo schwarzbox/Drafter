@@ -196,7 +196,7 @@ extension NSBezierPath {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         for i in 0 ..< self.elementCount {
             let type = self.element(at: i, associatedPoints: &cPnt)
-            let toStr: [String] = cPnt.map{
+            let toStr: [String] = cPnt.map {
                 String(Double($0.x)) + " " + String(Double($0.y)) }
             let finStr = toStr.joined(separator: " ")
             switch type {
@@ -222,8 +222,9 @@ extension NSBezierPath {
         for line in str.split(separator: "|") {
             let space = line.firstIndex(of: " ")
             if let sp = space {
-                let str = line.suffix(from: sp).dropFirst().split(separator: " ")
-                let floats = str.map{CGFloat(Double($0) ?? 0.0)}
+                let str = line.suffix(from: sp).dropFirst().split(
+                    separator: " ")
+                let floats = str.map {CGFloat(Double($0) ?? 0.0)}
                 cPnt = []
                 for i in stride(from: 0, to: floats.count, by: 2) {
                     cPnt.append(CGPoint(x: floats[i], y: floats[i+1]))
@@ -234,7 +235,9 @@ extension NSBezierPath {
                 case "lineTo":
                     path.line(to: cPnt[0])
                 case "curveTo":
-                    path.curve(to: cPnt[2], controlPoint1: cPnt[0], controlPoint2: cPnt[1])
+                    path.curve(to: cPnt[2],
+                               controlPoint1: cPnt[0],
+                               controlPoint2: cPnt[1])
                 case "closePath":
                     path.close()
                 default:

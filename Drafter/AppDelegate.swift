@@ -19,7 +19,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         print("applicationDidBecomeActive")
     }
 
-    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+    func applicationShouldTerminate(
+        _ sender: NSApplication) -> NSApplication.TerminateReply {
 
         if setGlobal.saved {
             let nc = NotificationCenter.default
@@ -28,9 +29,5 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateLater
         }
         return .terminateNow
-    }
-
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return true
     }
 }

@@ -27,7 +27,7 @@ class Dot: CALayer {
 
         super.init()
         // disable animation
-        self.actions = ["position": NSNull()]
+        self.actions = setEditor.disabledActions
         self.frame = CGRect(x: x-anchor.x * width,
                             y: y-anchor.y * height,
                             width: width, height: height)

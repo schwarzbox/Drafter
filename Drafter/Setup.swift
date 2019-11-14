@@ -87,7 +87,7 @@ struct SetupEditor {
     let fillColor = NSColor.systemBlue.sRGB()
     let guiColor = NSColor.unemphasizedSelectedContentBackgroundColor.sRGB()
     let controlColor = NSColor.systemGreen.sRGB()
-    let lineDashPattern: [NSNumber] = [4, 4, 0, 0]
+    let lineDashPattern: [NSNumber] = [4, 4, 4, 4]
 
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
