@@ -72,7 +72,6 @@ class ViewController: NSViewController,
 
     var history: [[Curve]] = [[]]
     var indexHistory: Int = 0
-//    var maxHistory: Int = 60
 
     var selectedSketch: Int = -1
 
@@ -112,7 +111,7 @@ class ViewController: NSViewController,
         if !event.modifierFlags.contains(.command),
             let resp = self.window.firstResponder,
             resp.isKind(of: NSWindow.self) {
-            return true
+                return true
         }
         return false
     }
@@ -122,7 +121,7 @@ class ViewController: NSViewController,
             let view = sketchView!
             if let ch = event.charactersIgnoringModifiers,
                 let tool = toolsKeys[ch] {
-                view.tool = tool
+                view.setTool(tag: tool.tag)
                 return true
             } else if event.keyCode >= 123 && event.keyCode <= 126 {
                 var dt = CGPoint(x: 0, y: 0)
@@ -311,8 +310,8 @@ class ViewController: NSViewController,
         nc.addObserver(self, selector: #selector(safeQuit),
                        name: Notification.Name("shouldTerminate"),
                        object: nil)
-        nc.addObserver(self, selector: #selector(saveHistory),
-                       name: Notification.Name("saveHistory"),
+        nc.addObserver(self, selector: #selector(saveStack),
+                       name: Notification.Name("saveStack"),
                        object: nil)
 
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
@@ -338,7 +337,11 @@ class ViewController: NSViewController,
     }
 
     @objc func updateSketchColor() {
-        sketchView!.colorCurve()
+        let view = sketchView!
+        if let panel = self.colorPanel, let cp = panel.sharedColorPanel {
+            cp.acceptsMouseMovedEvents = true
+        }
+        view.colorCurve()
         self.updateStack()
     }
 
@@ -423,6 +426,7 @@ class ViewController: NSViewController,
     func showUnusedViews(_ bool: Bool, from: Int = 2) {
         for index in from..<actionUI.subviews.count {
             let subs = actionUI.subviews[index].subviews
+
             if index==2 {
                 for i in 0..<subs.count {
                     if let stack = subs[i] as? NSStackView {
@@ -683,7 +687,7 @@ class ViewController: NSViewController,
             for cur in view.groups {
                 view.curvedPath.append(cur.path)
             }
-            self.saveHistory()
+            self.saveStack()
         }
     }
 
@@ -747,10 +751,12 @@ class ViewController: NSViewController,
 
     @IBAction func capCurve(_ sender: NSSegmentedControl) {
         sketchView!.capCurve(value: sender.indexOfSelectedItem)
+        self.saveStack()
     }
 
     @IBAction func joinCurve(_ sender: NSSegmentedControl) {
         sketchView!.joinCurve(value: sender.indexOfSelectedItem)
+        self.saveStack()
     }
 
     @IBAction func dashCurve(_ sender: Any) {
@@ -769,6 +775,7 @@ class ViewController: NSViewController,
     @IBAction func glyphsCurve(_ sender: NSTextField) {
         sketchView!.glyphsCurve(value: sender.stringValue,
                                 sharedFont: textUI!.sharedFont)
+        self.saveStack()
     }
 
 //    MARK: ColorPanel actions
@@ -839,97 +846,91 @@ class ViewController: NSViewController,
     @IBAction func sendCurve(_ sender: NSButton) {
         if let curve = sketchView!.selectedCurve {
             sketchView!.sendCurve(curve: curve, tag: sender.tag)
+            self.saveStack()
         }
     }
 
     @IBAction func flipCurve(_ sender: NSButton) {
         sketchView!.flipCurve(tag: sender.tag)
+        self.saveStack()
     }
 
     @IBAction func editCurve(_ sender: NSButton) {
         sketchView!.editCurve(sender: sender)
     }
 
-    @IBAction func groupCurve(_ sender: NSButton) {
+    @IBAction func groupCurve(_ sender: Any) {
         sketchView!.groupCurve(sender: sender)
+        self.saveStack()
+    }
+
+    @IBAction func ungroup(_ sender: NSMenuItem) {
+        sketchView!.groupCurve(sender: sender)
+        self.saveStack()
     }
 
     @IBAction func lockCurve(_ sender: NSButton) {
         sketchView!.lockCurve(sender: sender)
+        self.saveStack()
     }
 
 //    MARK: History
-    @objc func saveHistory() {
+    @objc func saveStack() {
         let view = sketchView!
-        self.history.replaceSubrange(
-        self.indexHistory+1..<self.history.count, with: [])
-
+        self.history[self.indexHistory+1..<self.history.count] = []
         self.history.append(view.copyAll())
         self.indexHistory = self.history.count-1
-        print(self.history)
-        print(self.indexHistory, self.history.count)
-        self.undoManager?.registerUndo(
-            withTarget: self,
-            selector: #selector(self.undo),
-            object: view.curves)
     }
-
 //    MARK: Menu actions
-    @IBAction func undo(_ sender: NSMenuItem) {
+    func restoreStack(history: () -> Void) {
         let view = sketchView!
 
         if let curve = view.selectedCurve {
             curve.clearControlFrame()
-            curve.clearPoints()
             view.selectedCurve = nil
         }
+
         view.groups = []
         view.removeAllCurves()
 
-        if self.indexHistory-1 >= 0 {
-            self.indexHistory-=1
-        }
+        history()
+
         view.curves = self.history[self.indexHistory]
-        view.addAll()
+        view.curves = view.copyAll()
 
-        print("undo", self.indexHistory, self.history.count)
+        view.addAllLayers()
+        view.clearCurvedPath()
 
-        self.updateStack()
-
-        self.undoManager?.registerUndo(
-            withTarget: self,
-            selector: #selector(self.redo),
-            object: view.curves)
+        self.updateSliders()
+    }
+    @IBAction func undoStack(_ sender: Any) {
+        if let resp = self.window.firstResponder,
+            resp.isKind(of: NSWindow.self) {
+            self.restoreStack {
+                if self.indexHistory-1 >= 0 {
+                    self.indexHistory-=1
+                }
+            }
+            print("undo", self.indexHistory, self.history)
+        }
     }
 
-    @IBAction func redo(_ sender: NSMenuItem) {
-        let view = sketchView!
-
-        if let curve = view.selectedCurve {
-            curve.clearControlFrame()
-            curve.clearPoints()
-            view.selectedCurve = nil
+    @IBAction func redoStack(_ sender: Any) {
+        if let resp = self.window.firstResponder,
+            resp.isKind(of: NSWindow.self) {
+            self.restoreStack {
+                if self.indexHistory+1 < self.history.count {
+                    self.indexHistory+=1
+                }
+            }
+            print("redo", self.indexHistory, self.history)
         }
-        view.groups = []
-        view.removeAllCurves()
-
-        if self.indexHistory+1 < self.history.count {
-            self.indexHistory+=1
-        }
-        view.curves = self.history[self.indexHistory]
-        view.addAll()
-        print("redo", self.indexHistory, self.history.count)
-        self.updateStack()
-
-        self.undoManager?.registerUndo(
-            withTarget: self,
-            selector: #selector(self.undo),
-            object: view.curves)
     }
 
     @IBAction func cut(_ sender: NSMenuItem) {
         sketchView!.copyCurve(from: sketchView!.selectedCurve)
         sketchView!.deleteCurve()
+        self.saveStack()
     }
 
     @IBAction func copy(_ sender: NSMenuItem) {
@@ -944,14 +945,7 @@ class ViewController: NSViewController,
         sketchView!.pasteCurve(to: CGPoint(
             x: deltaX + view.bounds.minX ,
             y: deltaY + view.bounds.minY))
-    }
-
-    @IBAction func group(_ sender: NSMenuItem) {
-        sketchView!.groupCurve(sender: sender)
-    }
-
-    @IBAction func ungroup(_ sender: NSMenuItem) {
-        sketchView!.groupCurve(sender: sender)
+        self.saveStack()
     }
 
     @IBAction override func selectAll(_ sender: Any?) {
@@ -974,6 +968,7 @@ class ViewController: NSViewController,
 
     @IBAction func delete(_ sender: NSMenuItem) {
         sketchView!.deleteCurve()
+        self.saveStack()
     }
 
     func showFileName() {
@@ -989,7 +984,7 @@ class ViewController: NSViewController,
             curve.clearControlFrame()
             curve.clearPoints()
         }
-        view.clearPathLayer(layer: view.editLayer, path: view.editedPath)
+        view.clearCurvedPath()
         frameUI.hide()
     }
 

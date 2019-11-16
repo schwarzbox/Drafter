@@ -21,6 +21,7 @@ let toolsKeys: [String: Tool] = [
     "s": tools[8], "v": tools[9], "f": tools[10]]
 
 protocol Drawable {
+    var tag: Int { get }
     var name: String { get }
     func create(ctrl: Bool, shift: Bool, opt: Bool,
                 event: NSEvent?)
@@ -31,6 +32,7 @@ protocol Drawable {
 }
 
 class Tool: Drawable {
+    var tag: Int {-1}
     static var parent: SketchPad?
     func useTool(_ action: @autoclosure () -> Void) {
          Tool.parent!.editedPath = NSBezierPath()
@@ -146,6 +148,7 @@ class Tool: Drawable {
 }
 
 class Drag: Tool {
+    override var tag: Int {0}
     override var name: String {"drag"}
     func action(topLeft: CGPoint, bottomRight: CGPoint) {
         let size = self.flipSize(topLeft: topLeft,
@@ -197,6 +200,7 @@ class Drag: Tool {
 }
 
 class Line: Tool {
+    override var tag: Int {1}
     override var name: String {"line"}
     func action(topLeft: CGPoint, bottomRight: CGPoint) {
         Tool.parent!.editedPath.move(to: topLeft)
@@ -235,6 +239,7 @@ class Line: Tool {
 }
 
 class Triangle: Tool {
+    override var tag: Int {2}
     func action(topLeft: CGPoint, bottomRight: CGPoint, sides: Int,
                 angle: CGFloat) {
         let size = self.flipSize(topLeft: topLeft,
@@ -280,6 +285,7 @@ class Triangle: Tool {
 }
 
 class Rectangle: Tool {
+    override var tag: Int {3}
     func action(topLeft: CGPoint, bottomRight: CGPoint,
                 shift: Bool = false) {
         var botLeft: CGPoint
@@ -362,6 +368,7 @@ class Rectangle: Tool {
 }
 
 class Pentagon: Triangle {
+    override var tag: Int {4}
     override func create(ctrl: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.parent!.startPos,
@@ -374,6 +381,7 @@ class Pentagon: Triangle {
 }
 
 class Hexagon: Triangle {
+    override var tag: Int {5}
     override func create(ctrl: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.parent!.startPos,
@@ -387,6 +395,7 @@ class Hexagon: Triangle {
 }
 
 class Arc: Tool {
+    override var tag: Int {6}
     func action(topLeft: CGPoint, bottomRight: CGPoint) {
         let size = self.flipSize(topLeft: topLeft,
                                  bottomRight: bottomRight)
@@ -444,6 +453,7 @@ class Arc: Tool {
 }
 
 class Oval: Tool {
+    override var tag: Int {7}
     func action(topLeft: CGPoint, bottomRight: CGPoint,
                 shift: Bool = false) {
         let size = self.flipSize(topLeft: topLeft, bottomRight: bottomRight)
@@ -486,6 +496,7 @@ class Oval: Tool {
 }
 
 class Stylus: Line {
+    override var tag: Int {8}
     override var name: String {"line"}
     override func action(topLeft: CGPoint, bottomRight: CGPoint) {
         Tool.parent!.editedPath.curve(to: bottomRight,
@@ -531,6 +542,7 @@ class Stylus: Line {
 }
 
 class Vector: Line {
+    override var tag: Int {9}
     override var name: String {"shape"}
     func action(topLeft: CGPoint) {
         let par = Tool.parent!
@@ -613,6 +625,7 @@ class Vector: Line {
 }
 
 class Text: Tool {
+    override var tag: Int {10}
     override var name: String {"text"}
     func action(pos: CGPoint? = nil) {
         let topLeft = pos ?? Tool.parent!.startPos

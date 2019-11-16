@@ -578,3 +578,11 @@ extension NSOpenPanel {
         self.canChooseFiles = true
     }
 }
+
+extension NSColorPanel {
+    override open func mouseMoved(with event: NSEvent) {
+        let nc = NotificationCenter.default
+        nc.post(name: Notification.Name("saveStack"), object: nil)
+        self.acceptsMouseMovedEvents = false
+    }
+}

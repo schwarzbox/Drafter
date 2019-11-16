@@ -93,6 +93,7 @@ class ColorPanel: NSStackView {
         } else if let panel = sender as? NSColorPanel {
             color = self.setColor(color: panel.color)
             self.sharedColorPanel?.color = color
+
         }
 
         let nc = NotificationCenter.default

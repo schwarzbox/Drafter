@@ -5,54 +5,6 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
-// post about groups
-// setup tiers
-// patron only post with mini tutor
-
-// 0.79
-// test undo redo // undo when edit
-
-// [control dots]
-// select dots and drag together (move segments)
-// edit curve on create, delete dots
-// combine create and edit curve or separate edit and create mode
-
-
-// 0.8
-// transform text field when type
-// add text immediately in the cursor position
-// add control points to text
-
-
-// 0.9
-// Filters
-// fillRule (union, mask)
-// flatneess curve? mitter limits?
-
-// 1.0
-// Bugs
-// fix sizes
-// rotate&resize image + gradient fixed
-// save blur blur image
-// Save .png with .drf in bundle as zip
-
-
-// 1.5
-// save svg
-// open svg
-
-
-// add?
-// flexible polygons
-// star
-
-// add group to group (show groups members)
-// show size of rect when create or resize?
-
-// editable text add text field and button to transform?
-// text next line?
-// allow move lineWidth inside outside
-
 import Cocoa
 
 class SketchPad: NSView {
@@ -141,15 +93,6 @@ class SketchPad: NSView {
         // filters
         self.layerUsesCoreImageFilters = true
     }
-
-//    override func updateLayer() { }
-//    override func makeBackingLayer() -> CALayer { }
-//    override func draw(_ dirtyRect: NSRect) {
-//        super.draw(dirtyRect)
-        // fill background
-//        NSColor.white.setStroke()
-//        __NSFrameRect(dirtyRect)
-//    }
 
     override func viewWillDraw() {
         self.updateWithPath(layer: self.editLayer, path: self.editedPath)
@@ -349,7 +292,6 @@ class SketchPad: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
-        print("down")
         let shift: Bool = event.modifierFlags.contains(.shift) ? true : false
         let opt: Bool = event.modifierFlags.contains(.option) ? true : false
 
@@ -415,7 +357,9 @@ class SketchPad: NSView {
         self.startPos = convert(event.locationInWindow, from: nil)
 
         self.updateSliders()
-        self.saveHistory()
+        if self.selectedCurve != nil {
+            self.saveStack()
+        }
         self.needsDisplay = true
     }
 
@@ -605,9 +549,9 @@ class SketchPad: NSView {
         nc.post(name: Notification.Name("updateStack"), object: nil)
     }
 
-    func saveHistory() {
+    func saveStack() {
         let nc = NotificationCenter.default
-        nc.post(name: Notification.Name("saveHistory"), object: nil)
+        nc.post(name: Notification.Name("saveStack"), object: nil)
     }
 
 //    MARK: Rulers
@@ -862,7 +806,7 @@ class SketchPad: NSView {
 
 //    MARK: Buttons func
     func sendCurve(curve: Curve, tag: Int, dist: Int = 1) {
-        if let index = self.curves.firstIndex(of: curve), !curve.lock {
+        if var index = self.curves.firstIndex(of: curve), !curve.lock {
             var goal = index
             switch tag {
             case 0: goal -= goal-dist>=0 ? dist : 0
@@ -871,36 +815,36 @@ class SketchPad: NSView {
                 break
             }
 
-            if goal != index {
-                var delta = 0
-                let goalCurve = self.curves[goal]
-                if goal < index {
-                    for (ind, cur) in self.curves.enumerated() where ind<goal {
-                        delta += cur.groups.count-1
-                    }
+            if goal == index { return }
 
-                    for i in stride(from: goalCurve.groups.count-1,
-                                    through: 0, by: -1) {
-                        for j in 0..<curve.groups.count {
-                            self.layer?.sublayers?.swapAt(goal + delta + i + j,
-                                                          index + delta + i + j)
-                        }
-                    }
-                } else {
-                    for (ind, cur) in self.curves.enumerated() where ind<index {
-                        delta += cur.groups.count-1
-                    }
-                    for j in 0..<goalCurve.groups.count {
-                        for i in stride(from: curve.groups.count-1,
-                                        through: 0, by: -1) {
-                            self.layer?.sublayers?.swapAt(goal + delta + i + j,
-                                                          index + delta + i + j)
-                        }
+            var delta = 0
+            let goalCurve = self.curves[goal]
+
+            if goal < index {
+                for (ind, cur) in self.curves.enumerated() where ind<goal {
+                    delta += cur.groups.count-1
+                }
+                for i in stride(from: goalCurve.groups.count-1,
+                                through: 0, by: -1) {
+                    for j in 0..<curve.groups.count {
+                        self.layer?.sublayers?.swapAt(
+                            goal + delta + i + j, index + delta + i + j)
                     }
                 }
-                self.curves.swapAt(goal, index)
-                self.updateStack()
+            } else {
+                for (ind, cur) in self.curves.enumerated() where ind<index {
+                    delta += cur.groups.count-1
+                }
+                for j in 0..<goalCurve.groups.count {
+                    for i in stride(from: curve.groups.count-1,
+                                    through: 0, by: -1) {
+                        self.layer?.sublayers?.swapAt(
+                            goal + delta + i + j, index + delta + i + j)
+                    }
+                }
             }
+            self.curves.swapAt(goal, index)
+            self.updateStack()
         }
     }
 
@@ -1043,7 +987,6 @@ class SketchPad: NSView {
                 self.frameUI.hide()
             }
         }
-        self.saveHistory()
         self.updateStack()
     }
 
@@ -1225,7 +1168,7 @@ class SketchPad: NSView {
         return curves
     }
 
-    func addAll() {
+    func addAllLayers() {
         for curve in self.curves {
             for cur in curve.groups {
                 self.layer?.addSublayer(cur.canvas)
@@ -1242,7 +1185,7 @@ class SketchPad: NSView {
     }
 
     func copyCurve(from: Curve?) {
-        if let curve = from, !curve.edit {
+        if let curve = from {
             var groups: [Curve] = []
             for cur in curve.groups {
                 if let path = cur.path.copy() as? NSBezierPath {
@@ -1276,11 +1219,12 @@ class SketchPad: NSView {
     }
 
     func pasteCurve(to: CGPoint) {
-        let edit = self.selectedCurve?.edit ?? false
-
-        if let clone = self.copiedCurve, !edit {
+        if let clone = self.copiedCurve {
             if let curve = self.selectedCurve {
                 self.clearControls(curve: curve)
+                if curve.edit {
+                    self.editFinished(curve: curve)
+                }
             }
             self.addToLayer(curve: clone)
             self.addCurve(curve: clone)
@@ -1575,16 +1519,17 @@ class SketchPad: NSView {
         let originY = bounds.midY
         let ang = CGFloat(angle)
         let groups = self.groups.count>1 ? self.groups : curve.groups
-        for cur in groups {
-            let rotate = AffineTransform(rotationByRadians: ang - cur.angle)
 
+        let groupAngle = ang - curve.angle
+        for cur in groups {
+            let rotate = AffineTransform(rotationByRadians: groupAngle)
             cur.applyTransform(
                 oX: originX, oY: originY,
                 transform: {
                     cur.path.transform(using: rotate)})
 
             self.clearControls(curve: cur, updatePoints: (
-                cur.updatePoints(angle: ang - cur.angle,
+                cur.updatePoints(angle: groupAngle,
                                  ox: originX, oy: originY)
             ))
 
@@ -1761,36 +1706,10 @@ class SketchPad: NSView {
         if let imageRep = bitmapImageRepForCachingDisplay(
             in: self.sketchPath.bounds) {
             self.cacheDisplay(in: self.sketchPath.bounds, to: imageRep)
-//            let context = NSGraphicsContext(bitmapImageRep: imageRep)!
-//            let cgCtx = context.cgContext
-//            cgCtx.clear(self.sketchBorder.bounds)
-//            var index = 0
-//            if let layer = self.layer, let sublayers = layer.sublayers {
-//                for sublayer in sublayers {
-//                    let curve = self.curves[index]
-//                    if curve.blur > 0, let cgImg = sublayer.cgImage() {
-//
-//                        let ciImg = CIImage(cgImage: cgImg)
-//                        let filter = CIFilter(name: "CIGaussianBlur")
-//                        filter?.setValue(ciImg,
-//                                         forKey: kCIInputImageKey)
-//                        filter?.setValue(curve.blur,
-//                                         forKey: kCIInputRadiusKey)
-//                        if let output = filter?.outputImage {
-//                            if let cgImage = self.cgImageFrom(
-//                                ciImage: output) {
-//                                cgCtx.draw(cgImage, in: sublayer.bounds)
-//                            }
-//                        }
-//                    } else {
-//                        sublayer.render(in: cgCtx)
-//                    }
-//                    index += 1
-//                }
+
                 return imageRep.representation(
                     using: fileType, properties: properties)!
             }
-//        }
         return nil
     }
 }
