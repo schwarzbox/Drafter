@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.78
+v0.79
 
 # Features
 
@@ -87,8 +87,6 @@ Scroll canvas with two fingers
 
 
 # Future releases
-
-v 0.79 Vector Union Mask
 
 v0.8 Improve Text
 

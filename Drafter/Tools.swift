@@ -140,8 +140,7 @@ class Tool: Drawable {
             Tool.parent!.newCurve()
         }
         if let curve = Tool.parent!.selectedCurve {
-            curve.frameAngle = 0
-            curve.controlDot = nil
+            curve.reset()
             Tool.parent!.createControls(curve: curve)
         }
     }
@@ -617,8 +616,7 @@ class Vector: Line {
             Tool.parent!.newCurve()
         }
         if let curve = Tool.parent!.selectedCurve, curve.edit || editDone {
-            curve.frameAngle = 0
-            curve.controlDot = nil
+            curve.reset()
             Tool.parent!.createControls(curve: curve)
         }
     }

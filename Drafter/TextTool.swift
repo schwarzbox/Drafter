@@ -9,7 +9,7 @@
 import Cocoa
 
 class TextTool: NSStackView {
-    @IBOutlet weak var textField: NSTextField!
+    @IBOutlet weak var textField: InputField!
     @IBOutlet weak var popFontFamily: NSPopUpButton!
     @IBOutlet weak var popFontType: NSPopUpButton!
 
@@ -30,7 +30,6 @@ class TextTool: NSStackView {
         let titType = self.popFontType.titleOfSelectedItem ?? setCurve.fontType
         self.popFontType.setTitle(titType)
         self.setupFont()
-
     }
 
     func setupFontFamily() {
@@ -70,6 +69,7 @@ class TextTool: NSStackView {
     func hide() {
         self.isHidden = true
         if let txt = self.arrangedSubviews.first as? NSTextField {
+
             txt.isEnabled = false
         }
     }
@@ -95,6 +95,7 @@ class TextTool: NSStackView {
             self.setupFont()
             if let font = self.sharedFont {
                 self.textField.font = font
+                self.textField.resize()
             }
         }
     }
@@ -106,6 +107,7 @@ class TextTool: NSStackView {
             self.setupFont()
             if let font = self.sharedFont {
                 self.textField.font = font
+                self.textField.resize()
             }
         }
     }

@@ -8,15 +8,14 @@
 
 import Cocoa
 
-class ControlFrame: CALayer {
+class ControlFrame: CAShapeLayer {
     var parent: SketchPad?
     var ctrlPad: CGFloat = setEditor.dotSize * 4
     var ctrlPad50: CGFloat = setEditor.dotSize * 2
     var dotSize: CGFloat = setEditor.dotSize
     var dotRadius: CGFloat = setEditor.dotRadius
     var dotMag: CGFloat = 0
-    var lineWidth: CGFloat = setEditor.lineWidth
-    var lineDashPattern = setEditor.lineDashPattern
+
     let frameHandles = [1, 3, 5, 7]
 
     required init?(coder aDecoder: NSCoder) {
@@ -37,12 +36,11 @@ class ControlFrame: CALayer {
         self.dotMag = parent.dotMag
         self.ctrlPad = self.dotSize * 4
         self.ctrlPad50 = self.dotSize * 2
-        self.lineDashPattern = parent.lineDashPattern
 
         self.lineWidth = parent.lineWidth
+        self.lineDashPattern = parent.lineDashPattern
 
-        self.borderWidth = self.lineWidth
-        self.borderColor = setEditor.fillColor.cgColor
+        self.initBorder()
 
         var gradientLoc: [CGPoint] = []
         for i in curve.gradientLocation {
@@ -92,6 +90,21 @@ class ControlFrame: CALayer {
                           gradientDirFinal: gradientDirFinal)
         self.initRoundedCornerDots(parent: parent, curve: curve,
                                    numDots: points.count)
+
+    }
+
+    func initBorder() {
+        let path = NSBezierPath()
+        path.appendRect(self.bounds)
+        self.makeShape(path: path,
+                       strokeColor: setEditor.strokeColor,
+                       lineWidth: self.lineWidth)
+        path.removeAllPoints()
+        path.appendRect(self.bounds)
+        self.makeShape(path: path,
+                       strokeColor: setEditor.fillColor,
+                       lineWidth: self.lineWidth,
+                       dashPattern: self.lineDashPattern)
     }
 
     func initRotate() {
@@ -109,7 +122,7 @@ class ControlFrame: CALayer {
                       gradientDirFinal: CGPoint) {
         let path = NSBezierPath()
 
-        path.move(to: CGPoint(x: self.bounds.minX,
+        path.move(to: CGPoint(x: self.bounds.maxX,
                               y: self.bounds.minY))
         path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad50,
                               y: self.bounds.minY))
@@ -134,7 +147,8 @@ class ControlFrame: CALayer {
             path.line(to: gradientDirFinal)
             self.makeShape(path: path, strokeColor: setEditor.strokeColor,
                            lineWidth: self.lineWidth)
-            self.makeShape(path: path, strokeColor: setEditor.fillColor,
+            self.makeShape(path: path,
+                           strokeColor: setEditor.fillColor,
                            lineWidth: self.lineWidth,
                            dashPattern: self.lineDashPattern)
         }
@@ -202,7 +216,7 @@ class ControlFrame: CALayer {
 
     func initRoundedCornerDots(parent: SketchPad,
                                curve: Curve, numDots: Int) {
-        if let rounded = curve.rounded {
+        if let rounded = curve.rounded, curve.points.count>7 {
             let fillColor = setEditor.strokeColor
             let strokeColor = setEditor.fillColor
 
@@ -248,8 +262,7 @@ class ControlFrame: CALayer {
                  lineWidth: CGFloat = setEditor.lineWidth,
                  strokeColor: NSColor = setEditor.strokeColor,
                  fillColor: NSColor = setEditor.fillColor,
-                 path: NSBezierPath = NSBezierPath(),
-                 dashPattern: [NSNumber] = setEditor.lineDashPattern) {
+                 path: NSBezierPath = NSBezierPath()) {
         let cp = Dot.init(x: x, y: y, width: width, height: height,
                           rounded: rounded, anchor: anchor,
                           lineWidth: lineWidth,

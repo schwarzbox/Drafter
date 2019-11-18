@@ -24,24 +24,32 @@ class FrameButtons: NSStackView {
     }
 
     func updateState(curve: Curve) {
-        if let lock = self.subviews[6] as? NSButton {
-            lock.state = curve.lock ? .on : .off
-        }
 
         if let group = self.subviews[5] as? NSButton {
             group.state = curve.groups.count > 1 ? .on : .off
+        }
+        if let mask = self.subviews[6] as? NSButton {
+            mask.state = curve.mask ? .on : .off
+        }
+        if let lock = self.subviews[7] as? NSButton {
+            lock.state = curve.lock ? .on : .off
         }
 
         if curve.edit {
             self.isEnabled(tag: 4)
         } else if curve.lock {
-            self.isEnabled(tag: 6)
+            self.isEnabled(tag: 7)
         } else {
             self.isEnabled(all: true)
         }
 
+        if !curve.fill {
+            self.setEnabled(tag: 6, bool: false)
+        }
+        
         if curve.groups.count>1 {
             self.setEnabled(tag: 4, bool: false)
+            self.setEnabled(tag: 6, bool: false)
         }
     }
 

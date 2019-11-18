@@ -19,10 +19,10 @@ class Curve: Equatable {
     let imageMask = CAShapeLayer()
     let imageLayer = CAShapeLayer()
     let filterLayer = CAShapeLayer()
+    let canvasMask = CAShapeLayer()
     let canvas = CAShapeLayer()
 
     var layers: [CALayer] = []
-
     var angle: CGFloat = 0.0
     var lineWidth = setCurve.lineWidth {
         willSet(value) {
@@ -33,8 +33,16 @@ class Curve: Equatable {
 
     var cap: Int = setCurve.lineCap
     var join: Int = setCurve.lineJoin
-    var dash: [NSNumber] = setCurve.lineDashPattern
 
+    var miter = setCurve.miterLimit {
+        willSet(value) {
+            self.canvas.miterLimit = value
+            self.filterLayer.miterLimit = value
+        }
+    }
+
+    var dash: [NSNumber] = setCurve.lineDashPattern
+    var winding: Int = setCurve.windingRule
     var colors: [NSColor] = setCurve.colors {
         willSet(value) {
             var gradColors: [CGColor] = []
@@ -43,9 +51,13 @@ class Curve: Equatable {
                 case 0:
                     let clr = color.cgColor.sRGB(alpha: self.alpha[0])
                     self.canvas.strokeColor = clr
+                    self.filterLayer.strokeColor = clr.sRGB(
+                        alpha: self.alpha[6])
                 case 1:
                     let clr = color.cgColor.sRGB(alpha: self.alpha[1])
                     self.canvas.fillColor = clr
+                    self.filterLayer.fillColor = clr.sRGB(
+                        alpha: self.alpha[6])
                 case 2:
                     let clr = color.cgColor
                     self.canvas.shadowColor = clr
@@ -110,10 +122,20 @@ class Curve: Equatable {
 
     var points: [ControlPoint] = []
 
-    var frameAngle: CGFloat = 0
+    var curveAngle: CGFloat = 0
+
+    var saveOrigin: CGPoint?
+    var curveOrigin: CGPoint {
+        let bounds = self.groups.count>1
+        ? self.groupRect(curves: self.groups, includeStroke: false)
+        : self.groupRect(curves: self.groups, includeStroke: false)
+        return CGPoint(x: bounds.midX, y: bounds.midY)
+    }
+
     var rounded: CGPoint?
     var gradient: Bool = false
     var fill: Bool = false
+    var mask: Bool = false
     var edit: Bool = false
     var lock: Bool = false
 
@@ -144,8 +166,9 @@ class Curve: Equatable {
         self.fill = fill
         self.rounded = rounded
         self.groups = [self]
+
         self.layers = [imageLayer, gradientLayer, filterLayer]
-        // filters
+
         self.filterLayer.filters = []
         self.filterLayer.backgroundColor = NSColor.clear.cgColor
         // CIPointillize
@@ -155,11 +178,12 @@ class Curve: Equatable {
                 self.filterLayer.filters?.append(filter)
             }
         }
-        self.canvas.actions = setEditor.disabledActions
-        for i in 0..<self.layers.count {
-            self.layers[i].actions = setEditor.disabledActions
-            self.canvas.addSublayer(layers[i])
+
+        for layer in self.layers {
+            layer.actions = setEditor.disabledActions
+            self.canvas.addSublayer(layer)
         }
+        self.canvas.actions = setEditor.disabledActions
         self.updateLayer()
     }
 
@@ -194,6 +218,15 @@ class Curve: Equatable {
             self.canvas.lineDashPattern = nil
             self.filterLayer.lineDashPattern = nil
         }
+    }
+
+    let windingRules: [CAShapeLayerFillRule] = [
+        .nonZero, .evenOdd
+    ]
+
+    func setWindingRule(value: Int) {
+        self.winding = value
+        self.canvas.fillRule = windingRules[value]
     }
 
     func setPoints(points: [ControlPoint]) {
@@ -261,7 +294,6 @@ class Curve: Equatable {
             let line50: CGFloat = includeStroke
                 ? self.lineWidth / 2
                 : 0
-
             rect = CGRect(
                 x: self.path.bounds.minX - line50,
                 y: self.path.bounds.minY - line50,
@@ -271,10 +303,25 @@ class Curve: Equatable {
         return rect
     }
 
+    func reversed() -> Bool {
+        let tmpPath = NSBezierPath(rect: self.path.bounds)
+        tmpPath.lineWidth = 0
+        tmpPath.append(self.path)
+        let pnt = CGPoint(x: self.path.bounds.midX,
+                          y: self.path.bounds.midY)
+
+        if (tmpPath.contains(pnt) && self.path.contains(pnt)) ||
+            (!tmpPath.contains(pnt) && !self.path.contains(pnt)) {
+            return true
+        }
+        return false
+    }
+
 //    MARK: Layer func
     func updateLayer() {
         self.gradientMask.path = self.path.cgPath
         self.gradientLayer.mask = self.gradientMask
+
         self.imageMask.path = self.path.cgPath
         self.imageLayer.mask = self.imageMask
 
@@ -290,6 +337,38 @@ class Curve: Equatable {
         for layer in self.layers {
             layer.bounds = self.canvas.bounds
             layer.position = self.canvas.position
+        }
+
+        self.updateMask()
+    }
+
+    func updateMask() {
+        if self.mask {
+            let path = self.reversed() ? self.path : self.path.reversed
+            if let maskPath = path.copy() as? NSBezierPath,
+                let par = self.parent {
+                let bounds = self.groupRect(curves: self.groups)
+                for curve in par.curves where !curve.canvas.isHidden {
+                    for cur in curve.groups where cur != self && cur.fill {
+                        let curBounds = cur.groupRect(curves: cur.groups)
+                        if bounds.intersects(curBounds) {
+                            if cur.reversed() {
+                                maskPath.append(cur.path.reversed)
+                            } else {
+                                maskPath.append(cur.path)
+                            }
+                        }
+                    }
+                }
+                if maskPath.elementCount>0 {
+                    self.canvasMask.path = maskPath.cgPath
+                    self.canvas.mask = self.canvasMask
+                } else {
+                    self.canvas.mask = nil
+                }
+            }
+        } else {
+            self.canvas.mask = nil
         }
     }
 
@@ -402,7 +481,6 @@ class Curve: Equatable {
         var pointsLeft = [points[0],
                           point.cp2.position, point.mp.position]
         self.path.setAssociatedPoints(&pointsLeft, at: indexLeft)
-
     }
 
     func moveControlPoints(index: [Int], tags: [Int],
@@ -471,9 +549,15 @@ class Curve: Equatable {
                     }
                 }
                 point.trackDot(parent: self.parent!, dot: point.mp)
-                self.updateLayer()
             }
+            self.updateLayer()
         }
+    }
+
+    func reset() {
+        self.curveAngle = 0
+        self.saveOrigin = nil
+        self.controlDot = nil
     }
 
     func resetPoints() {
@@ -488,8 +572,13 @@ class Curve: Equatable {
         for (index, point) in self.points.enumerated() {
             if !point.cp1.isHidden || !point.cp2.isHidden {
                 self.points.remove(at: index)
+                self.path.printPath()
                 point.delete()
-                self.path = self.path.removePath(at: index+1)
+                let removeAt = index == self.points.count
+                    ? index
+                    : index+1
+                self.path = self.path.removePath(at: removeAt)
+                self.path.printPath()
                 break
             }
         }

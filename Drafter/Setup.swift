@@ -16,7 +16,9 @@ struct Drf {
     var lineWidth: CGFloat = setCurve.lineWidth
     var cap: Int = setCurve.lineCap
     var join: Int = setCurve.lineJoin
+    var miter: CGFloat = setCurve.miterLimit
     var dash: [NSNumber] = setCurve.lineDashPattern
+    var winding: Int = setCurve.windingRule
     var alpha: [CGFloat] = setCurve.alpha
     var shadow: [CGFloat] = setCurve.shadow
     var gradientDirection: [CGPoint] = setCurve.gradientDirection
@@ -26,7 +28,10 @@ struct Drf {
     var points: [ControlPoint] = []
     var name: String = ""
     var oldName: String = ""
+    var mask: Bool = false
     var group: Bool = false
+    var lock: Bool = false
+    var invisible: Bool = false
 }
 
 struct SetupGlobal {
@@ -42,7 +47,10 @@ struct SetupCurve {
     let maxLineWidth: CGFloat = 64
     let lineCap = 0
     let lineJoin = 0
+    let miterLimit: CGFloat = 10
+    let maxMiter: CGFloat = 16
     let lineDashPattern: [NSNumber] = [0, 0, 0, 0]
+    let windingRule = 0
     let minDash: Double = 0
     let maxDash: Double = 32
 
@@ -100,14 +108,24 @@ struct SetupEditor {
         imageLiteralResourceName: NSImage.lockLockedTemplateName)
     let unlockImg = NSImage.init(
         imageLiteralResourceName: NSImage.lockUnlockedTemplateName)
+
     let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
+    let inputFieldSize: CGFloat = 128
 
     let filename: String = "untitled"
     let fileTypes: [String] = ["drf", "png", "svg"]
 
     let disabledActions = ["position": NSNull(),
-                           "bounds": NSNull(),
                            "path": NSNull(),
+                           "mask": NSNull(),
+                           "bounds": NSNull(),
+                           "strokeColor": NSNull(),
+                           "fillColor": NSNull(),
+                           "lineWidth": NSNull(),
+                           "lineCap": NSNull(),
+                           "lineJoin": NSNull(),
+                           "miterLimit": NSNull(),
+                           "lineDashPattern": NSNull(),
                            "transform": NSNull(),
                            "filters": NSNull(),
                            "shadowRadius": NSNull(),

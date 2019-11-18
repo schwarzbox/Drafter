@@ -21,8 +21,8 @@ class ViewController: NSViewController,
     @IBOutlet weak var toolUI: NSStackView!
     @IBOutlet weak var frameUI: FrameButtons!
     @IBOutlet weak var textUI: TextTool!
-    @IBOutlet weak var actionUI: NSStackView!
 
+    @IBOutlet weak var actionUI: NSStackView!
     @IBOutlet weak var colorUI: NSStackView!
 
     @IBOutlet weak var zoomSketch: NSSlider!
@@ -37,8 +37,11 @@ class ViewController: NSViewController,
     @IBOutlet weak var curveWidth: ActionSlider!
     @IBOutlet weak var curveCap: NSSegmentedControl!
     @IBOutlet weak var curveJoin: NSSegmentedControl!
+    @IBOutlet weak var curveMiter: ActionSlider!
+
     @IBOutlet weak var curveDashGap: NSStackView!
     @IBOutlet weak var curveDashGapLabel: NSStackView!
+    @IBOutlet weak var curveWinding: NSSegmentedControl!
 
     @IBOutlet weak var curveStrokeOpacity: ActionSlider!
     @IBOutlet weak var curveFillOpacity: ActionSlider!
@@ -238,12 +241,16 @@ class ViewController: NSViewController,
         curveWidth.doubleValue = Double(setCurve.lineWidth)
         curveWidth.maxValue = Double(setCurve.maxLineWidth)
 
-         for view in curveDashGap.subviews {
+        curveCap.selectedSegment = setCurve.lineCap
+        curveJoin.selectedSegment = setCurve.lineJoin
+        for view in curveDashGap.subviews {
              if let slider = view as? NSSlider {
                  slider.minValue = setCurve.minDash
                  slider.maxValue = setCurve.maxDash
              }
          }
+        curveMiter.doubleValue = Double(setCurve.miterLimit)
+        curveMiter.maxValue = Double(setCurve.maxMiter)
     }
 
     func setupColors() {
@@ -283,7 +290,7 @@ class ViewController: NSViewController,
         sketchView.textUI = textUI
 
         sketchView.curveWidth = curveWidth
-
+        sketchView.curveMiter = curveMiter
         sketchView.curveShadowRadius = curveShadowRadius
         sketchView.curveShadowOffsetX = curveShadowOffsetX
         sketchView.curveShadowOffsetY = curveShadowOffsetY
@@ -371,6 +378,7 @@ class ViewController: NSViewController,
             self.curveWidth.doubleValue = Double(curve.lineWidth)
             self.curveCap.selectedSegment = curve.cap
             self.curveJoin.selectedSegment = curve.join
+            self.curveMiter.doubleValue = Double(curve.miter)
 
             for i in 0..<curve.dash.count {
                  let value = Double(truncating: curve.dash[i])
@@ -381,6 +389,7 @@ class ViewController: NSViewController,
                      label.doubleValue = value
                  }
             }
+            self.curveWinding.selectedSegment = curve.winding
 
             for (i, color) in curve.colors.enumerated() {
                 self.colorPanels[i].fillColor = color
@@ -460,11 +469,12 @@ class ViewController: NSViewController,
             oX -= (curve.canvas.bounds.height-curve.canvas.bounds.width)/2
         }
         curve.applyTransform(oX: oX, oY: oY,
-           transform: {
-               curve.updateLayer()
-               image = action()
+            transform: {
+                curve.updateLayer()
+                image = action()
         })
         curve.updateLayer()
+
         return image
     }
 
@@ -680,10 +690,13 @@ class ViewController: NSViewController,
 
     func restoreControlFrame(view: SketchPad) {
         if NSEvent.pressedMouseButtons == 0 {
-            if let curve = view.selectedCurve, curve.controlFrame==nil,
+            if let curve = view.selectedCurve,
+                curve.controlFrame==nil,
                 !curve.lock {
+                curve.reset()
                 view.createControls(curve: curve)
             }
+
             for cur in view.groups {
                 view.curvedPath.append(cur.path)
             }
@@ -751,12 +764,32 @@ class ViewController: NSViewController,
 
     @IBAction func capCurve(_ sender: NSSegmentedControl) {
         sketchView!.capCurve(value: sender.indexOfSelectedItem)
+
         self.saveStack()
     }
 
     @IBAction func joinCurve(_ sender: NSSegmentedControl) {
         sketchView!.joinCurve(value: sender.indexOfSelectedItem)
+        if let stack = actionUI.subviews[4] as? NSStackView {
+            if let view = stack.subviews[3] as? ActionSlider {
+                if sender.indexOfSelectedItem == 0 {
+                    view.isEnabled(all: true)
+                } else {
+                    view.isEnabled(all: false)
+                }
+            }
+        }
         self.saveStack()
+    }
+
+    @IBAction func miterCurve(_ sender: Any) {
+        let view = sketchView!
+        let val = self.getTagValue(
+            sender: sender, limit: {x in x < 0 ? 0 : x})
+
+        self.curveMiter.doubleValue = val.value
+        view.miterCurve(value: val.value)
+        self.restoreControlFrame(view: view)
     }
 
     @IBAction func dashCurve(_ sender: Any) {
@@ -769,6 +802,11 @@ class ViewController: NSViewController,
         }
         view.dashCurve(tag: val.tag, value: lim)
         self.restoreControlFrame(view: view)
+    }
+
+    @IBAction func windingCurve(_ sender: NSSegmentedControl) {
+        sketchView!.windingCurve(value: sender.indexOfSelectedItem)
+        self.saveStack()
     }
 
 //    MARK: TextTool action
@@ -855,8 +893,9 @@ class ViewController: NSViewController,
         self.saveStack()
     }
 
-    @IBAction func editCurve(_ sender: NSButton) {
-        sketchView!.editCurve(sender: sender)
+    @IBAction func maskCurve(_ sender: NSButton) {
+        sketchView!.maskCurve(sender: sender)
+        self.saveStack()
     }
 
     @IBAction func groupCurve(_ sender: Any) {
@@ -867,6 +906,10 @@ class ViewController: NSViewController,
     @IBAction func ungroup(_ sender: NSMenuItem) {
         sketchView!.groupCurve(sender: sender)
         self.saveStack()
+    }
+
+    @IBAction func editCurve(_ sender: NSButton) {
+         sketchView!.editCurve(sender: sender)
     }
 
     @IBAction func lockCurve(_ sender: NSButton) {
@@ -881,12 +924,13 @@ class ViewController: NSViewController,
         self.history.append(view.copyAll())
         self.indexHistory = self.history.count-1
     }
+
 //    MARK: Menu actions
     func restoreStack(history: () -> Void) {
         let view = sketchView!
 
         if let curve = view.selectedCurve {
-            curve.clearControlFrame()
+            view.clearControls(curve: curve)
             view.selectedCurve = nil
         }
 
@@ -897,11 +941,21 @@ class ViewController: NSViewController,
 
         view.curves = self.history[self.indexHistory]
         view.curves = view.copyAll()
+        for cur in view.curves {
+            if cur.controlFrame != nil {
+                view.createControls(curve: cur)
+            }
+            if cur.edit {
+                view.editStarted(curve: cur)
+            }
+            view.selectedCurve = cur
+        }
 
         view.addAllLayers()
         view.clearCurvedPath()
-
+        view.needsDisplay = true
         self.updateSliders()
+
     }
     @IBAction func undoStack(_ sender: Any) {
         if let resp = self.window.firstResponder,
@@ -1110,7 +1164,9 @@ class ViewController: NSViewController,
             angle: CGFloat(drf.angle),
             lineWidth: drf.lineWidth,
             cap: drf.cap, join: drf.join,
+            miter: drf.miter,
             dash: drf.dash,
+            winding: drf.winding,
             alpha: drf.alpha,
             shadow: drf.shadow,
             gradientDirection: drf.gradientDirection,
@@ -1120,6 +1176,9 @@ class ViewController: NSViewController,
             points: drf.points)
         let name = String(drf.name.split(separator: " ")[0])
         curve.setName(name: name, curves: view.curves)
+        curve.mask = drf.mask
+        curve.lock = drf.lock
+        curve.canvas.isHidden = drf.invisible
         view.layer?.addSublayer(curve.canvas)
         return curve
     }
@@ -1161,10 +1220,13 @@ class ViewController: NSViewController,
                 drf.lineWidth = CGFloat(Double(str) ?? 0.0)
             case "-cap": drf.cap = Int(str) ?? 0
             case "-join": drf.join = Int(str) ?? 0
+            case "-mitter":
+                drf.miter = CGFloat(Double(str) ?? 0.0)
             case "-dash":
                 let dash = str.split(separator: " ").map {
                     NSNumber(value: Int($0) ?? 0)}
                 drf.dash = dash
+            case "-winding": drf.winding = Int(str) ?? 0
             case "-alpha":
                 drf.alpha = str.split(separator: " ").map {
                     CGFloat(Double($0) ?? 0.0)}
@@ -1191,7 +1253,10 @@ class ViewController: NSViewController,
                 }
                 drf.colors = colors
             case "-blur": drf.blur = Double(str) ?? 0.0
+            case "-mask": drf.mask = true
             case "-group": drf.group = true
+            case "-lock": drf.lock = true
+            case "-invisible": drf.invisible = true
             default: break
             }
         }
@@ -1268,10 +1333,12 @@ class ViewController: NSViewController,
                 code += "-lineWidth " + String(Double(cur.lineWidth)) + "\n"
                 code += "-cap " + String(cur.cap) + "\n"
                 code += "-join " + String(cur.join) + "\n"
+                code += "-mitter " + String(Double(cur.miter)) + "\n"
                 code += "-dash "
                 let dash = cur.dash.map {String(
                     Int(truncating: $0))}.joined(separator: " ")
                 code += dash + "\n"
+                code += "-winding " + String(cur.winding) + "\n"
                 code += "-alpha "
                 let alpha = cur.alpha.map {String(
                     Double($0))}.joined(separator: " ")
@@ -1297,9 +1364,10 @@ class ViewController: NSViewController,
                 }.joined(separator: " ")
                 code += clr + "\n"
                 code += "-blur " + String(Double(cur.blur)) + "\n"
-                if ind > 0 {
-                    code += "-group \n"
-                }
+                if cur.mask { code += "-mask \n" }
+                if ind > 0 { code += "-group \n" }
+                if cur.lock { code += "-lock \n" }
+                if cur.canvas.isHidden { code += "-invisible \n" }
                 code += "-\n"
             }
         }
