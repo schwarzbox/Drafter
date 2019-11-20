@@ -12,6 +12,7 @@ class ControlFrame: CAShapeLayer {
     var parent: SketchPad?
     var ctrlPad: CGFloat = setEditor.dotSize * 4
     var ctrlPad50: CGFloat = setEditor.dotSize * 2
+    var ctrlRot: CGFloat = setEditor.dotSize * 1.4
     var dotSize: CGFloat = setEditor.dotSize
     var dotRadius: CGFloat = setEditor.dotRadius
     var dotMag: CGFloat = 0
@@ -36,6 +37,7 @@ class ControlFrame: CAShapeLayer {
         self.dotMag = parent.dotMag
         self.ctrlPad = self.dotSize * 4
         self.ctrlPad50 = self.dotSize * 2
+        self.ctrlRot = self.dotSize * 1.4
 
         self.lineWidth = parent.lineWidth
         self.lineDashPattern = parent.lineDashPattern
@@ -70,8 +72,14 @@ class ControlFrame: CAShapeLayer {
             CGPoint(x: self.bounds.maxX, y: self.bounds.midY),
             CGPoint(x: self.bounds.maxX, y: self.bounds.minY),
             CGPoint(x: self.bounds.midX, y: self.bounds.minY),
-            CGPoint(x: self.bounds.maxX + self.ctrlPad,
-                    y: self.bounds.midY),
+            CGPoint(x: self.bounds.minX-self.ctrlRot,
+                    y: self.bounds.minY-self.ctrlRot),
+            CGPoint(x: self.bounds.minX-self.ctrlRot,
+                    y: self.bounds.maxY+self.ctrlRot),
+            CGPoint(x: self.bounds.maxX+self.ctrlRot,
+                    y: self.bounds.maxY+self.ctrlRot),
+            CGPoint(x: self.bounds.maxX+self.ctrlRot,
+                    y: self.bounds.minY-self.ctrlRot),
             CGPoint(x: self.bounds.maxX + self.ctrlPad50, y: self.bounds.minY),
             gradientDirStart, gradientDirFinal,
             gradientLoc[0], gradientLoc[1], gradientLoc[2]
@@ -80,7 +88,6 @@ class ControlFrame: CAShapeLayer {
             self.initDots(parent: parent, curve: curve, pnt: points)
             parent.layer?.addSublayer(self)
         }
-        self.initRotate()
 
         guard curve.groups.count == 1 else { return }
         guard parent.groups.count <= 1 else { return }
@@ -90,7 +97,6 @@ class ControlFrame: CAShapeLayer {
                           gradientDirFinal: gradientDirFinal)
         self.initRoundedCornerDots(parent: parent, curve: curve,
                                    numDots: points.count)
-
     }
 
     func initBorder() {
@@ -105,16 +111,6 @@ class ControlFrame: CAShapeLayer {
                        strokeColor: setEditor.fillColor,
                        lineWidth: self.lineWidth,
                        dashPattern: self.lineDashPattern)
-    }
-
-    func initRotate() {
-        let path = NSBezierPath()
-        path.move(to: CGPoint(x: self.bounds.maxX, y: self.bounds.midY))
-        path.line(to: CGPoint(x: self.bounds.maxX + self.ctrlPad,
-                              y: self.bounds.midY))
-        self.makeShape(path: path,
-                       strokeColor: setEditor.fillColor,
-                       lineWidth: self.lineWidth)
     }
 
     func initGradient(curve: Curve, gradientLoc: [CGPoint],
@@ -184,8 +180,10 @@ class ControlFrame: CAShapeLayer {
                              fillColor: NSColor.clear)
                 continue
             }
-            if i==pnt.count-7 {
+            if i>=pnt.count-11 && i<=pnt.count-7 {
                 rounded = self.dotRadius
+                fillColor = NSColor.clear
+                strokeColor = NSColor.clear
             }
             if (curve.groups.count>1 || parent.groups.count>1) &&
                 i==pnt.count-6 {
@@ -303,7 +301,7 @@ class ControlFrame: CAShapeLayer {
 
     func increaseDotSize(layer: Dot) {
         switch layer.tag {
-        case 9:
+        case 12:
             let size = self.dotSize + self.dotMag
                        layer.updateSize(width: size, height: size,
                                         lineWidth: self.lineWidth,
@@ -312,6 +310,7 @@ class ControlFrame: CAShapeLayer {
         case 1, 5: NSCursor.resizeLeftRight.set()
         case 2, 6: setCursor.cursorNWSE.set()
         case 3, 7: NSCursor.resizeUpDown.set()
+        case 8, 9, 10, 11: NSCursor.dragLink.set()
         default:
             break
         }
@@ -320,7 +319,7 @@ class ControlFrame: CAShapeLayer {
     func decreaseDotSize() {
         NSCursor.arrow.set()
         for layer in self.sublayers ?? [] {
-            if let dot = layer as? Dot, dot.tag == 9 {
+            if let dot = layer as? Dot, dot.tag == 12 {
                 let size = self.dotSize
                 dot.updateSize(width: size, height: size,
                                lineWidth: self.lineWidth,

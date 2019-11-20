@@ -5,6 +5,7 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
+
 import Cocoa
 
 class SketchPad: NSView {
@@ -256,7 +257,6 @@ class SketchPad: NSView {
             self.clearPathLayer(layer: self.curveLayer, path: self.curvedPath)
             self.clearControls(curve: curve, updatePoints: ())
 
-            // center
             var mpPoints: [CGPoint] = [
                 curve.boundsPoints(curves: curve.groups)[1]]
             var mPos = self.startPos
@@ -329,7 +329,7 @@ class SketchPad: NSView {
             let dot = curve.controlFrame?.collideControlDot(pos: self.startPos),
             !curve.lock {
             curve.controlDot = dot
-            if dot.tag == 9 {
+            if dot.tag == 12 {
                 curve.gradient = !curve.gradient
             }
         } else if let mp = self.movePoint,
@@ -381,7 +381,8 @@ class SketchPad: NSView {
                    fill: Bool, rounded: CGPoint?,
                    angle: CGFloat, lineWidth: CGFloat,
                    cap: Int, join: Int, miter: CGFloat,
-                   dash: [NSNumber], winding: Int,
+                   dash: [NSNumber], windingRule: Int,
+                   maskRule: Int,
                    alpha: [CGFloat], shadow: [CGFloat],
                    gradientDirection: [CGPoint],
                    gradientLocation: [NSNumber],
@@ -395,7 +396,8 @@ class SketchPad: NSView {
         curve.setLineCap(value: cap)
         curve.setLineJoin(value: join)
         curve.setDash(dash: dash)
-        curve.setWindingRule(value: winding)
+        curve.setWindingRule(value: windingRule)
+        curve.setMaskRule(value: maskRule)
         curve.alpha = alpha
         curve.shadow = shadow
         curve.gradientDirection = gradientDirection
@@ -431,7 +433,8 @@ class SketchPad: NSView {
             cap: setCurve.lineCap, join: setCurve.lineJoin,
             miter: CGFloat(self.curveMiter.doubleValue),
             dash: setCurve.lineDashPattern,
-            winding: setCurve.windingRule,
+            windingRule: setCurve.windingRule,
+            maskRule: setCurve.maskRule,
             alpha: alpha, shadow: shadowValues,
             gradientDirection: setCurve.gradientDirection,
             gradientLocation: setCurve.gradientLocation,
@@ -453,8 +456,10 @@ class SketchPad: NSView {
     }
 
     func updateMasks() {
-        for cur in self.curves {
-            cur.updateMask()
+        for curve in self.curves {
+            for cur in curve.groups {
+                cur.updateMask()
+            }
         }
     }
 
@@ -804,21 +809,19 @@ class SketchPad: NSView {
     }
 
 //    MARK: Buttons func
-    func sendCurve(curve: Curve, tag: Int, dist: Int = 1) {
-        if var index = self.curves.firstIndex(of: curve), !curve.lock {
+    func sendCurve(curve: Curve, tag: Int) {
+        if let index = self.curves.firstIndex(of: curve), !curve.lock {
             var goal = index
             switch tag {
-            case 0: goal -= goal-dist>=0 ? dist : 0
-            case 1: goal += goal<curves.count-dist ? dist : 0
+            case 0: goal -= goal-1>=0 ? 1 : 0
+            case 1: goal += goal<curves.count-1 ? 1 : 0
             default:
                 break
             }
 
             if goal == index { return }
-
             var delta = 0
             let goalCurve = self.curves[goal]
-
             if goal < index {
                 for (ind, cur) in self.curves.enumerated() where ind<goal {
                     delta += cur.groups.count-1
@@ -842,24 +845,8 @@ class SketchPad: NSView {
                     }
                 }
             }
-//            var subGoal = goal
-//            var subIndex = index
-//                        subGoal = goal + delta
-            //                subIndex = index + delta
-            //
-            //                let goalRange = self.layer?.sublayers?[subGoal..<subGoal+goalCurve.groups.count]
-            //                let indexRange = self.layer?.sublayers?[subIndex..<subIndex+curve.groups.count]
-            //
-            //                if let gRange = goalRange {
-            //                    self.layer?.sublayers?[subIndex..<subIndex+curve.groups.count] = gRange
-            //                }
-            //                if let iRange = indexRange {
-            //                    self.layer?.sublayers?[subGoal..<subGoal+goalCurve.groups.count] = iRange
-            //                }
-
             self.curves.swapAt(goal, index)
             self.updateStack()
-
         }
     }
 
@@ -1177,6 +1164,7 @@ class SketchPad: NSView {
                     self.removeCurve(curve: curve)
                 }
             }
+            self.updateMasks()
             self.updateSliders()
         }
     }
@@ -1230,7 +1218,8 @@ class SketchPad: NSView {
                         lineWidth: cur.lineWidth,
                         cap: cur.cap, join: cur.join,
                         miter: cur.miter, dash: cur.dash,
-                        winding: cur.winding,
+                        windingRule: cur.windingRule,
+                        maskRule: cur.maskRule,
                         alpha: cur.alpha,
                         shadow: cur.shadow,
                         gradientDirection: cur.gradientDirection,
@@ -1325,8 +1314,8 @@ class SketchPad: NSView {
         let dX = deltaX / self.zoomed
         let dY = deltaY / self.zoomed
 
-        let dXs = (deltaX - snap.x) / self.zoomed
-        let dYs = (deltaY + snap.y) / self.zoomed
+        let dXs = deltaX / self.zoomed - snap.x
+        let dYs = deltaY / self.zoomed + snap.y
 
         let bounds = self.groups.count>1
             ? curve.groupRect(curves: self.groups, includeStroke: false)
@@ -1365,26 +1354,30 @@ class SketchPad: NSView {
             let resize = Double(bounds.height + dYs)
             self.resizeCurve(tag: 1, value: resize, anchor: CGPoint(x: 0, y: 1),
                              ind: dot.tag!, shift: shift)
-        case 8:
+        case 8, 9, 10, 11:
+            if curve.saveAngle == nil {
+                curve.saveAngle = atan2(finPos.y+dY-curve.path.bounds.midY,
+                                        finPos.x+dX-curve.path.bounds.midX)
+            }
             self.rotateByDelta(curve: curve, pos: finPos,
                                dX: dX, dY: dY)
-        case 9:
+        case 12:
             break
-        case 10:
+        case 13:
             self.gradientDirectionCurve(
                 tag: 0, value: CGPoint(x: dX, y: dY))
-        case 11:
+        case 14:
             self.gradientDirectionCurve(
                 tag: 1, value: CGPoint(x: dX, y: dY))
-        case 12:
-            self.gradientLocationCurve(tag: 0, value: dX)
-        case 13:
-            self.gradientLocationCurve(tag: 1, value: dX)
-        case 14:
-            self.gradientLocationCurve(tag: 2, value: dX)
         case 15:
-            self.roundedCornerCurve(tag: 0, value: dX)
+            self.gradientLocationCurve(tag: 0, value: dX)
         case 16:
+            self.gradientLocationCurve(tag: 1, value: dX)
+        case 17:
+            self.gradientLocationCurve(tag: 2, value: dX)
+        case 18:
+            self.roundedCornerCurve(tag: 0, value: dX)
+        case 19:
             self.roundedCornerCurve(tag: 1, value: dY)
         default:
             break
@@ -1423,6 +1416,7 @@ class SketchPad: NSView {
     }
 
 //    MARK: Action func
+    var snapped = false
     func dragCurve(deltaX: CGFloat, deltaY: CGFloat, ctrl: Bool = false) {
         if let curve = self.selectedCurve, !curve.lock {
             let groups = self.groups.count>1
@@ -1432,8 +1426,8 @@ class SketchPad: NSView {
                 points: curve.boundsPoints(curves: groups),
                 curves: self.curves, exclude: groups, ctrl: ctrl)
 
-            let deltaX = (deltaX - snap.x) / self.zoomed
-            let deltaY = (deltaY + snap.y) / self.zoomed
+            let deltaX = (deltaX) / self.zoomed - snap.x
+            let deltaY = (deltaY) / self.zoomed + snap.y
             let move = AffineTransform.init(
                 translationByX: deltaX,
                 byY: -deltaY)
@@ -1467,7 +1461,7 @@ class SketchPad: NSView {
 
             let groups = self.groups.count>1 ? self.groups : curve.groups
             for cur in groups {
-                cur.path.transform(using: move)
+//                cur.path.transform(using: move)
                 self.clearControls(curve: cur, updatePoints: (
                     cur.updatePoints(deltaX: deltax, deltaY: -deltay)
                 ))
@@ -1587,12 +1581,16 @@ class SketchPad: NSView {
             let rotate = AffineTransform(
                 rotationByRadians: groupAngle)
             for cur in groups {
+                let rotateImage = CGAffineTransform(
+                    rotationAngle: curve.angle)
+                cur.imageLayer.setAffineTransform(rotateImage)
+
                 cur.applyTransform(
                     oX: origin.x, oY: origin.y,
                     transform: {cur.path.transform(using: rotate)})
 
                 self.clearControls(curve: cur, updatePoints: (
-                    cur.updatePoints(angle: groupAngle,
+                    cur.updatePoints(matrix: rotate,
                                      ox: origin.x, oy: origin.y)
                 ))
 
@@ -1601,21 +1599,19 @@ class SketchPad: NSView {
                 if !cur.edit {
                     cur.clearPoints()
                 }
-//                let rotateImage = CGAffineTransform(rotationAngle: groupAngle)
-//                cur.imageLayer.setAffineTransform(rotateImage)
             }
         }
     }
 
     func rotateByDelta(curve: Curve, pos: CGPoint, dX: CGFloat, dY: CGFloat) {
-        let rotate = atan2(pos.y+dY-curve.path.bounds.midY,
+        var rotate = atan2(pos.y+dY-curve.path.bounds.midY,
                            pos.x+dX-curve.path.bounds.midX)
+        if let saveAngle = curve.saveAngle {
+            rotate -= saveAngle
+        }
         let dt = CGFloat(rotate)-curve.curveAngle
-        let minR = setCurve.minRotate
-        let maxR = setCurve.maxRotate
         let ang = Double(curve.angle+dt)
-        let lim = ang > maxR ? maxR : ang < minR ? minR : ang
-        self.rotateCurve(angle: lim)
+        self.rotateCurve(angle: ang)
         curve.curveAngle = rotate
     }
 
@@ -1662,6 +1658,14 @@ class SketchPad: NSView {
     func windingCurve(value: Int) {
         if let curve = self.selectedCurve, !curve.lock {
             curve.setWindingRule(value: value)
+            self.needsDisplay = true
+        }
+    }
+
+    func maskRuleCurve(value: Int) {
+        if let curve = self.selectedCurve, !curve.lock {
+            curve.setMaskRule(value: value)
+            self.updateMasks()
             self.needsDisplay = true
         }
     }

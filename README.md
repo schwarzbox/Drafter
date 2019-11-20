@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.79
+v0.8
 
 # Features
 
@@ -88,14 +88,15 @@ Scroll canvas with two fingers
 
 # Future releases
 
-v0.8 Improve Text
-
-v0.9 Filters
+v0.9 Improve Text
 
 v1.0
 Bugs:  SaveBlur, Rotate image, Fix sizes, Save .png with .drf 
 
+v1.1
+Filters
 v1.5 .svg
+
 
 
 

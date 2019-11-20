@@ -207,11 +207,7 @@ class ControlPoint {
     }
 
     func rotateDots(ox: CGFloat, oy: CGFloat,
-                    angle: CGFloat, parent: SketchPad) {
-        let cs = cos(angle)
-        let sn = sin(angle)
-        let matrix: [CGPoint] = [CGPoint(x: cs, y: -sn), CGPoint(x: sn, y: cs)]
-
+                    matrix: [CGPoint], parent: SketchPad) {
         for dot in dots {
             dot.position = self.rotate(pos: dot.position,
                                        ox: ox, oy: oy, matrix: matrix)

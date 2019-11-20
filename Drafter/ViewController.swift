@@ -41,7 +41,8 @@ class ViewController: NSViewController,
 
     @IBOutlet weak var curveDashGap: NSStackView!
     @IBOutlet weak var curveDashGapLabel: NSStackView!
-    @IBOutlet weak var curveWinding: NSSegmentedControl!
+    @IBOutlet weak var curveWindingRule: NSSegmentedControl!
+    @IBOutlet weak var curveMaskRule: NSSegmentedControl!
 
     @IBOutlet weak var curveStrokeOpacity: ActionSlider!
     @IBOutlet weak var curveFillOpacity: ActionSlider!
@@ -129,10 +130,10 @@ class ViewController: NSViewController,
             } else if event.keyCode >= 123 && event.keyCode <= 126 {
                 var dt = CGPoint(x: 0, y: 0)
                 switch event.keyCode {
-                case 123: dt.x = -1
-                case 124: dt.x = 1
-                case 125: dt.y = 1
-                case 126: dt.y = -1
+                case 123: dt.x = -view.zoomed
+                case 124: dt.x = view.zoomed
+                case 125: dt.y = view.zoomed
+                case 126: dt.y = -view.zoomed
                 default: break
                 }
                 view.dragCurve(deltaX: dt.x, deltaY: dt.y, ctrl: true)
@@ -248,7 +249,10 @@ class ViewController: NSViewController,
                  slider.minValue = setCurve.minDash
                  slider.maxValue = setCurve.maxDash
              }
-         }
+        }
+        curveWindingRule.selectedSegment = setCurve.windingRule
+        curveMaskRule.selectedSegment = setCurve.maskRule
+
         curveMiter.doubleValue = Double(setCurve.miterLimit)
         curveMiter.maxValue = Double(setCurve.maxMiter)
     }
@@ -365,7 +369,9 @@ class ViewController: NSViewController,
             self.curveY.doubleValue = Double(bounds.midY)
             self.curveWid.doubleValue = Double(bounds.width)
             self.curveHei.doubleValue = Double(bounds.height)
-            self.curveRotate.doubleValue = Double(curve.angle)
+            let ang = Double(curve.angle).truncatingRemainder(
+                dividingBy: Double.pi)
+            self.curveRotate.doubleValue = ang
 
             if curve.groups.count==1 && view.groups.count <= 1 {
                 self.showUnusedViews(true)
@@ -389,7 +395,8 @@ class ViewController: NSViewController,
                      label.doubleValue = value
                  }
             }
-            self.curveWinding.selectedSegment = curve.winding
+            self.curveWindingRule.selectedSegment = curve.windingRule
+            self.curveMaskRule.selectedSegment = curve.maskRule
 
             for (i, color) in curve.colors.enumerated() {
                 self.colorPanels[i].fillColor = color
@@ -809,6 +816,12 @@ class ViewController: NSViewController,
         self.saveStack()
     }
 
+    @IBAction func maskRuleCurve(_ sender: NSSegmentedControl) {
+        sketchView!.maskRuleCurve(value: sender.indexOfSelectedItem)
+        self.saveStack()
+    }
+
+
 //    MARK: TextTool action
     @IBAction func glyphsCurve(_ sender: NSTextField) {
         sketchView!.glyphsCurve(value: sender.stringValue,
@@ -922,14 +935,17 @@ class ViewController: NSViewController,
         let view = sketchView!
         self.history[self.indexHistory+1..<self.history.count] = []
         self.history.append(view.copyAll())
+//        if self.indexHistory>setEditor.maxHistory {
+//            self.history[0...1] = []
+//        }
         self.indexHistory = self.history.count-1
     }
 
 //    MARK: Menu actions
     func restoreStack(history: () -> Void) {
         let view = sketchView!
-
         if let curve = view.selectedCurve {
+            print(curve.edit)
             view.clearControls(curve: curve)
             view.selectedCurve = nil
         }
@@ -944,18 +960,17 @@ class ViewController: NSViewController,
         for cur in view.curves {
             if cur.controlFrame != nil {
                 view.createControls(curve: cur)
+                view.selectedCurve = cur
             }
             if cur.edit {
                 view.editStarted(curve: cur)
             }
-            view.selectedCurve = cur
         }
 
         view.addAllLayers()
         view.clearCurvedPath()
         view.needsDisplay = true
         self.updateSliders()
-
     }
     @IBAction func undoStack(_ sender: Any) {
         if let resp = self.window.firstResponder,
@@ -982,8 +997,9 @@ class ViewController: NSViewController,
     }
 
     @IBAction func cut(_ sender: NSMenuItem) {
-        sketchView!.copyCurve(from: sketchView!.selectedCurve)
-        sketchView!.deleteCurve()
+        let view = sketchView!
+        view.copyCurve(from: sketchView!.selectedCurve)
+        view.deleteCurve()
         self.saveStack()
     }
 
@@ -1154,6 +1170,7 @@ class ViewController: NSViewController,
         } catch {
            print("error open \(filePath)")
         }
+        view.updateMasks()
         self.updateStack()
     }
 
@@ -1166,7 +1183,8 @@ class ViewController: NSViewController,
             cap: drf.cap, join: drf.join,
             miter: drf.miter,
             dash: drf.dash,
-            winding: drf.winding,
+            windingRule: drf.windingRule,
+            maskRule: drf.maskRule,
             alpha: drf.alpha,
             shadow: drf.shadow,
             gradientDirection: drf.gradientDirection,
@@ -1226,7 +1244,8 @@ class ViewController: NSViewController,
                 let dash = str.split(separator: " ").map {
                     NSNumber(value: Int($0) ?? 0)}
                 drf.dash = dash
-            case "-winding": drf.winding = Int(str) ?? 0
+            case "-windingRule": drf.windingRule = Int(str) ?? 0
+            case "-maskRule": drf.maskRule = Int(str) ?? 0
             case "-alpha":
                 drf.alpha = str.split(separator: " ").map {
                     CGFloat(Double($0) ?? 0.0)}
@@ -1338,7 +1357,8 @@ class ViewController: NSViewController,
                 let dash = cur.dash.map {String(
                     Int(truncating: $0))}.joined(separator: " ")
                 code += dash + "\n"
-                code += "-winding " + String(cur.winding) + "\n"
+                code += "-windingRule " + String(cur.windingRule) + "\n"
+                code += "-maskRule " + String(cur.maskRule) + "\n"
                 code += "-alpha "
                 let alpha = cur.alpha.map {String(
                     Double($0))}.joined(separator: " ")

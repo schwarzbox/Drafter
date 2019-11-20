@@ -42,7 +42,8 @@ class Curve: Equatable {
     }
 
     var dash: [NSNumber] = setCurve.lineDashPattern
-    var winding: Int = setCurve.windingRule
+    var windingRule: Int = setCurve.windingRule
+    var maskRule: Int = setCurve.maskRule
     var colors: [NSColor] = setCurve.colors {
         willSet(value) {
             var gradColors: [CGColor] = []
@@ -122,6 +123,7 @@ class Curve: Equatable {
 
     var points: [ControlPoint] = []
 
+    var saveAngle: CGFloat?
     var curveAngle: CGFloat = 0
 
     var saveOrigin: CGPoint?
@@ -207,6 +209,19 @@ class Curve: Equatable {
         self.filterLayer.lineJoin = lineJoinStyles[value]
     }
 
+    let windingRules: [CAShapeLayerFillRule] = [
+        .nonZero, .evenOdd
+    ]
+
+    func setWindingRule(value: Int) {
+        self.windingRule = value
+        self.canvas.fillRule = windingRules[value]
+    }
+
+    func setMaskRule(value: Int) {
+        self.maskRule = value
+    }
+
     func setDash(dash: [NSNumber]) {
         self.dash = dash
         if dash.first(where: { num in
@@ -218,15 +233,6 @@ class Curve: Equatable {
             self.canvas.lineDashPattern = nil
             self.filterLayer.lineDashPattern = nil
         }
-    }
-
-    let windingRules: [CAShapeLayerFillRule] = [
-        .nonZero, .evenOdd
-    ]
-
-    func setWindingRule(value: Int) {
-        self.winding = value
-        self.canvas.fillRule = windingRules[value]
     }
 
     func setPoints(points: [ControlPoint]) {
@@ -338,18 +344,19 @@ class Curve: Equatable {
             layer.bounds = self.canvas.bounds
             layer.position = self.canvas.position
         }
-
-        self.updateMask()
     }
 
     func updateMask() {
-        if self.mask {
-            let path = self.reversed() ? self.path : self.path.reversed
-            if let maskPath = path.copy() as? NSBezierPath,
-                let par = self.parent {
+        if let par = self.parent, self.mask  {
+            var path = NSBezierPath()
+            if self.maskRule==0 {
+                path = self.reversed() ? self.path : self.path.reversed
+            }
+            if let maskPath = path.copy() as? NSBezierPath {
                 let bounds = self.groupRect(curves: self.groups)
-                for curve in par.curves where !curve.canvas.isHidden {
-                    for cur in curve.groups where cur != self && cur.fill {
+                for curve in par.curves {
+                    for cur in curve.groups where cur != self &&
+                        cur.fill && !cur.canvas.isHidden {
                         let curBounds = cur.groupRect(curves: cur.groups)
                         if bounds.intersects(curBounds) {
                             if cur.reversed() {
@@ -555,6 +562,7 @@ class Curve: Equatable {
     }
 
     func reset() {
+        self.saveAngle = nil
         self.curveAngle = 0
         self.saveOrigin = nil
         self.controlDot = nil
@@ -596,10 +604,13 @@ class Curve: Equatable {
         self.updateLayer()
     }
 
-    func updatePoints(angle: CGFloat, ox: CGFloat, oy: CGFloat) {
+    func updatePoints(matrix: AffineTransform, ox: CGFloat, oy: CGFloat) {
         self.clearTrackArea()
+
+        let matrix: [CGPoint] = [CGPoint(x: matrix.m11, y: matrix.m21),
+                                 CGPoint(x: matrix.m12, y: matrix.m22)]
         for point in self.points {
-            point.rotateDots(ox: ox, oy: oy, angle: angle,
+            point.rotateDots(ox: ox, oy: oy, matrix: matrix,
                              parent: self.parent!)
         }
         self.updateLayer()

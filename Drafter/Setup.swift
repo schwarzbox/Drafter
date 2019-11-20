@@ -18,7 +18,8 @@ struct Drf {
     var join: Int = setCurve.lineJoin
     var miter: CGFloat = setCurve.miterLimit
     var dash: [NSNumber] = setCurve.lineDashPattern
-    var winding: Int = setCurve.windingRule
+    var windingRule: Int = setCurve.windingRule
+    var maskRule: Int = setCurve.maskRule
     var alpha: [CGFloat] = setCurve.alpha
     var shadow: [CGFloat] = setCurve.shadow
     var gradientDirection: [CGPoint] = setCurve.gradientDirection
@@ -49,8 +50,9 @@ struct SetupCurve {
     let lineJoin = 0
     let miterLimit: CGFloat = 10
     let maxMiter: CGFloat = 16
-    let lineDashPattern: [NSNumber] = [0, 0, 0, 0]
     let windingRule = 0
+    let maskRule = 0
+    let lineDashPattern: [NSNumber] = [0, 0, 0, 0]
     let minDash: Double = 0
     let maxDash: Double = 32
 
@@ -100,7 +102,7 @@ struct SetupEditor {
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 
-    let rulersDelta: CGFloat = 1.1
+    let rulersDelta: CGFloat = 1.2
     let rulersFontSize: CGFloat = 10
     let rulersShadow: NSSize = NSSize(width: 1, height: -1.5)
 
@@ -109,9 +111,11 @@ struct SetupEditor {
     let unlockImg = NSImage.init(
         imageLiteralResourceName: NSImage.lockUnlockedTemplateName)
 
-    let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
     let inputFieldSize: CGFloat = 128
+    let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
 
+    let maxHistory: Int = 30
+    
     let filename: String = "untitled"
     let fileTypes: [String] = ["drf", "png", "svg"]
 
