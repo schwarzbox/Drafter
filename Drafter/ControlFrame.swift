@@ -12,7 +12,7 @@ class ControlFrame: CAShapeLayer {
     var parent: SketchPad?
     var ctrlPad: CGFloat = setEditor.dotSize * 4
     var ctrlPad50: CGFloat = setEditor.dotSize * 2
-    var ctrlRot: CGFloat = setEditor.dotSize * 1.4
+    var ctrlRot: CGFloat = setEditor.dotSize * 1.3
     var dotSize: CGFloat = setEditor.dotSize
     var dotRadius: CGFloat = setEditor.dotRadius
     var dotMag: CGFloat = 0
@@ -37,7 +37,7 @@ class ControlFrame: CAShapeLayer {
         self.dotMag = parent.dotMag
         self.ctrlPad = self.dotSize * 4
         self.ctrlPad50 = self.dotSize * 2
-        self.ctrlRot = self.dotSize * 1.4
+        self.ctrlRot = self.dotSize * 1.3
 
         self.lineWidth = parent.lineWidth
         self.lineDashPattern = parent.lineDashPattern
@@ -306,11 +306,12 @@ class ControlFrame: CAShapeLayer {
                        layer.updateSize(width: size, height: size,
                                         lineWidth: self.lineWidth,
                                         circle: false)
-        case 0, 4: setCursor.cursorNESW.set()
-        case 1, 5: NSCursor.resizeLeftRight.set()
-        case 2, 6: setCursor.cursorNWSE.set()
-        case 3, 7: NSCursor.resizeUpDown.set()
-        case 8, 9, 10, 11: NSCursor.dragLink.set()
+        case 0, 4: setCursor.resizeNESW.set()
+        case 1, 5: setCursor.resizeWE.set()
+        case 2, 6: setCursor.resizeNWSE.set()
+        case 3, 7: setCursor.resizeNS.set()
+        case 8, 10: setCursor.rotateW.set()
+        case 9, 11: setCursor.rotateE.set()
         default:
             break
         }

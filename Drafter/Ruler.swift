@@ -22,6 +22,8 @@ class Ruler: CAShapeLayer {
     var solidPath = NSBezierPath()
     var alphaPath = NSBezierPath()
     var alphaLayer = CAShapeLayer()
+    var snapX: Bool = true
+    var snapY: Bool = true
 
     override init(layer: Any) {
         super.init(layer: layer)
@@ -79,9 +81,9 @@ class Ruler: CAShapeLayer {
             rulerPoints["y"] = curvePoints["y"]
         }
 
-        self.showRulers(rulerPoints: rulerPoints, ctrl: ctrl)
+        self.showRulers(rulerPoints: rulerPoints)
         var snap = self.deltaRulers(rulerPoints: rulerPoints)
-        if ctrl {
+        if !ctrl {
             snap.delta = CGPoint(x: 0, y: 0)
         }
         return snap
@@ -143,7 +145,7 @@ class Ruler: CAShapeLayer {
         var rulerPointX: RulerPoint?
         var rulerPointY: RulerPoint?
 
-        for cur in curves {
+        for cur in curves where !cur.canvas.isHidden {
             if exclude.contains(cur) {
                 continue
             }
@@ -286,8 +288,7 @@ class Ruler: CAShapeLayer {
         self.path = self.solidPath.cgPath
     }
 
-    func showRulers(rulerPoints: [String: RulerPoint?],
-                    ctrl: Bool = false) {
+    func showRulers(rulerPoints: [String: RulerPoint?]) {
         self.solidPath.removeAllPoints()
         self.alphaPath.removeAllPoints()
         for (_, point) in rulerPoints {

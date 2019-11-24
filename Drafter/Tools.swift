@@ -100,6 +100,8 @@ class Tool: Drawable {
                                     ctrl: ctrl)
         Tool.parent!.startPos.x -= snap.x
         Tool.parent!.startPos.y -= snap.y
+        Tool.parent!.snapMouseToRulers(snap: snap,
+                                       pos: Tool.parent!.startPos)
 
         if shift {
             Tool.parent!.rulers.appendCustomRule(move: mPos,
@@ -114,6 +116,7 @@ class Tool: Drawable {
                                 cp2: cp1.position)
         }
     }
+    
     func drag(shift: Bool, ctrl: Bool) {
         let snap = Tool.parent!.snapToRulers(
             points: [Tool.parent!.finPos],
@@ -121,6 +124,8 @@ class Tool: Drawable {
             curvePoints: mpPoints, ctrl: ctrl)
         Tool.parent!.finPos.x -= snap.x
         Tool.parent!.finPos.y -= snap.y
+        Tool.parent!.snapMouseToRulers(snap: snap,
+                                       pos: Tool.parent!.finPos)
     }
 
     func down(shift: Bool) {

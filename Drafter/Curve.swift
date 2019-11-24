@@ -16,9 +16,9 @@ class Curve: Equatable {
     var path: NSBezierPath
     let gradientMask = CAShapeLayer()
     let gradientLayer = CAGradientLayer()
-    let imageMask = CAShapeLayer()
     let imageLayer = CAShapeLayer()
-    let filterLayer = CAShapeLayer()
+    var imageScaleX: CGFloat = 1
+    var imageScaleY: CGFloat = 1
     let canvasMask = CAShapeLayer()
     let canvas = CAShapeLayer()
 
@@ -27,7 +27,7 @@ class Curve: Equatable {
     var lineWidth = setCurve.lineWidth {
         willSet(value) {
             self.canvas.lineWidth = value
-            self.filterLayer.lineWidth = value
+            self.imageLayer.lineWidth = value
         }
     }
 
@@ -37,7 +37,7 @@ class Curve: Equatable {
     var miter = setCurve.miterLimit {
         willSet(value) {
             self.canvas.miterLimit = value
-            self.filterLayer.miterLimit = value
+            self.imageLayer.miterLimit = value
         }
     }
 
@@ -52,12 +52,12 @@ class Curve: Equatable {
                 case 0:
                     let clr = color.cgColor.sRGB(alpha: self.alpha[0])
                     self.canvas.strokeColor = clr
-                    self.filterLayer.strokeColor = clr.sRGB(
+                    self.imageLayer.strokeColor = clr.sRGB(
                         alpha: self.alpha[6])
                 case 1:
                     let clr = color.cgColor.sRGB(alpha: self.alpha[1])
                     self.canvas.fillColor = clr
-                    self.filterLayer.fillColor = clr.sRGB(
+                    self.imageLayer.fillColor = clr.sRGB(
                         alpha: self.alpha[6])
                 case 2:
                     let clr = color.cgColor
@@ -86,10 +86,15 @@ class Curve: Equatable {
                 gradColors.append(srgb)
             }
             self.gradientLayer.colors = gradColors
-            self.filterLayer.strokeColor = self.canvas.strokeColor?.sRGB(
-                alpha: value[6])
-            self.filterLayer.fillColor = self.canvas.fillColor?.sRGB(
+
+            if self.imageLayer.contents == nil {
+                self.imageLayer.strokeColor = self.canvas.strokeColor?.sRGB(
                     alpha: value[6])
+                self.imageLayer.fillColor = self.canvas.fillColor?.sRGB(
+                    alpha: value[6])
+            } else {
+                self.imageLayer.opacity = Float(value[6])
+            }
         }
     }
 
@@ -116,8 +121,9 @@ class Curve: Equatable {
 
     var blur: Double = setCurve.minBlur {
         willSet(value) {
-            self.filterLayer.setValue(value,
-                forKeyPath: "filters.CIGaussianBlur.inputRadius")
+            let name = setCurve.filters[0]
+            self.imageLayer.setValue(value,
+                forKeyPath: "filters.\(name).inputRadius")
         }
     }
 
@@ -169,20 +175,21 @@ class Curve: Equatable {
         self.rounded = rounded
         self.groups = [self]
 
-        self.layers = [imageLayer, gradientLayer, filterLayer]
+        self.layers = [imageLayer, gradientLayer]
 
-        self.filterLayer.filters = []
-        self.filterLayer.backgroundColor = NSColor.clear.cgColor
+        self.imageLayer.filters = []
+        self.imageLayer.backgroundColor = NSColor.clear.cgColor
         // CIPointillize
-        for filterName in ["CIGaussianBlur"] {
+        for filterName in setCurve.filters {
             if let filter = CIFilter(name: filterName,
                                      parameters: ["inputRadius": 0]) {
-                self.filterLayer.filters?.append(filter)
+                self.imageLayer.filters?.append(filter)
             }
         }
 
         for layer in self.layers {
             layer.actions = setEditor.disabledActions
+            layer.contentsGravity = .center
             self.canvas.addSublayer(layer)
         }
         self.canvas.actions = setEditor.disabledActions
@@ -196,7 +203,7 @@ class Curve: Equatable {
     func setLineCap(value: Int) {
         self.cap = value
         self.canvas.lineCap = lineCapStyles[value]
-        self.filterLayer.lineCap = lineCapStyles[value]
+        self.imageLayer.lineCap = lineCapStyles[value]
     }
 
     let lineJoinStyles: [CAShapeLayerLineJoin] = [
@@ -206,7 +213,7 @@ class Curve: Equatable {
     func setLineJoin(value: Int) {
         self.join = value
         self.canvas.lineJoin = lineJoinStyles[value]
-        self.filterLayer.lineJoin = lineJoinStyles[value]
+        self.imageLayer.lineJoin = lineJoinStyles[value]
     }
 
     let windingRules: [CAShapeLayerFillRule] = [
@@ -227,11 +234,11 @@ class Curve: Equatable {
         if dash.first(where: { num in
             return Int(truncating: num) > 0}) != nil {
             self.canvas.lineDashPattern = dash
-            self.filterLayer.lineDashPattern = dash
+            self.imageLayer.lineDashPattern = dash
 
         } else {
             self.canvas.lineDashPattern = nil
-            self.filterLayer.lineDashPattern = nil
+            self.imageLayer.lineDashPattern = nil
         }
     }
 
@@ -260,7 +267,7 @@ class Curve: Equatable {
     func delete() {
         for curve in self.groups {
             curve.imageLayer.removeFromSuperlayer()
-            curve.filterLayer.removeFromSuperlayer()
+            curve.imageLayer.removeFromSuperlayer()
             curve.gradientLayer.removeFromSuperlayer()
             curve.canvas.removeFromSuperlayer()
         }
@@ -328,10 +335,7 @@ class Curve: Equatable {
         self.gradientMask.path = self.path.cgPath
         self.gradientLayer.mask = self.gradientMask
 
-        self.imageMask.path = self.path.cgPath
-        self.imageLayer.mask = self.imageMask
-
-        self.filterLayer.path = self.path.cgPath
+        self.imageLayer.path = self.path.cgPath
 
         self.canvas.path = self.path.cgPath
 
@@ -345,34 +349,60 @@ class Curve: Equatable {
             layer.position = self.canvas.position
         }
     }
+    func removeMaskBorderEdge() -> NSBezierPath? {
+        let rev = self.reversed()
+        let initPath = rev ? self.path : self.path.reversed
 
+        if let path = initPath.copy() as? NSBezierPath {
+            let bounds = path.bounds
+            let originX: CGFloat = bounds.midX
+            let originY: CGFloat = bounds.midY
+            let scaleX = (bounds.width+0.5) / bounds.width
+            let scaleY = (bounds.height+0.5) / bounds.height
+            let scale = AffineTransform(scaleByX: scaleX, byY: scaleY)
+            path.applyTransform(
+                oX: originX, oY: originY,
+                transform: {path.transform(using: scale)
+            })
+            rev ? path.append(self.path.reversed)
+                : path.append(self.path)
+
+            return path
+        }
+        return nil
+    }
     func updateMask() {
-        if let par = self.parent, self.mask  {
+        if let par = self.parent, self.mask {
             var path = NSBezierPath()
             if self.maskRule==0 {
                 path = self.reversed() ? self.path : self.path.reversed
+                if let copyPath = path.copy() as? NSBezierPath {
+                    path = copyPath
+                }
             }
-            if let maskPath = path.copy() as? NSBezierPath {
-                let bounds = self.groupRect(curves: self.groups)
-                for curve in par.curves {
-                    for cur in curve.groups where cur != self &&
-                        cur.fill && !cur.canvas.isHidden {
-                        let curBounds = cur.groupRect(curves: cur.groups)
-                        if bounds.intersects(curBounds) {
-                            if cur.reversed() {
-                                maskPath.append(cur.path.reversed)
-                            } else {
-                                maskPath.append(cur.path)
-                            }
+            let bounds = self.groupRect(curves: self.groups)
+            for curve in par.curves {
+                for cur in curve.groups where cur != self &&
+                    cur.fill && !cur.canvas.isHidden {
+                    let curBounds = cur.groupRect(curves: cur.groups)
+                    if bounds.intersects(curBounds) {
+                        if cur.reversed() {
+                            path.append(cur.path.reversed)
+                        } else {
+                            path.append(cur.path)
                         }
                     }
                 }
-                if maskPath.elementCount>0 {
-                    self.canvasMask.path = maskPath.cgPath
-                    self.canvas.mask = self.canvasMask
-                } else {
-                    self.canvas.mask = nil
+            }
+            if path.elementCount>0 {
+                if let scalePath = removeMaskBorderEdge() {
+                    path.append(scalePath)
                 }
+                self.canvasMask.path = path.cgPath
+                self.lineWidth = 0
+                self.canvas.mask = self.canvasMask
+            } else {
+                self.canvas.mask = nil
             }
         } else {
             self.canvas.mask = nil
@@ -607,8 +637,9 @@ class Curve: Equatable {
     func updatePoints(matrix: AffineTransform, ox: CGFloat, oy: CGFloat) {
         self.clearTrackArea()
 
-        let matrix: [CGPoint] = [CGPoint(x: matrix.m11, y: matrix.m21),
-                                 CGPoint(x: matrix.m12, y: matrix.m22)]
+        let matrix: [CGPoint] = [
+            CGPoint(x: matrix.m11, y: matrix.m21),
+            CGPoint(x: matrix.m12, y: matrix.m22)]
         for point in self.points {
             point.rotateDots(ox: ox, oy: oy, matrix: matrix,
                              parent: self.parent!)
@@ -685,15 +716,13 @@ class Curve: Equatable {
                 self.parent!.removeTrackingArea(trackingArea)
         }
     }
-
-//    MARK: Transform
-    func applyTransform(oX: CGFloat, oY: CGFloat, transform: () -> Void) {
-        let move = AffineTransform(translationByX: -oX, byY: -oY)
-        self.path.transform(using: move)
-
-        transform()
-
-        let moveorigin = AffineTransform(translationByX: oX, byY: oY)
-        self.path.transform(using: moveorigin)
+//  MARK: Transform
+    func transformImageLayer() {
+        self.imageLayer.transform = CATransform3DMakeRotation(
+            self.angle, 0, 0, 1)
+        self.imageLayer.transform = CATransform3DScale(
+            self.imageLayer.transform,
+            self.imageScaleX, self.imageScaleY, 1)
     }
 }
+

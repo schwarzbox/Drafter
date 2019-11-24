@@ -248,6 +248,16 @@ extension NSBezierPath {
 
         return path
     }
+
+    func applyTransform(oX: CGFloat, oY: CGFloat, transform: () -> Void) {
+        let move = AffineTransform(translationByX: -oX, byY: -oY)
+        self.transform(using: move)
+
+        transform()
+
+        let moveorigin = AffineTransform(translationByX: oX, byY: oY)
+        self.transform(using: moveorigin)
+    }
 }
 
 extension NSStackView {
@@ -355,6 +365,37 @@ extension String {
     func sizeOfString(usingFont font: NSFont) -> CGSize {
         let fontAttributes = [NSAttributedString.Key.font: font]
         return self.size(withAttributes: fontAttributes)
+    }
+}
+
+extension NSImage {
+    func rotated(by angle: CGFloat) -> NSImage {
+        let img = NSImage(size: self.size, flipped: false, drawingHandler: { (rect) -> Bool in
+            let (width, height) = (rect.size.width, rect.size.height)
+            let transform = NSAffineTransform()
+            transform.translateX(by: width / 2, yBy: height / 2)
+            transform.rotate(byRadians: angle)
+            transform.translateX(by: -width / 2, yBy: -height / 2)
+            transform.concat()
+            self.draw(in: rect)
+            return true
+        })
+        img.isTemplate = self.isTemplate
+        return img
+    }
+    func resized(scaleX: CGFloat, scaleY: CGFloat) -> NSImage {
+        let img = NSImage(size: self.size, flipped: false, drawingHandler: { (rect) -> Bool in
+            let (width, height) = (rect.size.width, rect.size.height)
+            let transform = NSAffineTransform()
+            transform.translateX(by: width / 2, yBy: height / 2)
+            transform.scaleX(by: scaleX, yBy: scaleY)
+            transform.translateX(by: -width / 2, yBy: -height / 2)
+            transform.concat()
+            self.draw(in: rect)
+            return true
+        })
+        img.isTemplate = self.isTemplate
+        return img
     }
 }
 
@@ -582,7 +623,8 @@ extension NSOpenPanel {
 extension NSColorPanel {
     override open func mouseMoved(with event: NSEvent) {
         let nc = NotificationCenter.default
-        nc.post(name: Notification.Name("saveStack"), object: nil)
+        nc.post(name: Notification.Name("saveHistory"), object: nil)
+        nc.post(name: Notification.Name("restoreFrame"), object: nil)
         self.acceptsMouseMovedEvents = false
     }
 }

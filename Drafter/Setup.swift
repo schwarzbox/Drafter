@@ -77,6 +77,9 @@ struct SetupCurve {
     let minBlur: Double = 0
     let maxBlur: Double = 64
 
+    let filters: [String] = ["CIGaussianBlur",
+                             "CIPointillize"]
+
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"
     let fontSize: CGFloat = 18
@@ -102,7 +105,7 @@ struct SetupEditor {
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 
-    let rulersDelta: CGFloat = 1.2
+    let rulersDelta: CGFloat = 2
     let rulersFontSize: CGFloat = 10
     let rulersShadow: NSSize = NSSize(width: 1, height: -1.5)
 
@@ -113,8 +116,6 @@ struct SetupEditor {
 
     let inputFieldSize: CGFloat = 128
     let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
-
-    let maxHistory: Int = 30
     
     let filename: String = "untitled"
     let fileTypes: [String] = ["drf", "png", "svg"]
@@ -138,14 +139,25 @@ struct SetupEditor {
                            "shadowColor": NSNull()]
 }
 
-let curImageNESW = NSImage(byReferencingFile : "/System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Resources/northEastSouthWestResizeCursor.png")!
-let curImageNWSE = NSImage(byReferencingFile :  "/System/Library/Frameworks/WebKit.framework/Versions/A/Frameworks/WebCore.framework/Versions/A/Resources/northWestSouthEastResizeCursor.png")!
-
 struct SetupCursor {
-    let cursorNESW: NSCursor = NSCursor.init(image: curImageNESW,
-                                             hotSpot: CGPoint(x: 8, y: 8))
-    let cursorNWSE: NSCursor = NSCursor.init(image: curImageNWSE,
-    hotSpot: CGPoint(x: 8, y: 8))
+    let resizeNS: NSCursor = NSCursor.init(
+        image: #imageLiteral(resourceName: "nsResizeCursor"),
+        hotSpot: CGPoint(x: 8, y: 8))
+    let resizeWE: NSCursor = NSCursor.init(
+        image: #imageLiteral(resourceName: "weResizeCursor"),
+        hotSpot: CGPoint(x: 8, y: 8))
+    let resizeNESW: NSCursor = NSCursor.init(
+        image: #imageLiteral(resourceName: "neswResizeCursor"),
+        hotSpot: CGPoint(x: 8, y: 8))
+    let resizeNWSE: NSCursor = NSCursor.init(
+        image: #imageLiteral(resourceName: "nwseResizeCursor"),
+        hotSpot: CGPoint(x: 8, y: 8))
+    let rotateW: NSCursor = NSCursor.init(
+        image: #imageLiteral(resourceName: "nwseResizeCursor"),
+        hotSpot: CGPoint(x: 8, y: 8))
+    let rotateE: NSCursor = NSCursor.init(
+        image: #imageLiteral(resourceName: "neswResizeCursor"),
+        hotSpot: CGPoint(x: 8, y: 8))
 }
 
 var setGlobal = SetupGlobal()

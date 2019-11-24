@@ -40,7 +40,8 @@ class ColorPanel: NSStackView {
         if let frm = frame {
             self.sharedColorPanel?.setFrame(frm, display: true)
         }
-        self.sharedColorPanel?.styleMask = .titled
+
+        self.sharedColorPanel?.styleMask = [.closable, .titled]
 
         self.sharedColorPanel?.backgroundColor = setEditor.guiColor
         self.sharedColorPanel?.makeKeyAndOrderFront(self)
@@ -93,7 +94,6 @@ class ColorPanel: NSStackView {
         } else if let panel = sender as? NSColorPanel {
             color = self.setColor(color: panel.color)
             self.sharedColorPanel?.color = color
-
         }
 
         let nc = NotificationCenter.default

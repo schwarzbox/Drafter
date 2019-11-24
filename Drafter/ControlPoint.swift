@@ -209,8 +209,9 @@ class ControlPoint {
     func rotateDots(ox: CGFloat, oy: CGFloat,
                     matrix: [CGPoint], parent: SketchPad) {
         for dot in dots {
-            dot.position = self.rotate(pos: dot.position,
-                                       ox: ox, oy: oy, matrix: matrix)
+            dot.position = self.rotate(
+                pos: dot.position,
+                ox: ox, oy: oy, matrix: matrix)
         }
 
         self.updateLines()

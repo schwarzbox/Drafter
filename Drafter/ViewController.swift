@@ -136,7 +136,7 @@ class ViewController: NSViewController,
                 case 126: dt.y = -view.zoomed
                 default: break
                 }
-                view.dragCurve(deltaX: dt.x, deltaY: dt.y, ctrl: true)
+                view.dragCurve(deltaX: dt.x, deltaY: dt.y)
                 return true
             } else if event.keyCode == 36 {
                 if let curve = view.selectedCurve, curve.edit {
@@ -309,20 +309,25 @@ class ViewController: NSViewController,
         nc.addObserver(self, selector: #selector(abortTextFields),
                        name: Notification.Name("abortTextFields"),
                        object: nil)
+
+        nc.addObserver(self, selector: #selector(safeQuit),
+                        name: Notification.Name("shouldTerminate"),
+                        object: nil)
+
+        nc.addObserver(self, selector: #selector(updateSliders),
+                             name: Notification.Name("updateSliders"),
+                             object: nil)
+
+        nc.addObserver(self, selector: #selector(restoreFrame),
+                        name: Notification.Name("restoreFrame"),
+                        object: nil)
+
         nc.addObserver(self, selector: #selector(updateSketchColor),
                        name: Notification.Name("updateSketchColor"),
                        object: nil)
-        nc.addObserver(self, selector: #selector(updateSliders),
-                       name: Notification.Name("updateSliders"),
-                       object: nil)
-        nc.addObserver(self, selector: #selector(updateStack),
-                       name: Notification.Name("updateStack"),
-                       object: nil)
-        nc.addObserver(self, selector: #selector(safeQuit),
-                       name: Notification.Name("shouldTerminate"),
-                       object: nil)
-        nc.addObserver(self, selector: #selector(saveStack),
-                       name: Notification.Name("saveStack"),
+
+        nc.addObserver(self, selector: #selector(saveHistory),
+                       name: Notification.Name("saveHistory"),
                        object: nil)
 
         nc.post(name: Notification.Name("abortTextFields"), object: nil)
@@ -341,24 +346,18 @@ class ViewController: NSViewController,
         }
     }
 
+    @objc func safeQuit() {
+         self.saveDocument(self)
+     }
+
     @objc func abortTextFields() {
         for field in self.textFields {
             field.abortEditing()
         }
     }
 
-    @objc func updateSketchColor() {
-        let view = sketchView!
-        if let panel = self.colorPanel, let cp = panel.sharedColorPanel {
-            cp.acceptsMouseMovedEvents = true
-        }
-        view.colorCurve()
-        self.updateStack()
-    }
-
     @objc func updateSliders() {
         let view = sketchView!
-        defer {self.updateStack()}
         if let curve = view.selectedCurve, !curve.lock {
             setGlobal.saved = true
             let bounds = view.groups.count>1
@@ -370,7 +369,7 @@ class ViewController: NSViewController,
             self.curveWid.doubleValue = Double(bounds.width)
             self.curveHei.doubleValue = Double(bounds.height)
             let ang = Double(curve.angle).truncatingRemainder(
-                dividingBy: Double.pi)
+                dividingBy: Double.pi+0.01)
             self.curveRotate.doubleValue = ang
 
             if curve.groups.count==1 && view.groups.count <= 1 {
@@ -425,20 +424,6 @@ class ViewController: NSViewController,
         }
     }
 
-    @objc func updateStack() {
-        sketchUI.reloadData()
-        if let curve = sketchView!.selectedCurve,
-            let index = sketchView!.curves.firstIndex(of: curve) {
-            selectedSketch = index
-        } else {
-            selectedSketch = -1
-        }
-    }
-
-    @objc func safeQuit() {
-        self.saveDocument(self)
-    }
-
     func showUnusedViews(_ bool: Bool, from: Int = 2) {
         for index in from..<actionUI.subviews.count {
             let subs = actionUI.subviews[index].subviews
@@ -475,7 +460,7 @@ class ViewController: NSViewController,
         } else {
             oX -= (curve.canvas.bounds.height-curve.canvas.bounds.width)/2
         }
-        curve.applyTransform(oX: oX, oY: oY,
+        curve.path.applyTransform(oX: oX, oY: oY,
             transform: {
                 curve.updateLayer()
                 image = action()
@@ -507,9 +492,10 @@ class ViewController: NSViewController,
     }
 
     func tableViewSelectionDidChange(_ notification: Notification) {
-           selectedSketch = sketchUI.selectedRow
-           sketchView!.selectSketch(tag: selectedSketch)
-       }
+        selectedSketch = sketchUI.selectedRow
+        sketchView!.selectSketch(tag: selectedSketch)
+        self.saveHistory()
+    }
 
     func tableView(_ tableView: NSTableView,
                    viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
@@ -529,6 +515,9 @@ class ViewController: NSViewController,
                 curve.canvas.isHidden = true
             } else if curve.groups.count>1 {
                 let img = NSImage.iconViewTemplateName
+                image = NSImage.init(imageLiteralResourceName: img)
+            } else if curve.mask {
+                let img = NSImage.slideshowTemplateName
                 image = NSImage.init(imageLiteralResourceName: img)
             } else {
                 image = self.getImage(index: row, curve: curve)
@@ -608,8 +597,7 @@ class ViewController: NSViewController,
         for _ in 0..<dist {
             view.sendCurve(curve: curve, tag: tag)
         }
-        sketchUI.reloadData()
-
+        self.saveHistory()
         return true
     }
 
@@ -627,11 +615,12 @@ class ViewController: NSViewController,
 
     @IBAction func visibleSketch(_ sender: NSButton) {
         sketchView!.visibleSketch(sender: sender)
+        self.saveHistory()
     }
 
     @IBAction func renameSketch(_ sender: NSTextField) {
         sketchView!.curves[sender.tag].name = sender.stringValue
-        sketchUI.reloadData()
+        self.saveHistory()
     }
 
 //    MARK: Zoom Actions
@@ -695,19 +684,24 @@ class ViewController: NSViewController,
         return (tag: tag, value: doubleValue)
     }
 
+    @objc func restoreFrame() {
+        let view = sketchView!
+        if let curve = view.selectedCurve,
+            curve.controlFrame==nil,
+            !curve.lock {
+            curve.reset()
+            view.createControls(curve: curve)
+        }
+
+        for cur in view.groups {
+            view.curvedPath.append(cur.path)
+        }
+    }
+
     func restoreControlFrame(view: SketchPad) {
         if NSEvent.pressedMouseButtons == 0 {
-            if let curve = view.selectedCurve,
-                curve.controlFrame==nil,
-                !curve.lock {
-                curve.reset()
-                view.createControls(curve: curve)
-            }
-
-            for cur in view.groups {
-                view.curvedPath.append(cur.path)
-            }
-            self.saveStack()
+            self.restoreFrame()
+            self.saveHistory()
         }
     }
 
@@ -772,7 +766,7 @@ class ViewController: NSViewController,
     @IBAction func capCurve(_ sender: NSSegmentedControl) {
         sketchView!.capCurve(value: sender.indexOfSelectedItem)
 
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction func joinCurve(_ sender: NSSegmentedControl) {
@@ -786,7 +780,7 @@ class ViewController: NSViewController,
                 }
             }
         }
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction func miterCurve(_ sender: Any) {
@@ -813,23 +807,30 @@ class ViewController: NSViewController,
 
     @IBAction func windingCurve(_ sender: NSSegmentedControl) {
         sketchView!.windingCurve(value: sender.indexOfSelectedItem)
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction func maskRuleCurve(_ sender: NSSegmentedControl) {
         sketchView!.maskRuleCurve(value: sender.indexOfSelectedItem)
-        self.saveStack()
+        self.saveHistory()
     }
-
 
 //    MARK: TextTool action
     @IBAction func glyphsCurve(_ sender: NSTextField) {
         sketchView!.glyphsCurve(value: sender.stringValue,
                                 sharedFont: textUI!.sharedFont)
-        self.saveStack()
+        self.saveHistory()
     }
 
 //    MARK: ColorPanel actions
+    @objc func updateSketchColor() {
+        let view = sketchView!
+        if let panel = self.colorPanel,
+            let cp = panel.sharedColorPanel {
+            cp.acceptsMouseMovedEvents = true
+        }
+        view.colorCurve()
+    }
     @IBAction func openColorPanel(_ sender: ColorBox) {
         let tag = sender.tag
         if tag < self.colorPanels.count {
@@ -897,56 +898,71 @@ class ViewController: NSViewController,
     @IBAction func sendCurve(_ sender: NSButton) {
         if let curve = sketchView!.selectedCurve {
             sketchView!.sendCurve(curve: curve, tag: sender.tag)
-            self.saveStack()
+            self.saveHistory()
         }
     }
 
     @IBAction func flipCurve(_ sender: NSButton) {
         sketchView!.flipCurve(tag: sender.tag)
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction func maskCurve(_ sender: NSButton) {
         sketchView!.maskCurve(sender: sender)
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction func groupCurve(_ sender: Any) {
         sketchView!.groupCurve(sender: sender)
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction func ungroup(_ sender: NSMenuItem) {
         sketchView!.groupCurve(sender: sender)
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction func editCurve(_ sender: NSButton) {
-         sketchView!.editCurve(sender: sender)
+        sketchView!.editCurve(sender: sender)
+        self.saveHistory()
     }
 
     @IBAction func lockCurve(_ sender: NSButton) {
         sketchView!.lockCurve(sender: sender)
-        self.saveStack()
+        self.saveHistory()
     }
 
 //    MARK: History
-    @objc func saveStack() {
-        let view = sketchView!
-        self.history[self.indexHistory+1..<self.history.count] = []
-        self.history.append(view.copyAll())
-//        if self.indexHistory>setEditor.maxHistory {
-//            self.history[0...1] = []
-//        }
+    func clearHistory() {
+        self.history = [[]]
         self.indexHistory = self.history.count-1
     }
 
+    @objc func saveHistory() {
+        let view = sketchView!
+        self.history[self.indexHistory+1..<self.history.count] = []
+        self.history.append(view.copyAll())
+        self.indexHistory = self.history.count-1
+        self.updateStack()
+    }
+
 //    MARK: Menu actions
+    func updateStack() {
+        sketchUI.reloadData()
+        if let curve = sketchView!.selectedCurve,
+            let index = sketchView!.curves.firstIndex(of: curve) {
+            selectedSketch = index
+        } else {
+            selectedSketch = -1
+        }
+    }
     func restoreStack(history: () -> Void) {
         let view = sketchView!
         if let curve = view.selectedCurve {
-            print(curve.edit)
             view.clearControls(curve: curve)
+            if curve.edit {
+                curve.clearPoints()
+            }
             view.selectedCurve = nil
         }
 
@@ -955,21 +971,26 @@ class ViewController: NSViewController,
 
         history()
 
+        view.clearCurvedPath()
         view.curves = self.history[self.indexHistory]
         view.curves = view.copyAll()
+        view.addAllLayers()
         for cur in view.curves {
             if cur.controlFrame != nil {
                 view.createControls(curve: cur)
                 view.selectedCurve = cur
+                break
             }
             if cur.edit {
                 view.editStarted(curve: cur)
+                view.selectedCurve = cur
+                break
             }
         }
 
-        view.addAllLayers()
-        view.clearCurvedPath()
+        view.updateMasks()
         view.needsDisplay = true
+        self.updateStack()
         self.updateSliders()
     }
     @IBAction func undoStack(_ sender: Any) {
@@ -1000,7 +1021,7 @@ class ViewController: NSViewController,
         let view = sketchView!
         view.copyCurve(from: sketchView!.selectedCurve)
         view.deleteCurve()
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction func copy(_ sender: NSMenuItem) {
@@ -1015,7 +1036,7 @@ class ViewController: NSViewController,
         sketchView!.pasteCurve(to: CGPoint(
             x: deltaX + view.bounds.minX ,
             y: deltaY + view.bounds.minY))
-        self.saveStack()
+        self.saveHistory()
     }
 
     @IBAction override func selectAll(_ sender: Any?) {
@@ -1038,7 +1059,7 @@ class ViewController: NSViewController,
 
     @IBAction func delete(_ sender: NSMenuItem) {
         sketchView!.deleteCurve()
-        self.saveStack()
+        self.saveHistory()
     }
 
     func showFileName() {
@@ -1072,6 +1093,9 @@ class ViewController: NSViewController,
         view.removeAllCurves()
 
         textUI.hide()
+
+        self.clearHistory()
+        self.updateStack()
         self.updateSliders()
         setGlobal.saved = false
     }
@@ -1108,31 +1132,40 @@ class ViewController: NSViewController,
     func openPng(filePath: URL) {
         let view = sketchView!
         let image = NSImage(contentsOf: filePath)
-        if let wid = image?.size.width, let hei = image?.size.height {
 
-            if view.selectedCurve == nil {
-                let topLeft = CGPoint(x: view.sketchPath.bounds.midX - wid/2,
-                                      y: view.sketchPath.bounds.midY - hei/2)
-                let bottomRight = CGPoint(
-                    x: view.sketchPath.bounds.midX + wid/2,
-                    y: view.sketchPath.bounds.midY + hei/2)
-                if let rect = tools[3] as? Rectangle {
-                    rect.useTool(
-                        rect.action(topLeft: topLeft,
-                                    bottomRight: bottomRight))
-                }
-                view.newCurve()
-                if let curve = view.selectedCurve {
-                    view.createControls(curve: curve)
-                }
+        if let img = image {
+            let rep = img.representations[0]
+            let wid = rep.size.width
+            let hei = rep.size.height
+            let pixWid = CGFloat(rep.pixelsWide)
+            let pixHei = CGFloat(rep.pixelsHigh)
+            if let curve = view.selectedCurve {
+                view.deselectCurve(curve: curve)
             }
 
+            let topLeft = CGPoint(x: view.sketchPath.bounds.midX - wid/2,
+                                  y: view.sketchPath.bounds.midY - hei/2)
+            let bottomRight = CGPoint(
+                x: view.sketchPath.bounds.midX + wid/2,
+                y: view.sketchPath.bounds.midY + hei/2)
+            if let rect = tools[3] as? Rectangle {
+                rect.useTool(
+                    rect.action(topLeft: topLeft,
+                                bottomRight: bottomRight))
+            }
+            view.newCurve()
             if let curve = view.selectedCurve {
-                curve.alpha = [CGFloat](repeating: 0, count: 7)
+                view.createControls(curve: curve)
+
+                curve.alpha = [CGFloat](repeating: 0,
+                                        count: setCurve.alpha.count)
+
                 curve.imageLayer.contents = image
-//                curve.filterLayer.contents = image
-                curve.imageLayer.bounds = curve.canvas.bounds
-                curve.imageLayer.position = curve.canvas.position
+                curve.alpha[6] = 1
+
+                curve.imageScaleX = CGFloat(wid) / pixWid
+                curve.imageScaleY = CGFloat(hei) / pixHei
+                curve.transformImageLayer()
 
                 curve.setName(name: "image", curves: view.curves)
                 self.updateSliders()
@@ -1171,7 +1204,7 @@ class ViewController: NSViewController,
            print("error open \(filePath)")
         }
         view.updateMasks()
-        self.updateStack()
+        self.saveHistory()
     }
 
     func openCurve(drf: Drf) -> Curve {

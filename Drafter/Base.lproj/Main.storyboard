@@ -786,7 +786,7 @@ CA
                                             <action selector="flipCurve:" target="XfG-lQ-9wD" id="c0q-8A-OEb"/>
                                         </connections>
                                     </button>
-                                    <button verticalHuggingPriority="750" tag="4" translatesAutoresizingMaskIntoConstraints="NO" id="uco-gi-Hxu" userLabel="●">
+                                    <button verticalHuggingPriority="750" tag="4" translatesAutoresizingMaskIntoConstraints="NO" id="uco-gi-Hxu" userLabel="edit">
                                         <rect key="frame" x="0.0" y="51" width="16" height="16"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="9FZ-VN-CqY"/>
@@ -800,7 +800,7 @@ CA
                                             <action selector="editCurve:" target="XfG-lQ-9wD" id="Gsc-oa-kFs"/>
                                         </connections>
                                     </button>
-                                    <button verticalHuggingPriority="750" tag="5" translatesAutoresizingMaskIntoConstraints="NO" id="SXd-b4-ies">
+                                    <button verticalHuggingPriority="750" tag="5" translatesAutoresizingMaskIntoConstraints="NO" id="SXd-b4-ies" userLabel="group">
                                         <rect key="frame" x="0.0" y="34" width="16" height="16"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="16" id="mTs-9R-b1m"/>
@@ -814,13 +814,13 @@ CA
                                             <action selector="groupCurve:" target="XfG-lQ-9wD" id="ivn-4C-zKL"/>
                                         </connections>
                                     </button>
-                                    <button verticalHuggingPriority="750" tag="6" translatesAutoresizingMaskIntoConstraints="NO" id="ias-hG-NdL">
+                                    <button verticalHuggingPriority="750" tag="6" translatesAutoresizingMaskIntoConstraints="NO" id="ias-hG-NdL" userLabel="mask">
                                         <rect key="frame" x="0.0" y="17" width="16" height="16"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="eL0-Od-HZd"/>
                                             <constraint firstAttribute="height" constant="16" id="fic-mv-U5K"/>
                                         </constraints>
-                                        <buttonCell key="cell" type="square" title="𝞵" alternateTitle="mask" bezelStyle="shadowlessSquare" alignment="center" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rv8-m2-wtp">
+                                        <buttonCell key="cell" type="square" alternateTitle="mask" bezelStyle="shadowlessSquare" image="NSSlideshowTemplate" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Rv8-m2-wtp">
                                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES" changeBackground="YES" changeGray="YES"/>
                                             <font key="font" size="9" name="HelveticaNeue"/>
                                         </buttonCell>
@@ -828,7 +828,7 @@ CA
                                             <action selector="maskCurve:" target="XfG-lQ-9wD" id="v5k-5C-jUJ"/>
                                         </connections>
                                     </button>
-                                    <button verticalHuggingPriority="750" tag="7" translatesAutoresizingMaskIntoConstraints="NO" id="XDq-Wk-7cd" userLabel="●">
+                                    <button verticalHuggingPriority="750" tag="7" translatesAutoresizingMaskIntoConstraints="NO" id="XDq-Wk-7cd" userLabel="lock">
                                         <rect key="frame" x="0.0" y="0.0" width="16" height="16"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="16" id="7q7-6Z-PwT"/>
@@ -1110,7 +1110,7 @@ CA
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                     </tableHeaderCell>
                                                     <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" refusesFirstResponder="YES" id="Eoc-Le-be3">
-                                                        <font key="font" metaFont="controlContent"/>
+                                                        <font key="font" metaFont="label" size="12"/>
                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
@@ -3378,5 +3378,6 @@ CA
         <image name="NSIconViewTemplate" width="14" height="10"/>
         <image name="NSLockUnlockedTemplate" width="10" height="14"/>
         <image name="NSQuickLookTemplate" width="19" height="12"/>
+        <image name="NSSlideshowTemplate" width="17" height="14"/>
     </resources>
 </document>

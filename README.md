@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.8
+v0.82
 
 # Features
 
@@ -69,7 +69,7 @@ Create shape with ⇧(Shift) to make width and height equal
 
 Resize shapes proportionaly with ⇧(Shift)
 
-Drag shape or dot with ^(Control) to switch off "snap to rullers"
+Drag shape or dot with ^(Control) to turn on "snap to rullers"
 
 Select shape with ⌥(Option) to clone it
 
@@ -86,12 +86,12 @@ Magnification gesture. Two fingers zoom
 Scroll canvas with two fingers
 
 
-# Future releases
+# Road map
 
 v0.9 Improve Text
 
 v1.0
-Bugs:  SaveBlur, Rotate image, Fix sizes, Save .png with .drf 
+Bugs:  SaveBlur,  Save .png with .drf 
 
 v1.1
 Filters
