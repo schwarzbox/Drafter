@@ -1,5 +1,5 @@
 //
-//  TextTool.swift
+//  FontTool.swift
 //  Drafter
 //
 //  Created by Alex Veledzimovich on 10/6/19.
@@ -8,34 +8,45 @@
 
 import Cocoa
 
-class TextTool: NSStackView {
-    @IBOutlet weak var textField: InputField!
+class FontTool: NSStackView {
+    @IBOutlet weak var sketchView: SketchPad!
+    @IBOutlet weak var inputField: InputTool!
     @IBOutlet weak var popFontFamily: NSPopUpButton!
     @IBOutlet weak var popFontType: NSPopUpButton!
+    @IBOutlet weak var sliderFontSize: ActionSlider!
+
+    var zoomed: CGFloat = 1
 
     var fontFamily: String = setCurve.fontFamily
     var fontType: String = setCurve.fontType
-    var fontSize: CGFloat = setCurve.fontSize
+    var fontSize: CGFloat = CGFloat(setCurve.fontSize)
     var fontMembers = [[Any]]()
     var sharedFont: NSFont?
+    var inputFont: NSFont?
 
-    func setupTextTool() {
+    func setupFontTool() {
         self.setupFontFamily()
         self.popFontFamily.selectItem(withTitle: setCurve.fontFamily)
-        let fFam = self.popFontFamily.titleOfSelectedItem ?? setCurve.fontFamily
+        let fFam = self.popFontFamily.titleOfSelectedItem ??
+            setCurve.fontFamily
         self.popFontFamily.setTitle(fFam)
         self.setupFontMembers()
         self.setupFontType()
         self.popFontType.selectItem(withTitle: setCurve.fontType)
-        let titType = self.popFontType.titleOfSelectedItem ?? setCurve.fontType
+        let titType = self.popFontType.titleOfSelectedItem ??
+            setCurve.fontType
         self.popFontType.setTitle(titType)
+
+        self.setupFontSize()
         self.setupFont()
     }
 
     func setupFontFamily() {
         self.popFontFamily.removeAllItems()
-        self.popFontFamily.addItems(
-            withTitles: NSFontManager.shared.availableFontFamilies)
+        for member in NSFontManager.shared.availableFontFamilies {
+
+            self.popFontFamily.addItem(withTitle: member)
+        }
     }
 
     func setupFontMembers() {
@@ -53,7 +64,12 @@ class TextTool: NSStackView {
                 self.popFontType.addItem(withTitle: type)
             }
         }
-        self.popFontType.selectItem(at: 0)
+    }
+
+    func setupFontSize() {
+        self.sliderFontSize.doubleValue = setCurve.fontSize
+        self.sliderFontSize.minValue = setCurve.minFont
+        self.sliderFontSize.maxValue = setCurve.maxFont
     }
 
     func setupFont() {
@@ -63,21 +79,14 @@ class TextTool: NSStackView {
                 withFamily: self.fontFamily,
                 traits: NSFontTraitMask(rawValue: traits),
                 weight: weight, size: self.fontSize)
+            self.inputFont = NSFontManager.shared.font(
+                withFamily: self.fontFamily,
+                traits: NSFontTraitMask(rawValue: traits),
+                weight: weight, size: self.fontSize * sketchView.zoomed)
         }
-    }
-
-    func hide() {
-        self.isHidden = true
-        if let txt = self.arrangedSubviews.first as? NSTextField {
-
-            txt.isEnabled = false
-        }
-    }
-
-    func show() {
-        self.isHidden = false
-        if let txt = self.arrangedSubviews.first as? NSTextField {
-            txt.isEnabled = true
+        if let font = self.inputFont {
+            self.inputField.font = font
+            self.inputField.resize()
         }
     }
 
@@ -89,14 +98,11 @@ class TextTool: NSStackView {
             self.setupFontMembers()
 
             self.setupFontType()
-            let fType = self.popFontType.selectedItem?.title ?? setCurve.fontType
+            let fType = self.popFontType.selectedItem?.title ??
+                setCurve.fontType
             self.fontType = fType
 
             self.setupFont()
-            if let font = self.sharedFont {
-                self.textField.font = font
-                self.textField.resize()
-            }
         }
     }
 
@@ -105,11 +111,21 @@ class TextTool: NSStackView {
             self.fontType = type
             sender.title = type
             self.setupFont()
-            if let font = self.sharedFont {
-                self.textField.font = font
-                self.textField.resize()
-            }
         }
+    }
+
+    @IBAction func selectSize(_ sender: Any) {
+        var val: Double = 1
+        if let sl = sender as? NSSlider {
+            val = sl.doubleValue
+        } else if let tf = sender as? NSTextField {
+            val = tf.doubleValue
+        }
+        let lim = val<1 ? 1 : val
+        self.sliderFontSize.doubleValue = lim
+        self.fontSize = CGFloat(val)
+
+        self.setupFont()
     }
 
 }

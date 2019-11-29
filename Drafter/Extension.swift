@@ -339,22 +339,29 @@ extension CGPoint {
         return atan2(hei, wid)
     }
 
-    func unitVector(other: CGPoint) -> CGPoint {
-        let wid = self.x - other.x
-        let hei = self.y - other.y
-        let hyp = hypot(wid, hei)
-        if hyp == 0 {
+    func normalVector(origin: CGPoint = CGPoint(x: 0, y: 0)) -> CGPoint {
+        return CGPoint(x: self.y, y: -self.x).unitVector(origin: origin)
+    }
+
+    func unitVector(origin: CGPoint = CGPoint(x: 0, y: 0)) -> CGPoint {
+        let mag = magnitude(origin: origin)
+        if mag == 0 {
             return CGPoint(x: 0, y: 0)
         }
-        return CGPoint(x: wid/hyp, y: hei/hyp)
+        return CGPoint(x: self.x/mag, y: self.y/mag)
+    }
+
+    func magnitude(origin: CGPoint = CGPoint(x: 0, y: 0)) -> CGFloat {
+        let wid = self.x - origin.x
+        let hei = self.y - origin.y
+        return hypot(wid, hei)
     }
 
     func sameLine(cp1: CGPoint, cp2: CGPoint,
-                  limit: CGFloat = 0.01) -> Bool {
-        let unit1 = cp1.unitVector(other: self)
-        let unit2 = cp2.unitVector(other: self)
-        if abs(unit1.x) - abs(unit2.x) < limit &&
-            abs(unit1.y) - abs(unit2.y) < limit {
+                  limit: CGFloat = 0.05) -> Bool {
+        let ang1 = abs(cp1.atan2Rad(other: self))
+        let ang2 = abs(cp2.atan2Rad(other: self)) - CGFloat.pi
+        if abs(ang1 - abs(ang2)) <= limit {
             return true
         }
         return false
@@ -370,7 +377,8 @@ extension String {
 
 extension NSImage {
     func rotated(by angle: CGFloat) -> NSImage {
-        let img = NSImage(size: self.size, flipped: false, drawingHandler: { (rect) -> Bool in
+        let img = NSImage(size: self.size, flipped: false,
+                          drawingHandler: { (rect) -> Bool in
             let (width, height) = (rect.size.width, rect.size.height)
             let transform = NSAffineTransform()
             transform.translateX(by: width / 2, yBy: height / 2)
@@ -384,7 +392,8 @@ extension NSImage {
         return img
     }
     func resized(scaleX: CGFloat, scaleY: CGFloat) -> NSImage {
-        let img = NSImage(size: self.size, flipped: false, drawingHandler: { (rect) -> Bool in
+        let img = NSImage(size: self.size, flipped: false,
+                          drawingHandler: { (rect) -> Bool in
             let (width, height) = (rect.size.width, rect.size.height)
             let transform = NSAffineTransform()
             transform.translateX(by: width / 2, yBy: height / 2)
@@ -424,7 +433,8 @@ extension CALayer {
         let height = Int(self.bounds.height)
 
         let imageRepresentation = NSBitmapImageRep(
-            bitmapDataPlanes: nil, pixelsWide: width, pixelsHigh: height,
+            bitmapDataPlanes: nil,
+            pixelsWide: width, pixelsHigh: height,
             bitsPerSample: 8, samplesPerPixel: 4,
             hasAlpha: true, isPlanar: false,
             colorSpaceName: NSColorSpaceName.deviceRGB,
@@ -440,9 +450,10 @@ extension CALayer {
         return nil
     }
 
-    func cgImage(pad: CGFloat) -> CGImage? {
-        let width = Int(max(self.bounds.width, self.bounds.height)+pad+1)
-        let height = Int(max(self.bounds.width, self.bounds.height)+pad+1)
+    func cgSquareImage(pad: CGFloat) -> CGImage? {
+        let maxSide = max(self.bounds.width, self.bounds.height)
+        let width = Int(maxSide+pad+1)
+        let height = Int(maxSide+pad+1)
         let canvas = CGContext(
             data: nil, width: width, height: height,
             bitsPerComponent: 8, bytesPerRow: 0,

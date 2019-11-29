@@ -14,7 +14,8 @@
 		1E056DE523135D500078A488 /* ControlFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E056DE423135D500078A488 /* ControlFrame.swift */; };
 		1E157C5A2332299200B191DF /* ColorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E157C592332299200B191DF /* ColorPanel.swift */; };
 		1E244AB52346A17F0037214C /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 1E244AB42346A17F0037214C /* .swiftlint.yml */; };
-		1E337DE92382C094009747A3 /* InputField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E337DE82382C094009747A3 /* InputField.swift */; };
+		1E337DE92382C094009747A3 /* InputTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E337DE82382C094009747A3 /* InputTool.swift */; };
+		1E337DF0238C1CA2009747A3 /* FontTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E337DEF238C1CA2009747A3 /* FontTool.swift */; };
 		1E4A3F2623011B790038D924 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A3F2523011B790038D924 /* AppDelegate.swift */; };
 		1E4A3F2823011B790038D924 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4A3F2723011B790038D924 /* ViewController.swift */; };
 		1E4A3F2A23011B7A0038D924 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E4A3F2923011B7A0038D924 /* Assets.xcassets */; };
@@ -24,7 +25,6 @@
 		1E70171B2356795800E28869 /* Ruler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E70171A2356795800E28869 /* Ruler.swift */; };
 		1EA051992327E2BC004F693F /* Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA051982327E2BC004F693F /* Setup.swift */; };
 		1EA0519D232DB449004F693F /* ColorBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EA0519C232DB449004F693F /* ColorBox.swift */; };
-		1EC146492349EE5800CB4A55 /* TextTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC146482349EE5800CB4A55 /* TextTool.swift */; };
 		1EC1464B234CA76E00CB4A55 /* FrameButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC1464A234CA76E00CB4A55 /* FrameButtons.swift */; };
 		1EEBDFF723623A8600FF7797 /* ActionSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEBDFF623623A8600FF7797 /* ActionSlider.swift */; };
 /* End PBXBuildFile section */
@@ -37,7 +37,8 @@
 		1E056DE423135D500078A488 /* ControlFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlFrame.swift; sourceTree = "<group>"; };
 		1E157C592332299200B191DF /* ColorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPanel.swift; sourceTree = "<group>"; };
 		1E244AB42346A17F0037214C /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftlint.yml; sourceTree = "<group>"; };
-		1E337DE82382C094009747A3 /* InputField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputField.swift; sourceTree = "<group>"; };
+		1E337DE82382C094009747A3 /* InputTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTool.swift; sourceTree = "<group>"; };
+		1E337DEF238C1CA2009747A3 /* FontTool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FontTool.swift; sourceTree = "<group>"; };
 		1E4A3F2223011B790038D924 /* Drafter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drafter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E4A3F2523011B790038D924 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1E4A3F2723011B790038D924 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -50,7 +51,6 @@
 		1E70171A2356795800E28869 /* Ruler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ruler.swift; sourceTree = "<group>"; };
 		1EA051982327E2BC004F693F /* Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Setup.swift; sourceTree = "<group>"; };
 		1EA0519C232DB449004F693F /* ColorBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorBox.swift; sourceTree = "<group>"; };
-		1EC146482349EE5800CB4A55 /* TextTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextTool.swift; sourceTree = "<group>"; };
 		1EC1464A234CA76E00CB4A55 /* FrameButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameButtons.swift; sourceTree = "<group>"; };
 		1EEBDFF623623A8600FF7797 /* ActionSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionSlider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -94,8 +94,8 @@
 				1E056DE423135D500078A488 /* ControlFrame.swift */,
 				1E70171A2356795800E28869 /* Ruler.swift */,
 				1E4D48F12379773C00EC9325 /* Tools.swift */,
-				1EC146482349EE5800CB4A55 /* TextTool.swift */,
-				1E337DE82382C094009747A3 /* InputField.swift */,
+				1E337DEF238C1CA2009747A3 /* FontTool.swift */,
+				1E337DE82382C094009747A3 /* InputTool.swift */,
 				1EC1464A234CA76E00CB4A55 /* FrameButtons.swift */,
 				1EEBDFF623623A8600FF7797 /* ActionSlider.swift */,
 				1E157C592332299200B191DF /* ColorPanel.swift */,
@@ -215,13 +215,13 @@
 				1EA051992327E2BC004F693F /* Setup.swift in Sources */,
 				1E70171B2356795800E28869 /* Ruler.swift in Sources */,
 				1EC1464B234CA76E00CB4A55 /* FrameButtons.swift in Sources */,
+				1E337DF0238C1CA2009747A3 /* FontTool.swift in Sources */,
 				1E4A3F3623011BC40038D924 /* SketchPad.swift in Sources */,
 				1E157C5A2332299200B191DF /* ColorPanel.swift in Sources */,
 				1E056DE3231337210078A488 /* Extension.swift in Sources */,
 				1E4A3F2823011B790038D924 /* ViewController.swift in Sources */,
-				1E337DE92382C094009747A3 /* InputField.swift in Sources */,
+				1E337DE92382C094009747A3 /* InputTool.swift in Sources */,
 				1EEBDFF723623A8600FF7797 /* ActionSlider.swift in Sources */,
-				1EC146492349EE5800CB4A55 /* TextTool.swift in Sources */,
 				1EA0519D232DB449004F693F /* ColorBox.swift in Sources */,
 				1E038A4E2315837B006D6C2A /* Dot.swift in Sources */,
 				1E4A3F2623011B790038D924 /* AppDelegate.swift in Sources */,

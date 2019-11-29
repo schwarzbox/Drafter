@@ -14,7 +14,7 @@ class SketchPad: NSView {
 
     weak var toolUI: NSStackView!
     weak var frameUI: FrameButtons!
-    weak var textUI: TextTool!
+    weak var fontUI: FontTool!
 
     weak var curveWidth: ActionSlider!
     weak var curveMiter: ActionSlider!
@@ -77,7 +77,6 @@ class SketchPad: NSView {
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        Tool.parent = self
 
         let options: NSTrackingArea.Options = [
             .mouseMoved, .activeInActiveApp, .inVisibleRect]
@@ -87,6 +86,7 @@ class SketchPad: NSView {
 
         self.zoomSketch(value: Double(self.zoomed * 100))
 
+        Tool.parent = self
         self.rulers = Ruler(parent: self)
 
         self.setupLayers()
@@ -351,7 +351,6 @@ class SketchPad: NSView {
         } else {
             self.tool.down(shift: shift)
         }
-        
         if opt { self.cloneCurve() }
         self.frameUI.hide()
         self.needsDisplay = true
@@ -388,7 +387,8 @@ class SketchPad: NSView {
                    alpha: [CGFloat], shadow: [CGFloat],
                    gradientDirection: [CGPoint],
                    gradientLocation: [NSNumber],
-                   colors: [NSColor], blur: Double,
+                   colors: [NSColor],
+                   filter: Int, filterRadius: Double,
                    points: [ControlPoint]) -> Curve {
 
         let curve = Curve.init(parent: self, path: path,
@@ -405,7 +405,8 @@ class SketchPad: NSView {
         curve.gradientDirection = gradientDirection
         curve.gradientLocation = gradientLocation
         curve.colors = colors
-        curve.blur = blur
+        curve.filter = filter
+        curve.filterRadius = filterRadius
         curve.setPoints(points: points)
         return curve
     }
@@ -441,7 +442,8 @@ class SketchPad: NSView {
             gradientDirection: setCurve.gradientDirection,
             gradientLocation: setCurve.gradientLocation,
             colors: colors,
-            blur: setCurve.minBlur,
+            filter: setCurve.filter,
+            filterRadius: setCurve.minFilterRadius,
             points: self.controlPoints)
 
         let name = filledCurve ? self.tool.name : "line"
@@ -926,6 +928,8 @@ class SketchPad: NSView {
                 curve.setName(name: "mask", curves: self.curves)
             }
             self.frameUI.hide()
+            curve.clearControlFrame()
+            curve.createControlFrame()
         }
         self.updateMasks()
     }
@@ -1111,7 +1115,7 @@ class SketchPad: NSView {
             }
         }
 
-        self.textUI.hide()
+        self.fontUI.inputField.hide()
         self.clearCurvedPath()
 
         self.tool = tools[tag]
@@ -1204,7 +1208,7 @@ class SketchPad: NSView {
             oldCopy = cur
         }
         for curve in self.curves {
-            self.copyCurve(from: curve)
+            self.copyCurve(from: curve, selfGroups: false)
             if let clone = self.copiedCurve {
                 curves.append(clone)
             }
@@ -1229,10 +1233,13 @@ class SketchPad: NSView {
         }
     }
 
-    func copyCurve(from: Curve?) {
+    func copyCurve(from: Curve?, selfGroups: Bool = true) {
         if let curve = from {
-            var groups: [Curve] = []
-            for cur in curve.groups {
+            var cloneGroups: [Curve] = []
+            let groups = self.groups.count>1 && selfGroups
+                ? self.groups
+                : curve.groups
+            for cur in groups {
                 if let path = cur.path.copy() as? NSBezierPath {
                     var points: [ControlPoint] = []
                     for point in cur.points {
@@ -1253,24 +1260,27 @@ class SketchPad: NSView {
                         gradientDirection: cur.gradientDirection,
                         gradientLocation: cur.gradientLocation,
                         colors: cur.colors,
-                        blur: cur.blur,
+                        filter: cur.filter,
+                        filterRadius: cur.filterRadius,
                         points: points)
                     clone.controlFrame = cur.controlFrame
                     clone.edit = cur.edit
                     clone.mask = cur.mask
                     clone.lock = cur.lock
                     clone.name = cur.name
-                    groups.append(clone)
+                    clone.text = cur.text
+                    cloneGroups.append(clone)
                 }
             }
-            groups[0].oldName = curve.oldName
-            groups[0].setGroups(curves: Array(groups.dropFirst()))
-            self.copiedCurve = groups[0]
+            cloneGroups[0].oldName = curve.oldName
+            cloneGroups[0].setGroups(curves: Array(cloneGroups.dropFirst()))
+
+            self.copiedCurve = cloneGroups[0]
         }
     }
 
     func pasteCurve(to: CGPoint) {
-        if let clone = self.copiedCurve {
+        if let clone = self.copiedCurve, !clone.edit {
             if let curve = self.selectedCurve {
                 self.clearControls(curve: curve)
                 if curve.edit {
@@ -1292,26 +1302,25 @@ class SketchPad: NSView {
     }
 
     func cloneCurve() {
-        self.copyCurve(from: self.selectedCurve)
-        if let curve = self.selectedCurve {
+        if let curve = self.selectedCurve, !curve.edit {
+            self.copyCurve(from: self.selectedCurve)
             self.pasteCurve(to: CGPoint(x: curve.path.bounds.midX,
                                         y: curve.path.bounds.midY))
         }
     }
 
 //    MARK: TextTool func
-    func glyphsCurve(value: String, sharedFont: NSFont?) {
+    func makeGlyphs(value: String, sharedFont: NSFont?) {
         self.editedPath = NSBezierPath()
-        if value.count > 0 {
+        if !value.isEmpty {
             if let font = sharedFont {
-                let fontRect = font.boundingRectForFont
-                let hei = fontRect.minY + fontRect.height/2
-
-                let x = (self.textUI.frame.minX) / self.zoomed
-                let y = (self.textUI.frame.minY + hei) / self.zoomed
+                let x = self.fontUI.inputField.frame.minX /
+                    self.zoomed
+                let y = (self.fontUI.inputField.frame.minY) /
+                    self.zoomed
 
                 let pos = CGPoint(x: x + self.bounds.minX,
-                                  y: y + self.bounds.minY )
+                                  y: y + self.bounds.minY)
                 self.editedPath.move(to: pos)
                 for char in value {
                     let glyph = font.glyph(withName: String(char))
@@ -1319,12 +1328,19 @@ class SketchPad: NSView {
                         withCGGlyph: CGGlyph(glyph), in: font)
                 }
             }
+        }
 
+    }
+    func glyphsCurve(value: String, sharedFont: NSFont?) {
+        self.makeGlyphs(value: value, sharedFont: sharedFont)
+        if self.editedPath.elementCount>0 {
             if let curve = self.selectedCurve {
                 self.clearControls(curve: curve)
             }
+
             self.newCurve()
             if let curve = self.selectedCurve {
+                curve.text = value
                 self.createControls(curve: curve)
             }
             self.updateSliders()
@@ -1647,6 +1663,7 @@ class SketchPad: NSView {
         if let curve = self.selectedCurve, !curve.lock {
             curve.lineWidth = CGFloat(value)
             self.clearControls(curve: curve)
+            self.updateMasks()
             self.updateSliders()
         }
     }
@@ -1751,13 +1768,20 @@ class SketchPad: NSView {
         }
     }
 
-    func blurCurve(value: Double) {
-           if let curve = self.selectedCurve, !curve.lock {
-               curve.blur = value
-               self.clearControls(curve: curve)
-               self.updateSliders()
-           }
-       }
+    func filterCurve(value: Int) {
+        if let curve = self.selectedCurve, !curve.lock {
+            curve.filter = value
+            self.updateSliders()
+        }
+    }
+
+    func filterRadius(value: Double) {
+        if let curve = self.selectedCurve, !curve.lock {
+            curve.filterRadius = value
+            self.clearControls(curve: curve)
+            self.updateSliders()
+        }
+    }
 
     func roundedCornerCurve(tag: Int, value: CGFloat) {
         if let curve = self.selectedCurve, let rounded = curve.rounded,
@@ -1795,7 +1819,7 @@ class SketchPad: NSView {
                                  offsetY: offsetYUp)
             }
             curve.updateLayer()
-            curve.updateMask()
+            self.updateMasks()
             self.clearControls(curve: curve)
         }
     }
@@ -1815,36 +1839,9 @@ class SketchPad: NSView {
         if let imageRep = bitmapImageRepForCachingDisplay(
             in: self.sketchPath.bounds) {
             self.cacheDisplay(in: self.sketchPath.bounds, to: imageRep)
-//            let context = NSGraphicsContext(bitmapImageRep: imageRep)!
-//            let cgCtx = context.cgContext
-//            cgCtx.clear(self.sketchBorder.bounds)
-//            var index = 0
-//            if let layer = self.layer, let sublayers = layer.sublayers {
-//                for sublayer in sublayers {
-//                    let curve = self.curves[index]
-//                    if curve.blur > 0, let cgImg = sublayer.cgImage() {
-//
-//                        let ciImg = CIImage(cgImage: cgImg)
-//                        let filter = CIFilter(name: "CIGaussianBlur")
-//                        filter?.setValue(ciImg,
-//                                         forKey: kCIInputImageKey)
-//                        filter?.setValue(curve.blur,
-//                                         forKey: kCIInputRadiusKey)
-//                        if let output = filter?.outputImage {
-//                            if let cgImage = self.cgImageFrom(
-//                                ciImage: output) {
-//                                cgCtx.draw(cgImage, in: sublayer.bounds)
-//                            }
-//                        }
-//                    } else {
-//                        sublayer.render(in: cgCtx)
-//                    }
-//                    index += 1
-//                }
                 return imageRep.representation(
                     using: fileType, properties: properties)!
             }
-//        }
         return nil
     }
 }

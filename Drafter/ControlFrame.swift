@@ -12,7 +12,7 @@ class ControlFrame: CAShapeLayer {
     var parent: SketchPad?
     var ctrlPad: CGFloat = setEditor.dotSize * 4
     var ctrlPad50: CGFloat = setEditor.dotSize * 2
-    var ctrlRot: CGFloat = setEditor.dotSize * 1.3
+    var ctrlRot: CGFloat = setEditor.dotSize * 1.5
     var dotSize: CGFloat = setEditor.dotSize
     var dotRadius: CGFloat = setEditor.dotRadius
     var dotMag: CGFloat = 0
@@ -37,7 +37,7 @@ class ControlFrame: CAShapeLayer {
         self.dotMag = parent.dotMag
         self.ctrlPad = self.dotSize * 4
         self.ctrlPad50 = self.dotSize * 2
-        self.ctrlRot = self.dotSize * 1.3
+        self.ctrlRot = self.dotSize * 1.5
 
         self.lineWidth = parent.lineWidth
         self.lineDashPattern = parent.lineDashPattern

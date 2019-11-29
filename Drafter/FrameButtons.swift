@@ -43,6 +43,10 @@ class FrameButtons: NSStackView {
             self.isEnabled(all: true)
         }
 
+        if !curve.text.isEmpty {
+            self.setEnabled(tag: 4, bool: false)
+        }
+
         if !curve.fill {
             self.setEnabled(tag: 6, bool: false)
         }

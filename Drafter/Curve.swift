@@ -119,11 +119,56 @@ class Curve: Equatable {
         }
     }
 
-    var blur: Double = setCurve.minBlur {
+    var filter: Int = setCurve.filter {
         willSet(value) {
-            let name = setCurve.filters[0]
-            self.imageLayer.setValue(value,
-                forKeyPath: "filters.\(name).inputRadius")
+            let radius = self.filterRadius
+            self.filterRadius = radius
+        }
+    }
+
+    var filterRadius: Double = setCurve.minFilterRadius {
+        willSet(value) {
+//            let image = self.canvas.ciImage()
+//
+//            if let filter = CIFilter(name: setCurve.filters[self.filter]) {
+//                filter.setDefaults()
+//                filter.setValue(image, forKey: kCIInputImageKey)
+//                filter.setValue(value, forKey: kCIInputRadiusKey)
+//                if let outImg = filter.value(
+//                    forKey: kCIOutputImageKey) as? CIImage {
+//
+//                    let outputImageRect = NSRectFromCGRect(outImg.extent)
+//                    print(outputImageRect)
+//
+//                    let filImg = NSImage(size: outputImageRect.size)
+//                    filImg.lockFocus()
+//
+//                    outImg.draw(at: NSPoint(x: 0,
+//                                            y: 0),
+//                                from: outputImageRect,
+//                                operation: .copy,
+//                                fraction: 1)
+//                    filImg.unlockFocus()
+//
+//                    let scaleImg = filImg.resized(scaleX: 0.5, scaleY: 0.5)
+//                    self.imageLayer.contents = scaleImg
+//                }
+//            }
+            let name = setCurve.filters[self.filter]
+            let center = CIVector(x: self.path.bounds.midX,
+                                  y: self.path.bounds.midY)
+            switch name {
+            case "CIGaussianBlur", "CIEdgeWork":
+                self.imageLayer.setValue(value,
+                    forKeyPath: "filters.\(name).inputRadius")
+            case "CIPointillize":
+                self.imageLayer.setValue(value,
+                    forKeyPath: "filters.\(name).inputRadius")
+                self.imageLayer.setValue(center,
+                    forKeyPath: "filters.\(name).inputCenter")
+            default:
+                break
+            }
         }
     }
 
@@ -134,11 +179,14 @@ class Curve: Equatable {
 
     var saveOrigin: CGPoint?
     var curveOrigin: CGPoint {
+        let parentGroups = parent?.groups ?? []
         let bounds = self.groups.count>1
         ? self.groupRect(curves: self.groups, includeStroke: false)
-        : self.groupRect(curves: self.groups, includeStroke: false)
+        : self.groupRect(curves: parentGroups, includeStroke: false)
         return CGPoint(x: bounds.midX, y: bounds.midY)
     }
+
+    var text: String = ""
 
     var rounded: CGPoint?
     var gradient: Bool = false
@@ -179,13 +227,13 @@ class Curve: Equatable {
 
         self.imageLayer.filters = []
         self.imageLayer.backgroundColor = NSColor.clear.cgColor
-        // CIPointillize
-        for filterName in setCurve.filters {
-            if let filter = CIFilter(name: filterName,
-                                     parameters: ["inputRadius": 0]) {
-                self.imageLayer.filters?.append(filter)
-            }
-        }
+
+//        for filterName in setCurve.filters {
+//            if let filter = CIFilter(name: filterName,
+//                                     parameters: [:]) {
+//                self.imageLayer.filters?.append(filter)
+//            }
+//        }
 
         for layer in self.layers {
             layer.actions = setEditor.disabledActions
@@ -349,6 +397,7 @@ class Curve: Equatable {
             layer.position = self.canvas.position
         }
     }
+
     func removeMaskBorderEdge() -> NSBezierPath? {
         let rev = self.reversed()
         let initPath = rev ? self.path : self.path.reversed
@@ -357,8 +406,8 @@ class Curve: Equatable {
             let bounds = path.bounds
             let originX: CGFloat = bounds.midX
             let originY: CGFloat = bounds.midY
-            let scaleX = (bounds.width+0.5) / bounds.width
-            let scaleY = (bounds.height+0.5) / bounds.height
+            let scaleX = (bounds.width+1) / bounds.width
+            let scaleY = (bounds.height+1) / bounds.height
             let scale = AffineTransform(scaleByX: scaleX, byY: scaleY)
             path.applyTransform(
                 oX: originX, oY: originY,
@@ -371,6 +420,7 @@ class Curve: Equatable {
         }
         return nil
     }
+
     func updateMask() {
         if let par = self.parent, self.mask {
             var path = NSBezierPath()
@@ -395,11 +445,11 @@ class Curve: Equatable {
                 }
             }
             if path.elementCount>0 {
-                if let scalePath = removeMaskBorderEdge() {
+                if self.maskRule==0, self.lineWidth==0,
+                    let scalePath = removeMaskBorderEdge() {
                     path.append(scalePath)
                 }
                 self.canvasMask.path = path.cgPath
-                self.lineWidth = 0
                 self.canvas.mask = self.canvasMask
             } else {
                 self.canvas.mask = nil
@@ -725,4 +775,3 @@ class Curve: Equatable {
             self.imageScaleX, self.imageScaleY, 1)
     }
 }
-

@@ -116,7 +116,7 @@ class Tool: Drawable {
                                 cp2: cp1.position)
         }
     }
-    
+
     func drag(shift: Bool, ctrl: Bool) {
         let snap = Tool.parent!.snapToRulers(
             points: [Tool.parent!.finPos],
@@ -632,17 +632,20 @@ class Text: Tool {
     override var name: String {"text"}
     func action(pos: CGPoint? = nil) {
         let topLeft = pos ?? Tool.parent!.startPos
-        Tool.parent!.textUI.show()
+
         let deltaX = topLeft.x-Tool.parent!.bounds.minX
         let deltaY = topLeft.y-Tool.parent!.bounds.minY
-        Tool.parent!.textUI.setFrameOrigin(CGPoint(
+
+        Tool.parent!.fontUI.inputField.setFrameOrigin(CGPoint(
             x: deltaX * Tool.parent!.zoomed,
             y: deltaY * Tool.parent!.zoomed))
+        Tool.parent!.fontUI.inputField.show()
     }
 
     override func create(ctrl: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.action(pos: Tool.parent!.finPos)
+
     }
 
     override func drag(shift: Bool, ctrl: Bool) {
@@ -652,5 +655,4 @@ class Text: Tool {
     override func down(shift: Bool) {
         self.action(pos: Tool.parent!.startPos)
     }
-
 }

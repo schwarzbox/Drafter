@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.82
+v0.83
 
 # Features
 

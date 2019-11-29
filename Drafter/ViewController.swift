@@ -20,7 +20,7 @@ class ViewController: NSViewController,
 
     @IBOutlet weak var toolUI: NSStackView!
     @IBOutlet weak var frameUI: FrameButtons!
-    @IBOutlet weak var textUI: TextTool!
+    @IBOutlet weak var fontUI: FontTool!
 
     @IBOutlet weak var actionUI: NSStackView!
     @IBOutlet weak var colorUI: NSStackView!
@@ -44,28 +44,25 @@ class ViewController: NSViewController,
     @IBOutlet weak var curveWindingRule: NSSegmentedControl!
     @IBOutlet weak var curveMaskRule: NSSegmentedControl!
 
-    @IBOutlet weak var curveStrokeOpacity: ActionSlider!
-    @IBOutlet weak var curveFillOpacity: ActionSlider!
-
     @IBOutlet weak var curveStrokeColor: ColorPanel!
     @IBOutlet weak var curveFillColor: ColorPanel!
-
+    @IBOutlet weak var curveShadowColor: ColorPanel!
     @IBOutlet weak var curveGradStart: ColorPanel!
     @IBOutlet weak var curveGradMiddle: ColorPanel!
     @IBOutlet weak var curveGradFinal: ColorPanel!
 
-    @IBOutlet weak var curveGradStOpacity: ActionSlider!
-    @IBOutlet weak var curveGradMidOpacity: ActionSlider!
-    @IBOutlet weak var curveGradFinOpacity: ActionSlider!
-
-    @IBOutlet weak var curveShadowColor: ColorPanel!
-
+    @IBOutlet weak var curveStrokeOpacity: ActionSlider!
+    @IBOutlet weak var curveFillOpacity: ActionSlider!
     @IBOutlet weak var curveShadowOpacity: ActionSlider!
     @IBOutlet weak var curveShadowRadius: ActionSlider!
     @IBOutlet weak var curveShadowOffsetX: ActionSlider!
     @IBOutlet weak var curveShadowOffsetY: ActionSlider!
+    @IBOutlet weak var curveGradStOpacity: ActionSlider!
+    @IBOutlet weak var curveGradMidOpacity: ActionSlider!
+    @IBOutlet weak var curveGradFinOpacity: ActionSlider!
 
-    @IBOutlet weak var curveBlur: ActionSlider!
+    @IBOutlet weak var curveFilter: NSPopUpButton!
+    @IBOutlet weak var curveFilterRadius: ActionSlider!
     @IBOutlet weak var curveFilterOpacity: ActionSlider!
 
     var alphaSliders: [ActionSlider] = []
@@ -142,6 +139,16 @@ class ViewController: NSViewController,
                 if let curve = view.selectedCurve, curve.edit {
                     view.editFinished(curve: curve)
                     return true
+                } else if let curve = view.selectedCurve, !curve.text.isEmpty {
+                    fontUI.inputField.stringValue = curve.text
+                    view.setTool(tag: tools.count-1)
+                    if let tool = view.tool as? Text {
+                        let pos = CGPoint(x: curve.canvas.bounds.minX,
+                                          y: curve.canvas.bounds.minY)
+                        tool.action(pos: pos)
+                    }
+                    view.removeCurve(curve: curve)
+                    return true
                 }
             }
         }
@@ -206,14 +213,12 @@ class ViewController: NSViewController,
         self.setupColors()
         self.setupAlpha()
         self.setupShadow()
-
-        curveBlur.minValue = setCurve.minBlur
-        curveBlur.maxValue = setCurve.maxBlur
+        self.setupFilters()
 
         ColorPanel.setupSharedColorPanel()
+        fontUI.setupFontTool()
 
         self.setupSketchView()
-        textUI!.setupTextTool()
 
         self.findAllTextFields(root: self.view)
 
@@ -226,13 +231,11 @@ class ViewController: NSViewController,
         zoomSketch.minValue = setEditor.minZoom * 2
         zoomSketch.maxValue = setEditor.maxZoom
         zoomDefaultSketch.removeAllItems()
-        var zoom: [String] = []
         for step in stride(from: Int(setEditor.minZoom),
                            to: Int(setEditor.maxZoom) + 1,
                            by: Int(setEditor.minZoom)) {
-            zoom.append(String(step))
+            zoomDefaultSketch.addItem(withTitle: String(step))
         }
-        zoomDefaultSketch.addItems(withTitles: zoom)
         let index100 = zoomDefaultSketch.indexOfItem(withTitle: "100")
         zoomDefaultSketch.select(zoomDefaultSketch.item(at: index100))
         zoomDefaultSketch.setTitle("100")
@@ -284,6 +287,20 @@ class ViewController: NSViewController,
         curveShadowOffsetY.doubleValue = shadow[2]
     }
 
+    func setupFilters() {
+        curveFilter.removeAllItems()
+        for filter in setCurve.filters {
+            curveFilter.addItem(
+                withTitle: filter.replacingOccurrences(of: "CI", with: ""))
+        }
+        curveFilter.selectItem(at: setCurve.filter)
+        if let sel = curveFilter.selectedItem {
+            curveFilter.setTitle(sel.title)
+        }
+        curveFilterRadius.minValue = setCurve.minFilterRadius
+        curveFilterRadius.maxValue = setCurve.maxFilterRadius
+    }
+
     func setupSketchView() {
         sketchView.parent = self
         sketchView.locationX = locationX
@@ -291,7 +308,7 @@ class ViewController: NSViewController,
 
         sketchView.toolUI = toolUI
         sketchView.frameUI = frameUI
-        sketchView.textUI = textUI
+        sketchView.fontUI = fontUI
 
         sketchView.curveWidth = curveWidth
         sketchView.curveMiter = curveMiter
@@ -334,14 +351,12 @@ class ViewController: NSViewController,
     }
 
     func findAllTextFields(root: NSView) {
-        for view in root.subviews {
-            for child in view.subviews {
-                if let textField = child as? NSTextField,
-                    textField.isEditable {
-                    self.textFields.append(textField)
-                } else {
-                    self.findAllTextFields(root: child)
-                }
+        for child in root.subviews {
+            if let textField = child as? NSTextField,
+                textField.isEditable {
+                self.textFields.append(textField)
+            } else {
+                self.findAllTextFields(root: child)
             }
         }
     }
@@ -416,7 +431,14 @@ class ViewController: NSViewController,
             self.curveShadowOffsetX.doubleValue = shadow[1]
             self.curveShadowOffsetY.doubleValue = shadow[2]
 
-            self.curveBlur.doubleValue = Double(curve.blur)
+            let ind = curve.filter
+            let filterName = setCurve.filters[ind].replacingOccurrences(
+                of: "CI", with: "")
+            self.curveFilter.setTitle(filterName)
+
+            self.curveFilterRadius.doubleValue = Double(curve.filterRadius)
+
+            self.enableMiter(sender: curveJoin)
         } else {
             self.showUnusedViews(false)
             self.curveWid.doubleValue = Double(view.sketchPath.bounds.width)
@@ -425,7 +447,7 @@ class ViewController: NSViewController,
     }
 
     func showUnusedViews(_ bool: Bool, from: Int = 2) {
-        for index in from..<actionUI.subviews.count {
+        for index in from..<actionUI.subviews.count-1 {
             let subs = actionUI.subviews[index].subviews
 
             if index==2 {
@@ -446,6 +468,18 @@ class ViewController: NSViewController,
         }
         if let sharedPanel = self.colorPanel, !bool {
             sharedPanel.closeSharedColorPanel()
+        }
+    }
+
+    func enableMiter(sender: NSSegmentedControl) {
+        if let stack = actionUI.subviews[4] as? NSStackView {
+            if let view = stack.subviews[3] as? ActionSlider {
+                if sender.indexOfSelectedItem == 0 {
+                    view.isEnabled(all: true)
+                } else {
+                    view.isEnabled(all: false)
+                }
+            }
         }
     }
 
@@ -478,7 +512,7 @@ class ViewController: NSViewController,
         let delta = size * (side/(size * 50))
         curve.lineWidth *= delta
         return self.moveToZero(curve: curve, action: {
-            if let img = curve.canvas.cgImage(pad: curve.lineWidth) {
+            if let img = curve.canvas.cgSquareImage(pad: curve.lineWidth) {
                 curve.lineWidth = oldLineWidth
                 return NSImage(cgImage: img,
                                size: setEditor.stackButtonSize)
@@ -517,8 +551,7 @@ class ViewController: NSViewController,
                 let img = NSImage.iconViewTemplateName
                 image = NSImage.init(imageLiteralResourceName: img)
             } else if curve.mask {
-                let img = NSImage.slideshowTemplateName
-                image = NSImage.init(imageLiteralResourceName: img)
+                image = setEditor.maskGrayImg
             } else {
                 image = self.getImage(index: row, curve: curve)
             }
@@ -636,6 +669,7 @@ class ViewController: NSViewController,
         view.zoomSketch(value: zoom)
         zoomSketch.doubleValue = zoom
         zoomDefaultSketch.title = String(Int(zoom))
+        fontUI.setupFont()
     }
 
     @IBAction func zoomSketch(_ sender: NSSlider) {
@@ -644,6 +678,7 @@ class ViewController: NSViewController,
                                   y: view.sketchPath.bounds.midY)
         view.zoomSketch(value: sender.doubleValue)
         zoomDefaultSketch.title = String(sender.intValue)
+        fontUI.setupFont()
     }
 
     @IBAction func zoomDefaultSketch(_ sender: NSPopUpButton) {
@@ -656,6 +691,7 @@ class ViewController: NSViewController,
             sender.title = sender.itemTitle(at: sender.indexOfSelectedItem)
             zoomSketch.doubleValue = value
             view.zoomSketch(value: value)
+            fontUI.setupFont()
         }
     }
 
@@ -771,15 +807,7 @@ class ViewController: NSViewController,
 
     @IBAction func joinCurve(_ sender: NSSegmentedControl) {
         sketchView!.joinCurve(value: sender.indexOfSelectedItem)
-        if let stack = actionUI.subviews[4] as? NSStackView {
-            if let view = stack.subviews[3] as? ActionSlider {
-                if sender.indexOfSelectedItem == 0 {
-                    view.isEnabled(all: true)
-                } else {
-                    view.isEnabled(all: false)
-                }
-            }
-        }
+        self.enableMiter(sender: sender)
         self.saveHistory()
     }
 
@@ -818,7 +846,8 @@ class ViewController: NSViewController,
 //    MARK: TextTool action
     @IBAction func glyphsCurve(_ sender: NSTextField) {
         sketchView!.glyphsCurve(value: sender.stringValue,
-                                sharedFont: textUI!.sharedFont)
+                                sharedFont: fontUI.sharedFont)
+        sender.stringValue = "Text"
         self.saveHistory()
     }
 
@@ -885,12 +914,17 @@ class ViewController: NSViewController,
         self.restoreControlFrame(view: view)
     }
 
-    @IBAction func blurCurve(_ sender: Any) {
+    @IBAction func filterCurve(_ sender: NSPopUpButton) {
+        print(sender.indexOfSelectedItem)
+        sketchView!.filterCurve(value: sender.indexOfSelectedItem)
+    }
+
+    @IBAction func filterRadius(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(
             sender: sender, limit: {x in x < 0 ? 0 : x})
-        curveBlur.doubleValue = val.value
-        view.blurCurve(value: val.value)
+        curveFilterRadius.doubleValue = val.value
+        view.filterRadius(value: val.value)
         self.restoreControlFrame(view: view)
     }
 
@@ -1092,7 +1126,7 @@ class ViewController: NSViewController,
 
         view.removeAllCurves()
 
-        textUI.hide()
+        fontUI.inputField.hide()
 
         self.clearHistory()
         self.updateStack()
@@ -1223,13 +1257,15 @@ class ViewController: NSViewController,
             gradientDirection: drf.gradientDirection,
             gradientLocation: drf.gradientLocation,
             colors: drf.colors,
-            blur: drf.blur,
+            filter: drf.filter,
+            filterRadius: drf.filterRadius,
             points: drf.points)
         let name = String(drf.name.split(separator: " ")[0])
         curve.setName(name: name, curves: view.curves)
         curve.mask = drf.mask
         curve.lock = drf.lock
         curve.canvas.isHidden = drf.invisible
+        curve.text = drf.text
         view.layer?.addSublayer(curve.canvas)
         return curve
     }
@@ -1271,7 +1307,7 @@ class ViewController: NSViewController,
                 drf.lineWidth = CGFloat(Double(str) ?? 0.0)
             case "-cap": drf.cap = Int(str) ?? 0
             case "-join": drf.join = Int(str) ?? 0
-            case "-mitter":
+            case "-miter":
                 drf.miter = CGFloat(Double(str) ?? 0.0)
             case "-dash":
                 let dash = str.split(separator: " ").map {
@@ -1304,11 +1340,13 @@ class ViewController: NSViewController,
                     colors.append(clr.sRGB())
                 }
                 drf.colors = colors
-            case "-blur": drf.blur = Double(str) ?? 0.0
+            case "-filter": drf.filter = Int(str) ?? 0
+            case "-filterRadius": drf.filterRadius = Double(str) ?? 0.0
             case "-mask": drf.mask = true
             case "-group": drf.group = true
             case "-lock": drf.lock = true
             case "-invisible": drf.invisible = true
+            case "-text": drf.text = str
             default: break
             }
         }
@@ -1385,7 +1423,7 @@ class ViewController: NSViewController,
                 code += "-lineWidth " + String(Double(cur.lineWidth)) + "\n"
                 code += "-cap " + String(cur.cap) + "\n"
                 code += "-join " + String(cur.join) + "\n"
-                code += "-mitter " + String(Double(cur.miter)) + "\n"
+                code += "-miter " + String(Double(cur.miter)) + "\n"
                 code += "-dash "
                 let dash = cur.dash.map {String(
                     Int(truncating: $0))}.joined(separator: " ")
@@ -1416,11 +1454,14 @@ class ViewController: NSViewController,
                     String(Double($0.blueComponent))
                 }.joined(separator: " ")
                 code += clr + "\n"
-                code += "-blur " + String(Double(cur.blur)) + "\n"
+                code += "filter " + String(cur.filter) + "\n"
+                code += "-filterRadius " + String(
+                    Double(cur.filterRadius)) + "\n"
                 if cur.mask { code += "-mask \n" }
                 if ind > 0 { code += "-group \n" }
                 if cur.lock { code += "-lock \n" }
                 if cur.canvas.isHidden { code += "-invisible \n" }
+                if !cur.text.isEmpty {code += "-text " + cur.text + "\n"}
                 code += "-\n"
             }
         }

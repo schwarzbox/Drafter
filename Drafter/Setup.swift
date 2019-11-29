@@ -25,7 +25,9 @@ struct Drf {
     var gradientDirection: [CGPoint] = setCurve.gradientDirection
     var gradientLocation: [NSNumber] = setCurve.gradientLocation
     var colors: [NSColor] = setCurve.colors
-    var blur: Double = setCurve.minBlur
+    var filter: Int = setCurve.filter
+    var filterRadius: Double = setCurve.minFilterRadius
+    var text: String = ""
     var points: [ControlPoint] = []
     var name: String = ""
     var oldName: String = ""
@@ -74,15 +76,21 @@ struct SetupCurve {
                              CGPoint(x: 1.0, y: 0.0)]
     let gradientLocation: [NSNumber] = [0.0, 0.50, 1.0]
 
-    let minBlur: Double = 0
-    let maxBlur: Double = 64
+    let filter: Int = 0
+    let minFilterRadius: Double = 0
+    let maxFilterRadius: Double = 64
 
     let filters: [String] = ["CIGaussianBlur",
-                             "CIPointillize"]
+                             "CIEdgeWork",
+                             "CIPointillize",
+                             "CIComicEffect"
+    ]
 
     let fontFamily: String = "Helvetica"
     let fontType: String = "Regular"
-    let fontSize: CGFloat = 18
+    let fontSize: Double = 16
+    let minFont: Double = 8
+    let maxFont: Double = 128
 }
 
 struct SetupEditor {
@@ -113,10 +121,9 @@ struct SetupEditor {
         imageLiteralResourceName: NSImage.lockLockedTemplateName)
     let unlockImg = NSImage.init(
         imageLiteralResourceName: NSImage.lockUnlockedTemplateName)
+    let maskGrayImg = #imageLiteral(resourceName: "maskGray")
 
-    let inputFieldSize: CGFloat = 128
     let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
-    
     let filename: String = "untitled"
     let fileTypes: [String] = ["drf", "png", "svg"]
 
