@@ -133,22 +133,29 @@ class ViewController: NSViewController,
                 case 126: dt.y = -view.zoomed
                 default: break
                 }
+                view.clearPathLayer(layer: view.curveLayer,
+                                    path: view.curvedPath)
                 view.dragCurve(deltaX: dt.x, deltaY: dt.y)
                 return true
             } else if event.keyCode == 36 {
                 if let curve = view.selectedCurve, curve.edit {
                     view.editFinished(curve: curve)
                     return true
-                } else if let curve = view.selectedCurve, !curve.text.isEmpty {
+                } else if let curve = view.selectedCurve,
+                    curve.groups.count==1, !curve.text.isEmpty,
+                    !curve.canvas.isHidden {
+                    view.groups = []
+                    view.tool = tools[tools.count-1]
+                    view.toolUI?.isOn(on: tools.count-1)
                     fontUI.inputField.stringValue = curve.text
-                    view.setTool(tag: tools.count-1)
-                    if let tool = view.tool as? Text {
-                        let pos = CGPoint(x: curve.canvas.bounds.minX,
-                                          y: curve.canvas.bounds.minY)
+                    if let tool = view.tool as? Text, let dt = curve.textDelta {
+                        let pos = CGPoint(x: curve.canvas.bounds.minX-dt.x,
+                                          y: curve.canvas.bounds.minY-dt.y)
                         tool.action(pos: pos)
+                        curve.canvas.isHidden = true
+                        curve.clearControlFrame()
+                        return true
                     }
-                    view.removeCurve(curve: curve)
-                    return true
                 }
             }
         }
@@ -724,11 +731,11 @@ class ViewController: NSViewController,
         let view = sketchView!
         if let curve = view.selectedCurve,
             curve.controlFrame==nil,
+            !curve.canvas.isHidden,
             !curve.lock {
             curve.reset()
             view.createControls(curve: curve)
         }
-
         for cur in view.groups {
             view.curvedPath.append(cur.path)
         }
@@ -1077,7 +1084,10 @@ class ViewController: NSViewController,
         let view = sketchView!
         if let resp = self.window.firstResponder,
             resp.isKind(of: NSWindow.self) {
-            view.groups = view.curves
+            view.groups = []
+            for curve in view.curves {
+                view.groups.append(contentsOf: curve.groups)
+            }
             if let curve = view.selectedCurve {
                 view.clearControls(curve: curve)
             }
@@ -1146,13 +1156,13 @@ class ViewController: NSViewController,
             completionHandler: {(result) -> Void in
                 if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
                     if openPanel.urls.count>0 {
-                        let filePath = openPanel.urls[0]
-                        let ext = filePath.pathExtension
+                        let fileUrl = openPanel.urls[0]
+                        let ext = fileUrl.pathExtension
                         switch ext {
-                        case "drf": self.openDrf(filePath: filePath)
-                        case "svg": self.openSvg(filePath: filePath)
+                        case "bundle": self.openDrf(fileUrl: fileUrl)
+                        case "svg": self.openSvg(fileUrl: fileUrl)
                         default:
-                            self.openPng(filePath: filePath)
+                            self.openPng(fileUrl: fileUrl)
                         }
                     }
                 } else {
@@ -1163,12 +1173,10 @@ class ViewController: NSViewController,
         setGlobal.saved = false
     }
 
-    func openPng(filePath: URL) {
+    func openPng(fileUrl: URL) {
         let view = sketchView!
-        let image = NSImage(contentsOf: filePath)
-
-        if let img = image {
-            let rep = img.representations[0]
+        if let image = NSImage(contentsOf: fileUrl) {
+            let rep = image.representations[0]
             let wid = rep.size.width
             let hei = rep.size.height
             let pixWid = CGFloat(rep.pixelsWide)
@@ -1190,16 +1198,9 @@ class ViewController: NSViewController,
             view.newCurve()
             if let curve = view.selectedCurve {
                 view.createControls(curve: curve)
-
-                curve.alpha = [CGFloat](repeating: 0,
-                                        count: setCurve.alpha.count)
-
-                curve.imageLayer.contents = image
-                curve.alpha[6] = 1
-
-                curve.imageScaleX = CGFloat(wid) / pixWid
-                curve.imageScaleY = CGFloat(hei) / pixHei
-                curve.transformImageLayer()
+                curve.initImageLayer(image: image,
+                                     scaleX: CGFloat(wid) / pixWid,
+                                     scaleY: CGFloat(hei) / pixHei)
 
                 curve.setName(name: "image", curves: view.curves)
                 self.updateSliders()
@@ -1207,41 +1208,58 @@ class ViewController: NSViewController,
         }
     }
 
-    func openDrf(filePath: URL) {
+    func openDrf(fileUrl: URL) {
+        let filePaths = openDir(fileUrl: fileUrl)
         let view = sketchView!
         var drf = Drf()
-        do {
-            let file = try String(contentsOf: filePath, encoding: .utf8)
-            var groups: [Curve] = []
-            defer {
-                groups[0].setGroups(curves: Array(groups.dropFirst()))
-            }
-            for line in file.split(separator: "\n") {
-                if line == "-" {
-                    let curve = self.openCurve(drf: drf)
-                    if drf.group {
-                        groups.append(curve)
-                    } else {
-                        if groups.count>0 {
-                            groups[0].setGroups(
-                                curves: Array(groups.dropFirst()))
-                            groups.removeAll()
-                        }
-                        groups.append(curve)
-                        view.addCurve(curve: curve)
-                    }
-                    drf = Drf()
-                }
-                self.parseLine(drf: &drf, line: String(line))
-            }
-        } catch {
-           print("error open \(filePath)")
+        for path in filePaths where path.hasSuffix("drf") {
+            do {
+                let fileUrl = fileUrl.appendingPathComponent(path)
+                let file = try String(contentsOf: fileUrl, encoding: .utf8)
+                var groups: [Curve] = []
+                defer {
+                    groups[0].setGroups(curves: Array(groups.dropFirst()))
+               }
+               for line in file.split(separator: "\n") {
+                   if line == "-" {
+                       let curve = self.openCurve(drf: drf,
+                                                  fileUrl: fileUrl)
+                       if drf.group {
+                           groups.append(curve)
+                       } else {
+                           if groups.count>0 {
+                               groups[0].setGroups(
+                                   curves: Array(groups.dropFirst()))
+                               groups.removeAll()
+                           }
+                           groups.append(curve)
+                           view.addCurve(curve: curve)
+                       }
+                       drf = Drf()
+                   }
+                   self.parseLine(drf: &drf, line: String(line))
+               }
+           } catch {
+               print(error.localizedDescription)
+           }
         }
+
         view.updateMasks()
         self.saveHistory()
     }
 
-    func openCurve(drf: Drf) -> Curve {
+    func openDir(fileUrl: URL) -> [String] {
+        var filePaths: [String] = []
+        do {
+            filePaths = try FileManager.default.contentsOfDirectory(
+                atPath: fileUrl.relativePath)
+        } catch {
+            print(error.localizedDescription)
+        }
+        return filePaths
+    }
+
+    func openCurve(drf: Drf, fileUrl: URL) -> Curve {
         let view = sketchView!
         let curve = view.initCurve(
             path: drf.path, fill: drf.fill, rounded: drf.rounded,
@@ -1260,12 +1278,23 @@ class ViewController: NSViewController,
             filter: drf.filter,
             filterRadius: drf.filterRadius,
             points: drf.points)
+
         let name = String(drf.name.split(separator: " ")[0])
         curve.setName(name: name, curves: view.curves)
+        curve.oldName = drf.oldName
         curve.mask = drf.mask
         curve.lock = drf.lock
         curve.canvas.isHidden = drf.invisible
         curve.text = drf.text
+        curve.textDelta = drf.textDelta
+
+        let dirUrl = fileUrl.deletingLastPathComponent()
+        let imgUrl = dirUrl.appendingPathComponent(drf.name + ".tiff")
+        if let image = NSImage(contentsOf: imgUrl) {
+            curve.initImageLayer(image: image,
+                                 scaleX: drf.imageScaleX,
+                                 scaleY: drf.imageScaleY)
+        }
         view.layer?.addSublayer(curve.canvas)
         return curve
     }
@@ -1347,12 +1376,23 @@ class ViewController: NSViewController,
             case "-lock": drf.lock = true
             case "-invisible": drf.invisible = true
             case "-text": drf.text = str
+            case "-textDelta":
+                if !str.isEmpty {
+                    let float = str.split(separator: " ")
+                    drf.textDelta = CGPoint(
+                        x: CGFloat(Double(float[0]) ?? 0.0),
+                        y: CGFloat(Double(float[1]) ?? 0.0))
+                }
+            case "-imageScaleX":
+                drf.imageScaleX = CGFloat(Double(str) ?? 0.0)
+            case "-imageScaleY":
+                drf.imageScaleY = CGFloat(Double(str) ?? 0.0)
             default: break
             }
         }
     }
 
-    func openSvg(filePath: URL) {
+    func openSvg(fileUrl: URL) {
         print("open svg")
     }
 
@@ -1364,13 +1404,40 @@ class ViewController: NSViewController,
 
         self.clearSketch(view: view)
 
-        let filePath = url.appendingPathComponent(name + "." + ext)
-
         switch ext {
-        case "drf": self.saveDrf(filePath: filePath)
-        case "svg": self.saveSvg(filePath: filePath)
+        case "bundle":
+            let dirUrl = url.appendingPathComponent(
+                name + ".bundle", isDirectory: true)
+            do {
+                try FileManager.default.createDirectory(
+                    atPath: dirUrl.relativePath,
+                    withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print(error.localizedDescription)
+            }
+            let fileUrl = dirUrl.appendingPathComponent(name + ".drf")
+            for curve in view.curves {
+                for cur in curve.groups
+                    where cur.imageLayer.contents != nil {
+                    if let img = cur.imageLayer.contents as? NSImage {
+                        do {
+                            let fileUrl = dirUrl.appendingPathComponent(
+                                cur.name + ".tiff")
+                            try img.tiffRepresentation?.write(to: fileUrl)
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    }
+                }
+            }
+            self.saveDrf(fileUrl: fileUrl)
+
+        case "svg":
+            let fileUrl = url.appendingPathComponent(name + "." + ext)
+            self.saveSvg(fileUrl: fileUrl)
         default:
-            self.savePng(filePath: filePath)
+            let fileUrl = url.appendingPathComponent(name + "." + ext)
+            self.savePng(fileUrl: fileUrl)
         }
 
         if let curve = view.selectedCurve {
@@ -1385,19 +1452,19 @@ class ViewController: NSViewController,
         setGlobal.saved = false
     }
 
-    func savePng(filePath: URL) {
+    func savePng(fileUrl: URL) {
         let view = sketchView!
         if let image = view.imageData() {
             do {
-                try image.write(to: filePath, options: .atomic)
+                try image.write(to: fileUrl, options: .atomic)
 
             } catch {
-                print("error save \(filePath)")
+                print(error.localizedDescription)
             }
         }
     }
 
-    func saveDrf(filePath: URL) {
+    func saveDrf(fileUrl: URL) {
         let view = sketchView!
         var code: String = ""
         for curve in view.curves {
@@ -1454,7 +1521,7 @@ class ViewController: NSViewController,
                     String(Double($0.blueComponent))
                 }.joined(separator: " ")
                 code += clr + "\n"
-                code += "filter " + String(cur.filter) + "\n"
+                code += "-filter " + String(cur.filter) + "\n"
                 code += "-filterRadius " + String(
                     Double(cur.filterRadius)) + "\n"
                 if cur.mask { code += "-mask \n" }
@@ -1462,17 +1529,27 @@ class ViewController: NSViewController,
                 if cur.lock { code += "-lock \n" }
                 if cur.canvas.isHidden { code += "-invisible \n" }
                 if !cur.text.isEmpty {code += "-text " + cur.text + "\n"}
+                code += "-textDelta "
+                let textDelta = cur.textDelta != nil
+                    ? (String(Double(cur.textDelta?.x ?? 0)) + " " +
+                        String(Double(cur.textDelta?.y ?? 0))) + "\n"
+                    : "\n"
+                code += textDelta
+                code += "-imageScaleX " +
+                    String(Double(cur.imageScaleX)) + "\n"
+                code += "-imageScaleY " +
+                    String(Double(cur.imageScaleY)) + "\n"
                 code += "-\n"
             }
         }
         do {
-            try code.write(to: filePath, atomically: false, encoding: .utf8)
+            try code.write(to: fileUrl, atomically: false, encoding: .utf8)
         } catch {
-            print("error save \(filePath)")
+            print(error.localizedDescription)
         }
     }
 
-    func saveSvg(filePath: URL) {
+    func saveSvg(fileUrl: URL) {
         let view = sketchView!
     }
 
@@ -1525,7 +1602,6 @@ class ViewController: NSViewController,
                     let ok = NSApplication.ModalResponse.OK.rawValue
 
                     if result.rawValue == ok {
-
                         let name = savePanel.nameFieldStringValue
                         let indexDot = name.firstIndex(of: ".")
                         var trimName = name

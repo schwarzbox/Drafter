@@ -161,11 +161,11 @@ class Drag: Tool {
             x: topLeft.x, y: topLeft.y,
             width: size.wid, height: size.hei))
         Tool.parent!.groups.removeAll()
-        for cur in Tool.parent!.curves where cur.groups.count == 1 {
+        for cur in Tool.parent!.curves {
            let curves = cur.groupRect(curves: cur.groups)
            if Tool.parent!.curvedPath.bounds.contains(curves) &&
                !Tool.parent!.groups.contains(cur) {
-               Tool.parent!.groups.append(cur)
+                Tool.parent!.groups.append(contentsOf: cur.groups)
            }
         }
         for cur in Tool.parent!.groups {

@@ -18,13 +18,12 @@ class FrameButtons: NSStackView {
             width: self.bounds.width,
             height: self.bounds.height)
 
-            self.updateState(curve: curve)
+            self.updateState(view: view, curve: curve)
             self.show()
         }
     }
 
-    func updateState(curve: Curve) {
-
+    func updateState(view: SketchPad, curve: Curve) {
         if let group = self.subviews[5] as? NSButton {
             group.state = curve.groups.count > 1 ? .on : .off
         }
@@ -50,10 +49,14 @@ class FrameButtons: NSStackView {
         if !curve.fill {
             self.setEnabled(tag: 6, bool: false)
         }
-        
+
         if curve.groups.count>1 {
             self.setEnabled(tag: 4, bool: false)
             self.setEnabled(tag: 6, bool: false)
+        }
+        for cur in view.groups where cur.groups.count>1 {
+            self.setEnabled(tag: 5, bool: false)
+            break
         }
     }
 

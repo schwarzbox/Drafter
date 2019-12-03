@@ -17,24 +17,24 @@ class FontTool: NSStackView {
 
     var zoomed: CGFloat = 1
 
-    var fontFamily: String = setCurve.fontFamily
-    var fontType: String = setCurve.fontType
-    var fontSize: CGFloat = CGFloat(setCurve.fontSize)
+    var fontFamily: String = setEditor.fontFamily
+    var fontType: String = setEditor.fontType
+    var fontSize: CGFloat = CGFloat(setEditor.fontSize)
     var fontMembers = [[Any]]()
     var sharedFont: NSFont?
     var inputFont: NSFont?
 
     func setupFontTool() {
         self.setupFontFamily()
-        self.popFontFamily.selectItem(withTitle: setCurve.fontFamily)
+        self.popFontFamily.selectItem(withTitle: setEditor.fontFamily)
         let fFam = self.popFontFamily.titleOfSelectedItem ??
-            setCurve.fontFamily
+            setEditor.fontFamily
         self.popFontFamily.setTitle(fFam)
         self.setupFontMembers()
         self.setupFontType()
-        self.popFontType.selectItem(withTitle: setCurve.fontType)
+        self.popFontType.selectItem(withTitle: setEditor.fontType)
         let titType = self.popFontType.titleOfSelectedItem ??
-            setCurve.fontType
+            setEditor.fontType
         self.popFontType.setTitle(titType)
 
         self.setupFontSize()
@@ -43,9 +43,10 @@ class FontTool: NSStackView {
 
     func setupFontFamily() {
         self.popFontFamily.removeAllItems()
-        for member in NSFontManager.shared.availableFontFamilies {
-
-            self.popFontFamily.addItem(withTitle: member)
+        for fam in NSFontManager.shared.availableFontFamilies {
+            if setEditor.fonts.contains(fam) {
+                self.popFontFamily.addItem(withTitle: fam)
+            }
         }
     }
 
@@ -67,9 +68,9 @@ class FontTool: NSStackView {
     }
 
     func setupFontSize() {
-        self.sliderFontSize.doubleValue = setCurve.fontSize
-        self.sliderFontSize.minValue = setCurve.minFont
-        self.sliderFontSize.maxValue = setCurve.maxFont
+        self.sliderFontSize.doubleValue = setEditor.fontSize
+        self.sliderFontSize.minValue = setEditor.minFont
+        self.sliderFontSize.maxValue = setEditor.maxFont
     }
 
     func setupFont() {
@@ -79,6 +80,8 @@ class FontTool: NSStackView {
                 withFamily: self.fontFamily,
                 traits: NSFontTraitMask(rawValue: traits),
                 weight: weight, size: self.fontSize)
+
+
             self.inputFont = NSFontManager.shared.font(
                 withFamily: self.fontFamily,
                 traits: NSFontTraitMask(rawValue: traits),
@@ -99,7 +102,7 @@ class FontTool: NSStackView {
 
             self.setupFontType()
             let fType = self.popFontType.selectedItem?.title ??
-                setCurve.fontType
+                setEditor.fontType
             self.fontType = fType
 
             self.setupFont()

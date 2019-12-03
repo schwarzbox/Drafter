@@ -27,14 +27,19 @@ struct Drf {
     var colors: [NSColor] = setCurve.colors
     var filter: Int = setCurve.filter
     var filterRadius: Double = setCurve.minFilterRadius
-    var text: String = ""
+
     var points: [ControlPoint] = []
+
     var name: String = ""
     var oldName: String = ""
     var mask: Bool = false
     var group: Bool = false
     var lock: Bool = false
     var invisible: Bool = false
+    var text: String = ""
+    var textDelta: CGPoint?
+    var imageScaleX: CGFloat = 1
+    var imageScaleY: CGFloat = 1
 }
 
 struct SetupGlobal {
@@ -82,15 +87,7 @@ struct SetupCurve {
 
     let filters: [String] = ["CIGaussianBlur",
                              "CIEdgeWork",
-                             "CIPointillize",
-                             "CIComicEffect"
-    ]
-
-    let fontFamily: String = "Helvetica"
-    let fontType: String = "Regular"
-    let fontSize: Double = 16
-    let minFont: Double = 8
-    let maxFont: Double = 128
+                             "CIPointillize"]
 }
 
 struct SetupEditor {
@@ -125,7 +122,7 @@ struct SetupEditor {
 
     let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
     let filename: String = "untitled"
-    let fileTypes: [String] = ["drf", "png", "svg"]
+    let fileTypes: [String] = ["bundle", "png", "svg"]
 
     let disabledActions = ["position": NSNull(),
                            "path": NSNull(),
@@ -144,6 +141,38 @@ struct SetupEditor {
                            "shadowOpacity": NSNull(),
                            "shadowOffset": NSNull(),
                            "shadowColor": NSNull()]
+
+    let fontFamily: String = "Helvetica"
+    let fontType: String = "Regular"
+    let fontSize: Double = 16
+    let minFont: Double = 8
+    let maxFont: Double = 128
+    let fonts: [String] = [
+        "American Typewriter", "Andale Mono",
+        "Arcade", "Arial", "Arial Black",
+        "Arial Narrow", "Avenir", "Avenir Next",
+        "Bradley Hand", "Brush Script MT",
+        "Chalkboard", "Chalkduster", "Comic Sans MS",
+        "Copperplate", "Courier",
+        "Courier New", "Didot", "DIN Alternate",
+        "DIN Condensed", "Futura", "Geneva", "Georgia",
+        "Gill Sans", "Helvetica", "Helvetica Neue",
+        "Herculanum", "Hoefler Text", "Impact",
+        "InaiMathi", "Kefa", "Kohinoor Bangla",
+        "Kohinoor Devanagari", "Kohinoor Gujarati",
+        "Kohinoor Telugu", "Krungthep",
+        "Monaco", "Mukta Mahee", "Lucida Grande",
+        "Luminari", "Marker Felt", "Menlo",
+        "Microsoft Sans Serif", "Monaco", "Mukta Mahee",
+        "Noteworthy", "Optima", "Papyrus",
+        "PCBius", "Phosphate", "PT Mono", "PT Sans",
+        "PT Sans Caption", "PT Sans Narrow",
+        "PT Serif", "PT Serif Caption",
+        "Rockwell", "Savoye LET", "SignPainter",
+        "Silkscreen", "Silom", "Snell Roundhand",
+        "Space Invaders", "Stencil Std", "Tahoma", "Times",
+        "Times New Roman", "Trattatello",
+        "Trebuchet MS", "Verdana", "Zapfino"]
 }
 
 struct SetupCursor {

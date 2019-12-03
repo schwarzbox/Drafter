@@ -30,7 +30,7 @@ class InputTool: NSTextField {
         if let cell = self.cell, let font = self.font {
             let sz = cell.stringValue.sizeOfString(usingFont: font)
             self.setFrameSize(
-                CGSize(width: sz.width+2,
+                CGSize(width: sz.width+sz.width/2,
                        height: cell.cellSize.height))
 
         }

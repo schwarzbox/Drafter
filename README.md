@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.83
+v0.84
 
 # Features
 
@@ -87,11 +87,10 @@ Scroll canvas with two fingers
 
 
 # Road map
-
-v0.9 Improve Text
-
+v 0.85
+drag and drop files
 v1.0
-Bugs:  SaveBlur,  Save .png with .drf 
+Bugs:  SaveBlur,  Save .png with .drf, SaveBundle
 
 v1.1
 Filters

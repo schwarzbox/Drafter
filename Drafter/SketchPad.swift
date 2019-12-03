@@ -501,16 +501,18 @@ class SketchPad: NSView {
             self.selectedCurve = lockedCurve
         }
 
-        if let curve = self.selectedCurve, curve.groups.count==1, shift {
+        if let curve = self.selectedCurve, shift {
             if self.groups.contains(curve) {
-                if let index = self.groups.firstIndex(of: curve) {
-                    self.groups.remove(at: index)
+                for cur in curve.groups {
+                    if let index = self.groups.firstIndex(of: cur) {
+                        self.groups.remove(at: index)
+                    }
                 }
             } else {
-                self.groups.append(curve)
+                self.groups.append(contentsOf: curve.groups)
             }
         } else if let curve = self.selectedCurve,
-            self.groups.contains(curve), self.groups.count>1 {
+            self.groups.contains(curve) {
             if curve.groupRect(curves: self.groups).contains(pos) &&
                 !curve.canvas.isHidden {
                 self.selectedCurve = curve
@@ -938,6 +940,9 @@ class SketchPad: NSView {
         var sortedGroup: [Curve] = []
         for curve in self.curves {
             if self.groups.contains(curve) {
+                if curve.groups.count>1 {
+                    return
+                }
                 sortedGroup.append(curve)
             }
         }
@@ -1269,6 +1274,13 @@ class SketchPad: NSView {
                     clone.lock = cur.lock
                     clone.name = cur.name
                     clone.text = cur.text
+                    clone.textDelta = cur.textDelta
+
+                    if cur.imageLayer.contents != nil {
+                        clone.initImageLayer(image: cur.imageLayer.contents,
+                                             scaleX: cur.imageScaleX,
+                                             scaleY: cur.imageScaleY)
+                    }
                     cloneGroups.append(clone)
                 }
             }
@@ -1310,10 +1322,11 @@ class SketchPad: NSView {
     }
 
 //    MARK: TextTool func
-    func makeGlyphs(value: String, sharedFont: NSFont?) {
+    func makeGlyphs(value: String, sharedFont: NSFont?) -> CGPoint? {
         self.editedPath = NSBezierPath()
         if !value.isEmpty {
             if let font = sharedFont {
+                let hei = font.descender
                 let x = self.fontUI.inputField.frame.minX /
                     self.zoomed
                 let y = (self.fontUI.inputField.frame.minY) /
@@ -1321,29 +1334,48 @@ class SketchPad: NSView {
 
                 let pos = CGPoint(x: x + self.bounds.minX,
                                   y: y + self.bounds.minY)
-                self.editedPath.move(to: pos)
+                var correctPos = pos
+                correctPos.y -= hei
+                self.editedPath.move(to: correctPos)
                 for char in value {
                     let glyph = font.glyph(withName: String(char))
                     self.editedPath.append(
                         withCGGlyph: CGGlyph(glyph), in: font)
                 }
+                return pos
             }
         }
-
+        return nil
     }
     func glyphsCurve(value: String, sharedFont: NSFont?) {
-        self.makeGlyphs(value: value, sharedFont: sharedFont)
+        let pos = self.makeGlyphs(value: value, sharedFont: sharedFont)
         if self.editedPath.elementCount>0 {
+            defer { self.updateSliders() }
+            if let curve = self.selectedCurve, !curve.text.isEmpty {
+                if let path = self.editedPath.copy() as? NSBezierPath {
+                    curve.text = value
+                    curve.path = path
+                    curve.canvas.isHidden = false
+                    self.setTool(tag: 0)
+                    self.createControls(curve: curve)
+                    self.selectedCurve = curve
+                    return
+                }
+            }
             if let curve = self.selectedCurve {
                 self.clearControls(curve: curve)
             }
 
             self.newCurve()
-            if let curve = self.selectedCurve {
-                curve.text = value
-                self.createControls(curve: curve)
+            if let newCurve = self.selectedCurve {
+                newCurve.text = value
+                if let origin = pos {
+                    newCurve.textDelta = CGPoint(
+                        x: newCurve.canvas.frame.minX - origin.x,
+                        y: newCurve.canvas.frame.minY - origin.y)
+                }
+                self.createControls(curve: newCurve)
             }
-            self.updateSliders()
         }
     }
 
@@ -1461,7 +1493,8 @@ class SketchPad: NSView {
 
 //    MARK: Action func
     func dragCurve(deltaX: CGFloat, deltaY: CGFloat, ctrl: Bool = false) {
-        if let curve = self.selectedCurve, !curve.lock {
+        if let curve = self.selectedCurve, !curve.lock,
+            !curve.canvas.isHidden {
             let groups = self.groups.count>1
                 ? self.groups
                 : curve.groups

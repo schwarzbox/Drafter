@@ -187,6 +187,7 @@ class Curve: Equatable {
     }
 
     var text: String = ""
+    var textDelta: CGPoint?
 
     var rounded: CGPoint?
     var gradient: Bool = false
@@ -766,7 +767,21 @@ class Curve: Equatable {
                 self.parent!.removeTrackingArea(trackingArea)
         }
     }
-//  MARK: Transform
+//  MARK: ImageLayer
+    func initImageLayer(image: Any?,
+                        scaleX: CGFloat,
+                        scaleY: CGFloat) {
+        self.alpha = [CGFloat](repeating: 0,
+                                count: setCurve.alpha.count)
+
+        self.imageLayer.contents = image
+        self.alpha[6] = 1
+
+        self.imageScaleX = scaleX
+        self.imageScaleY = scaleY
+        self.transformImageLayer()
+    }
+
     func transformImageLayer() {
         self.imageLayer.transform = CATransform3DMakeRotation(
             self.angle, 0, 0, 1)
