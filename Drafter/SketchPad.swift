@@ -5,6 +5,38 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
+
+// 0.91 refactor
+// perfomance
+// blur grad?
+// clearControls createControls
+// combine curve edit and create mode
+
+// 0.95
+// hex pent from triangle
+// arc from circle with middle radius
+// merge layers in one layer
+
+// 1.0
+// Bugs
+// save draft not bundle 
+
+// 1.5
+// save svg
+// open svg
+
+// add?
+// flex poly
+// star
+
+// curved text?
+
+// show groups members
+// add group to group?
+
+// select dots and drag together?
+// edit curve on create, delete dots?
+
 import Cocoa
 
 class SketchPad: NSView {
@@ -26,7 +58,7 @@ class SketchPad: NSView {
     var colorPanels: [ColorPanel]!
 
     var trackArea: NSTrackingArea!
-    var rulers: Ruler!
+    var rulers: RulerTool!
 
     var sketchDir: URL?
     var sketchName: String?
@@ -86,13 +118,17 @@ class SketchPad: NSView {
 
         self.zoomSketch(value: Double(self.zoomed * 100))
 
-        Tool.parent = self
-        self.rulers = Ruler(parent: self)
+        Tool.view = self
+        self.rulers = RulerTool(view: self)
 
         self.setupLayers()
 
         // filters
         self.layerUsesCoreImageFilters = true
+        // drag & drop
+        self.registerForDraggedTypes(
+            [NSPasteboard.PasteboardType.URL,
+             NSPasteboard.PasteboardType.fileURL])
     }
 
 //    override func updateLayer() { }
@@ -141,6 +177,44 @@ class SketchPad: NSView {
                             width: setEditor.screenWidth,
                             height: setEditor.screenHeight)
         self.sketchPath = NSBezierPath(rect: sketchBorder)
+    }
+
+//    MARK: Drag&Drop func
+    fileprivate func checkExtension(_ drag: NSDraggingInfo) -> Bool {
+        guard let board = drag.draggingPasteboard.propertyList(
+            forType: NSPasteboard.PasteboardType(
+                rawValue: "NSFilenamesPboardType")) as? NSArray,
+              let path = board[0] as? String
+        else { return false }
+
+        let suffix = URL(fileURLWithPath: path).pathExtension
+        for ext in setEditor.fileTypes {
+            if ext.lowercased() == suffix {
+                return true
+            }
+        }
+        return false
+    }
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        if checkExtension(sender) == true {
+            return .copy
+        } else {
+            return NSDragOperation()
+        }
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let pasteboard = sender.draggingPasteboard.propertyList(
+            forType: NSPasteboard.PasteboardType(
+                rawValue: "NSFilenamesPboardType")) as? NSArray,
+              let path = pasteboard[0] as? String
+        else { return false }
+
+        let fileUrl = URL.init(fileURLWithPath: path)
+        let nc = NotificationCenter.default
+        nc.post(name: Notification.Name("openFiles"), object: nil,
+                userInfo: ["fileUrl": fileUrl])
+        return true
     }
 
 //    MARK: Mouse func
@@ -387,8 +461,7 @@ class SketchPad: NSView {
                    alpha: [CGFloat], shadow: [CGFloat],
                    gradientDirection: [CGPoint],
                    gradientLocation: [NSNumber],
-                   colors: [NSColor],
-                   filter: Int, filterRadius: Double,
+                   colors: [NSColor], filterRadius: Double,
                    points: [ControlPoint]) -> Curve {
 
         let curve = Curve.init(parent: self, path: path,
@@ -405,7 +478,6 @@ class SketchPad: NSView {
         curve.gradientDirection = gradientDirection
         curve.gradientLocation = gradientLocation
         curve.colors = colors
-        curve.filter = filter
         curve.filterRadius = filterRadius
         curve.setPoints(points: points)
         return curve
@@ -442,7 +514,6 @@ class SketchPad: NSView {
             gradientDirection: setCurve.gradientDirection,
             gradientLocation: setCurve.gradientLocation,
             colors: colors,
-            filter: setCurve.filter,
             filterRadius: setCurve.minFilterRadius,
             points: self.controlPoints)
 
@@ -672,7 +743,7 @@ class SketchPad: NSView {
 
         self.updateControlSize()
 
-        if let curve = self.selectedCurve {
+        if let curve = self.selectedCurve, !curve.canvas.isHidden {
             self.clearControls(curve: curve)
             self.createControls(curve: curve)
             if curve.edit {
@@ -998,6 +1069,10 @@ class SketchPad: NSView {
                         }
                     }
                     cur.canvas.removeFromSuperlayer()
+                    let name = String(
+                        cur.name.split(separator: " ")[0])
+                    cur.setName(name: name, curves: self.curves)
+
                     self.layer?.addSublayer(cur.canvas)
                     self.addCurve(curve: cur)
                 }
@@ -1171,7 +1246,8 @@ class SketchPad: NSView {
         self.frameUI.isOn(on: -1)
     }
     func removeCurve(curve: Curve) {
-        if let index = self.curves.firstIndex(of: curve) {
+        if let index = self.curves.firstIndex(of: curve),
+            !curve.lock {
             curve.clearPoints()
             curve.delete()
 
@@ -1188,7 +1264,7 @@ class SketchPad: NSView {
         if tool is Vector && self.movePoint != nil {
             return
         }
-        if let curve = self.selectedCurve, !curve.lock {
+        if let curve = self.selectedCurve {
             if curve.edit && curve.points.count > 2 {
                 curve.removePoint()
             } else {
@@ -1265,7 +1341,6 @@ class SketchPad: NSView {
                         gradientDirection: cur.gradientDirection,
                         gradientLocation: cur.gradientLocation,
                         colors: cur.colors,
-                        filter: cur.filter,
                         filterRadius: cur.filterRadius,
                         points: points)
                     clone.controlFrame = cur.controlFrame
@@ -1316,8 +1391,12 @@ class SketchPad: NSView {
     func cloneCurve() {
         if let curve = self.selectedCurve, !curve.edit {
             self.copyCurve(from: self.selectedCurve)
-            self.pasteCurve(to: CGPoint(x: curve.path.bounds.midX,
-                                        y: curve.path.bounds.midY))
+            let bounds = self.groups.count>1
+                ? curve.groupRect(curves: self.groups)
+                : curve.groupRect(curves: curve.groups)
+
+            self.pasteCurve(to: CGPoint(x: bounds.midX,
+                                        y: bounds.midY))
         }
     }
 
@@ -1327,6 +1406,7 @@ class SketchPad: NSView {
         if !value.isEmpty {
             if let font = sharedFont {
                 let hei = font.descender
+                print(hei)
                 let x = self.fontUI.inputField.frame.minX /
                     self.zoomed
                 let y = (self.fontUI.inputField.frame.minY) /
@@ -1801,13 +1881,6 @@ class SketchPad: NSView {
         }
     }
 
-    func filterCurve(value: Int) {
-        if let curve = self.selectedCurve, !curve.lock {
-            curve.filter = value
-            self.updateSliders()
-        }
-    }
-
     func filterRadius(value: Double) {
         if let curve = self.selectedCurve, !curve.lock {
             curve.filterRadius = value
@@ -1858,17 +1931,23 @@ class SketchPad: NSView {
     }
 
 //    MARK: Support
-    func cgImageFrom(ciImage: CIImage) -> CGImage? {
-        let context = CIContext(options: nil)
-        if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
-            return cgImage
-        }
-        return nil
-    }
 
     func imageData(
         fileType: NSBitmapImageRep.FileType = .png,
         properties: [NSBitmapImageRep.PropertyKey: Any] = [:]) -> Data? {
+        defer {
+            for curve in self.curves {
+                for cur in curve.groups {
+                    cur.clearFilter()
+                }
+            }
+        }
+        for curve in self.curves {
+            for cur in curve.groups where cur.filterRadius > 0 {
+                cur.applyFilter()
+            }
+        }
+
         if let imageRep = bitmapImageRepForCachingDisplay(
             in: self.sketchPath.bounds) {
             self.cacheDisplay(in: self.sketchPath.bounds, to: imageRep)

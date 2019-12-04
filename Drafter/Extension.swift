@@ -428,10 +428,7 @@ extension CALayer {
         return false
     }
 
-    func ciImage() -> CIImage? {
-        let width = Int(self.bounds.width)
-        let height = Int(self.bounds.height)
-
+    func ciImage(width: Int, height: Int) -> CIImage? {
         let imageRepresentation = NSBitmapImageRep(
             bitmapDataPlanes: nil,
             pixelsWide: width, pixelsHigh: height,
@@ -439,9 +436,9 @@ extension CALayer {
             hasAlpha: true, isPlanar: false,
             colorSpaceName: NSColorSpaceName.deviceRGB,
             bytesPerRow: 0, bitsPerPixel: 0)!
-        imageRepresentation.size = bounds.size
 
         let context = NSGraphicsContext(bitmapImageRep: imageRepresentation)!
+
         self.render(in: context.cgContext)
 
         if let image =  CIImage(bitmapImageRep: imageRepresentation) {
@@ -454,14 +451,14 @@ extension CALayer {
         let maxSide = max(self.bounds.width, self.bounds.height)
         let width = Int(maxSide+pad+1)
         let height = Int(maxSide+pad+1)
-        let canvas = CGContext(
+        let context = CGContext(
             data: nil, width: width, height: height,
             bitsPerComponent: 8, bytesPerRow: 0,
             space: CGColorSpace(name: CGColorSpace.sRGB)!,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
 
-        self.render(in: canvas)
-        if let image = canvas.makeImage() {
+        self.render(in: context)
+        if let image = context.makeImage() {
             return image
         }
         return nil

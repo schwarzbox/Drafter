@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.84
+v0.91
 
 # Features
 
@@ -57,6 +57,7 @@ Save (⌘S), Save-As (⇧⌘S) - save to *.drf or *.png
 Undo (⌘Z), Redo (⇧⌘Z) - not implemented
 
 Cut (⌘X) - place selected shape to the buffer, Copy (⌘C) - copy selected shape
+
 Paste (⌘V) - paste shape to the mouse position
 
 Group (⌘G), Ungroup (⇧⌘G) 
@@ -87,13 +88,16 @@ Scroll canvas with two fingers
 
 
 # Road map
-v 0.85
-drag and drop files
-v1.0
-Bugs:  SaveBlur,  Save .png with .drf, SaveBundle
 
-v1.1
-Filters
+v.0.95
+merge
+
+v.097
+perfomance
+
+v1.0
+Bugs:  Bundle extension
+
 v1.5 .svg
 
 

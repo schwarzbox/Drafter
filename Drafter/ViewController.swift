@@ -61,15 +61,15 @@ class ViewController: NSViewController,
     @IBOutlet weak var curveGradMidOpacity: ActionSlider!
     @IBOutlet weak var curveGradFinOpacity: ActionSlider!
 
-    @IBOutlet weak var curveFilter: NSPopUpButton!
     @IBOutlet weak var curveFilterRadius: ActionSlider!
-    @IBOutlet weak var curveFilterOpacity: ActionSlider!
 
     var alphaSliders: [ActionSlider] = []
     var colorPanels: [ColorPanel] = []
     var textFields: [NSTextField] = []
     var colorPanel: ColorPanel?
     var savePanel: NSSavePanel?
+    var openPanel: NSOpenPanel?
+    var saveTool: SaveTool?
 
     var history: [[Curve]] = [[]]
     var indexHistory: Int = 0
@@ -213,8 +213,7 @@ class ViewController: NSViewController,
 
         alphaSliders = [curveStrokeOpacity, curveFillOpacity,
                         curveShadowOpacity, curveGradStOpacity,
-                        curveGradMidOpacity, curveGradFinOpacity,
-                        curveFilterOpacity]
+                        curveGradMidOpacity, curveGradFinOpacity]
 
         self.setupStroke()
         self.setupColors()
@@ -224,6 +223,7 @@ class ViewController: NSViewController,
 
         ColorPanel.setupSharedColorPanel()
         fontUI.setupFontTool()
+        saveTool = SaveTool.init(view: sketchView!)
 
         self.setupSketchView()
 
@@ -295,15 +295,6 @@ class ViewController: NSViewController,
     }
 
     func setupFilters() {
-        curveFilter.removeAllItems()
-        for filter in setCurve.filters {
-            curveFilter.addItem(
-                withTitle: filter.replacingOccurrences(of: "CI", with: ""))
-        }
-        curveFilter.selectItem(at: setCurve.filter)
-        if let sel = curveFilter.selectedItem {
-            curveFilter.setTitle(sel.title)
-        }
         curveFilterRadius.minValue = setCurve.minFilterRadius
         curveFilterRadius.maxValue = setCurve.maxFilterRadius
     }
@@ -349,7 +340,9 @@ class ViewController: NSViewController,
         nc.addObserver(self, selector: #selector(updateSketchColor),
                        name: Notification.Name("updateSketchColor"),
                        object: nil)
-
+        nc.addObserver(self, selector: #selector(openFiles),
+                       name: Notification.Name("openFiles"),
+                       object: nil)
         nc.addObserver(self, selector: #selector(saveHistory),
                        name: Notification.Name("saveHistory"),
                        object: nil)
@@ -369,8 +362,8 @@ class ViewController: NSViewController,
     }
 
     @objc func safeQuit() {
-         self.saveDocument(self)
-     }
+        self.saveDocument(self)
+    }
 
     @objc func abortTextFields() {
         for field in self.textFields {
@@ -437,11 +430,6 @@ class ViewController: NSViewController,
             self.curveShadowRadius.doubleValue = shadow[0]
             self.curveShadowOffsetX.doubleValue = shadow[1]
             self.curveShadowOffsetY.doubleValue = shadow[2]
-
-            let ind = curve.filter
-            let filterName = setCurve.filters[ind].replacingOccurrences(
-                of: "CI", with: "")
-            self.curveFilter.setTitle(filterName)
 
             self.curveFilterRadius.doubleValue = Double(curve.filterRadius)
 
@@ -864,6 +852,9 @@ class ViewController: NSViewController,
         if let panel = self.colorPanel,
             let cp = panel.sharedColorPanel {
             cp.acceptsMouseMovedEvents = true
+            if let curve = view.selectedCurve {
+                view.clearControls(curve: curve)
+            }
         }
         view.colorCurve()
     }
@@ -919,11 +910,6 @@ class ViewController: NSViewController,
         }
         view.shadowCurve(tag: val.tag, value: lim)
         self.restoreControlFrame(view: view)
-    }
-
-    @IBAction func filterCurve(_ sender: NSPopUpButton) {
-        print(sender.indexOfSelectedItem)
-        sketchView!.filterCurve(value: sender.indexOfSelectedItem)
     }
 
     @IBAction func filterRadius(_ sender: Any) {
@@ -1042,7 +1028,7 @@ class ViewController: NSViewController,
                     self.indexHistory-=1
                 }
             }
-            print("undo", self.indexHistory, self.history)
+//            print("undo", self.indexHistory, self.history)
         }
     }
 
@@ -1054,7 +1040,7 @@ class ViewController: NSViewController,
                     self.indexHistory+=1
                 }
             }
-            print("redo", self.indexHistory, self.history)
+//            print("redo", self.indexHistory, self.history)
         }
     }
 
@@ -1144,256 +1130,52 @@ class ViewController: NSViewController,
         setGlobal.saved = false
     }
 
+    @objc func openFiles(notification: NSNotification) {
+        let view = sketchView!
+        if let curve = view.selectedCurve, curve.edit {
+            return
+        }
+        if let fileUrl = notification.userInfo!["fileUrl"] as? URL {
+            let ext = fileUrl.pathExtension
+            switch ext {
+            case "bundle":
+                self.saveTool?.openDrf(fileUrl: fileUrl)
+            case "svg":
+                self.saveTool?.openSvg(fileUrl: fileUrl)
+            default:
+                self.saveTool?.openPng(fileUrl: fileUrl)
+            }
+            view.updateMasks()
+            self.saveHistory()
+            setGlobal.saved = false
+        }
+    }
+
     @IBAction func openDocument(_ sender: NSMenuItem) {
-        if let curve = sketchView!.selectedCurve, curve.edit {
+        let view = sketchView!
+        if let curve = view.selectedCurve, curve.edit {
             return
         }
         self.colorPanel?.closeSharedColorPanel()
-        let openPanel = NSOpenPanel()
-        openPanel.setupPanel()
-        openPanel.beginSheetModal(
-            for: self.window!,
-            completionHandler: {(result) -> Void in
-                if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
-                    if openPanel.urls.count>0 {
-                        let fileUrl = openPanel.urls[0]
-                        let ext = fileUrl.pathExtension
-                        switch ext {
-                        case "bundle": self.openDrf(fileUrl: fileUrl)
-                        case "svg": self.openSvg(fileUrl: fileUrl)
-                        default:
-                            self.openPng(fileUrl: fileUrl)
+        openPanel = NSOpenPanel()
+        if let openPanel = openPanel {
+            openPanel.setupPanel()
+            openPanel.beginSheetModal(
+                for: self.window!,
+                completionHandler: {(result) -> Void in
+                    if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
+                        if openPanel.urls.count>0 {
+                            let nc = NotificationCenter.default
+                            nc.post(name: Notification.Name("openFiles"),
+                                    object: nil,
+                                    userInfo: ["fileUrl": openPanel.urls[0]])
                         }
+                    } else {
+                        openPanel.close()
                     }
-                } else {
-                    openPanel.close()
                 }
-            }
-        )
-        setGlobal.saved = false
-    }
-
-    func openPng(fileUrl: URL) {
-        let view = sketchView!
-        if let image = NSImage(contentsOf: fileUrl) {
-            let rep = image.representations[0]
-            let wid = rep.size.width
-            let hei = rep.size.height
-            let pixWid = CGFloat(rep.pixelsWide)
-            let pixHei = CGFloat(rep.pixelsHigh)
-            if let curve = view.selectedCurve {
-                view.deselectCurve(curve: curve)
-            }
-
-            let topLeft = CGPoint(x: view.sketchPath.bounds.midX - wid/2,
-                                  y: view.sketchPath.bounds.midY - hei/2)
-            let bottomRight = CGPoint(
-                x: view.sketchPath.bounds.midX + wid/2,
-                y: view.sketchPath.bounds.midY + hei/2)
-            if let rect = tools[3] as? Rectangle {
-                rect.useTool(
-                    rect.action(topLeft: topLeft,
-                                bottomRight: bottomRight))
-            }
-            view.newCurve()
-            if let curve = view.selectedCurve {
-                view.createControls(curve: curve)
-                curve.initImageLayer(image: image,
-                                     scaleX: CGFloat(wid) / pixWid,
-                                     scaleY: CGFloat(hei) / pixHei)
-
-                curve.setName(name: "image", curves: view.curves)
-                self.updateSliders()
-            }
+            )
         }
-    }
-
-    func openDrf(fileUrl: URL) {
-        let filePaths = openDir(fileUrl: fileUrl)
-        let view = sketchView!
-        var drf = Drf()
-        for path in filePaths where path.hasSuffix("drf") {
-            do {
-                let fileUrl = fileUrl.appendingPathComponent(path)
-                let file = try String(contentsOf: fileUrl, encoding: .utf8)
-                var groups: [Curve] = []
-                defer {
-                    groups[0].setGroups(curves: Array(groups.dropFirst()))
-               }
-               for line in file.split(separator: "\n") {
-                   if line == "-" {
-                       let curve = self.openCurve(drf: drf,
-                                                  fileUrl: fileUrl)
-                       if drf.group {
-                           groups.append(curve)
-                       } else {
-                           if groups.count>0 {
-                               groups[0].setGroups(
-                                   curves: Array(groups.dropFirst()))
-                               groups.removeAll()
-                           }
-                           groups.append(curve)
-                           view.addCurve(curve: curve)
-                       }
-                       drf = Drf()
-                   }
-                   self.parseLine(drf: &drf, line: String(line))
-               }
-           } catch {
-               print(error.localizedDescription)
-           }
-        }
-
-        view.updateMasks()
-        self.saveHistory()
-    }
-
-    func openDir(fileUrl: URL) -> [String] {
-        var filePaths: [String] = []
-        do {
-            filePaths = try FileManager.default.contentsOfDirectory(
-                atPath: fileUrl.relativePath)
-        } catch {
-            print(error.localizedDescription)
-        }
-        return filePaths
-    }
-
-    func openCurve(drf: Drf, fileUrl: URL) -> Curve {
-        let view = sketchView!
-        let curve = view.initCurve(
-            path: drf.path, fill: drf.fill, rounded: drf.rounded,
-            angle: CGFloat(drf.angle),
-            lineWidth: drf.lineWidth,
-            cap: drf.cap, join: drf.join,
-            miter: drf.miter,
-            dash: drf.dash,
-            windingRule: drf.windingRule,
-            maskRule: drf.maskRule,
-            alpha: drf.alpha,
-            shadow: drf.shadow,
-            gradientDirection: drf.gradientDirection,
-            gradientLocation: drf.gradientLocation,
-            colors: drf.colors,
-            filter: drf.filter,
-            filterRadius: drf.filterRadius,
-            points: drf.points)
-
-        let name = String(drf.name.split(separator: " ")[0])
-        curve.setName(name: name, curves: view.curves)
-        curve.oldName = drf.oldName
-        curve.mask = drf.mask
-        curve.lock = drf.lock
-        curve.canvas.isHidden = drf.invisible
-        curve.text = drf.text
-        curve.textDelta = drf.textDelta
-
-        let dirUrl = fileUrl.deletingLastPathComponent()
-        let imgUrl = dirUrl.appendingPathComponent(drf.name + ".tiff")
-        if let image = NSImage(contentsOf: imgUrl) {
-            curve.initImageLayer(image: image,
-                                 scaleX: drf.imageScaleX,
-                                 scaleY: drf.imageScaleY)
-        }
-        view.layer?.addSublayer(curve.canvas)
-        return curve
-    }
-
-    func parseLine(drf: inout Drf, line: String) {
-        let view = sketchView!
-        if let sp = line.firstIndex(of: " ") {
-            let str = String(line.suffix(from: sp).dropFirst())
-            switch line.prefix(upTo: sp) {
-            case "-name": drf.name = str
-            case "-oldName": drf.oldName = str
-            case "-path": drf.path = drf.path.stringToPath(str: str)
-            case "-points":
-                var points: [ControlPoint] = []
-                for line in str.split(separator: "|") {
-                    let floats = line.split(separator: " ").map {
-                        CGFloat(Double($0) ?? 0.0)}
-                    var pnt: [CGPoint] = []
-                    for i in stride(from: 0, to: floats.count, by: 2) {
-                        pnt.append(CGPoint(x: floats[i],
-                                           y: floats[i+1]))
-                    }
-                    points.append(ControlPoint(view,
-                                               cp1: pnt[0],
-                                               cp2: pnt[1],
-                                               mp: pnt[2]))
-                }
-                drf.points = points
-            case "-fill": drf.fill = Bool(str) ?? true
-            case "-rounded":
-                if !str.isEmpty {
-                    let float = str.split(separator: " ")
-                    drf.rounded = CGPoint(
-                        x: CGFloat(Double(float[0]) ?? 0.0),
-                        y: CGFloat(Double(float[1]) ?? 0.0))
-                }
-            case "-angle": drf.angle = Double(str) ?? 0.0
-            case "-lineWidth":
-                drf.lineWidth = CGFloat(Double(str) ?? 0.0)
-            case "-cap": drf.cap = Int(str) ?? 0
-            case "-join": drf.join = Int(str) ?? 0
-            case "-miter":
-                drf.miter = CGFloat(Double(str) ?? 0.0)
-            case "-dash":
-                let dash = str.split(separator: " ").map {
-                    NSNumber(value: Int($0) ?? 0)}
-                drf.dash = dash
-            case "-windingRule": drf.windingRule = Int(str) ?? 0
-            case "-maskRule": drf.maskRule = Int(str) ?? 0
-            case "-alpha":
-                drf.alpha = str.split(separator: " ").map {
-                    CGFloat(Double($0) ?? 0.0)}
-            case "-shadow":
-                drf.shadow = str.split(separator: " ").map {
-                    CGFloat(Double($0) ?? 0.0)}
-            case "-gradientDirection":
-                let dir = str.split(separator: " ").map {
-                    CGFloat(Double($0) ?? 0.0)}
-                drf.gradientDirection = [CGPoint(x: dir[0], y: dir[1]),
-                                         CGPoint(x: dir[2], y: dir[3])]
-            case "-gradientLocation":
-                drf.gradientLocation = str.split(separator: " ").map {
-                    NSNumber(value: Double(String($0)) ?? 0) }
-            case "-colors":
-                let cmp = str.split(separator: " ").map {
-                    CGFloat(Double($0) ?? 0.0)}
-                var colors: [NSColor] = []
-                for i in stride(from: 0, to: cmp.count, by: 3) {
-                    let clr = NSColor(
-                        red: cmp[i], green: cmp[i+1], blue: cmp[i+2],
-                        alpha: 1)
-                    colors.append(clr.sRGB())
-                }
-                drf.colors = colors
-            case "-filter": drf.filter = Int(str) ?? 0
-            case "-filterRadius": drf.filterRadius = Double(str) ?? 0.0
-            case "-mask": drf.mask = true
-            case "-group": drf.group = true
-            case "-lock": drf.lock = true
-            case "-invisible": drf.invisible = true
-            case "-text": drf.text = str
-            case "-textDelta":
-                if !str.isEmpty {
-                    let float = str.split(separator: " ")
-                    drf.textDelta = CGPoint(
-                        x: CGFloat(Double(float[0]) ?? 0.0),
-                        y: CGFloat(Double(float[1]) ?? 0.0))
-                }
-            case "-imageScaleX":
-                drf.imageScaleX = CGFloat(Double(str) ?? 0.0)
-            case "-imageScaleY":
-                drf.imageScaleY = CGFloat(Double(str) ?? 0.0)
-            default: break
-            }
-        }
-    }
-
-    func openSvg(fileUrl: URL) {
-        print("open svg")
     }
 
     func saveSketch(url: URL, name: String, ext: String) {
@@ -1430,14 +1212,13 @@ class ViewController: NSViewController,
                     }
                 }
             }
-            self.saveDrf(fileUrl: fileUrl)
-
+            saveTool?.saveDrf(fileUrl: fileUrl)
         case "svg":
             let fileUrl = url.appendingPathComponent(name + "." + ext)
-            self.saveSvg(fileUrl: fileUrl)
+            saveTool?.saveSvg(fileUrl: fileUrl)
         default:
             let fileUrl = url.appendingPathComponent(name + "." + ext)
-            self.savePng(fileUrl: fileUrl)
+            saveTool?.savePng(fileUrl: fileUrl)
         }
 
         if let curve = view.selectedCurve {
@@ -1450,107 +1231,6 @@ class ViewController: NSViewController,
         view.zoomOrigin = zoomOrigin
         view.zoomSketch(value: Double(zoomed * 100))
         setGlobal.saved = false
-    }
-
-    func savePng(fileUrl: URL) {
-        let view = sketchView!
-        if let image = view.imageData() {
-            do {
-                try image.write(to: fileUrl, options: .atomic)
-
-            } catch {
-                print(error.localizedDescription)
-            }
-        }
-    }
-
-    func saveDrf(fileUrl: URL) {
-        let view = sketchView!
-        var code: String = ""
-        for curve in view.curves {
-            for (ind, cur) in curve.groups.enumerated() {
-                code += ("-name " + cur.name + "\n")
-                code += ("-oldName " + cur.oldName + "\n")
-                if let path = cur.path.copy() as? NSBezierPath {
-                    code += "-path " + path.pathToString() + "\n"
-                    code += "-points "
-                    for point in cur.points {
-                        code += point.stringPoint() + "|"
-                    }
-                }
-                code += "\n"
-                code += "-fill " + String(cur.fill) + "\n"
-                code += "-rounded "
-                let rounded = cur.rounded != nil
-                    ? (String(Double(cur.rounded?.x ?? 0)) + " " +
-                        String(Double(cur.rounded?.y ?? 0))) + "\n"
-                    : "\n"
-                code += rounded
-                code += "-angle " + String(Double(cur.angle)) + "\n"
-                code += "-lineWidth " + String(Double(cur.lineWidth)) + "\n"
-                code += "-cap " + String(cur.cap) + "\n"
-                code += "-join " + String(cur.join) + "\n"
-                code += "-miter " + String(Double(cur.miter)) + "\n"
-                code += "-dash "
-                let dash = cur.dash.map {String(
-                    Int(truncating: $0))}.joined(separator: " ")
-                code += dash + "\n"
-                code += "-windingRule " + String(cur.windingRule) + "\n"
-                code += "-maskRule " + String(cur.maskRule) + "\n"
-                code += "-alpha "
-                let alpha = cur.alpha.map {String(
-                    Double($0))}.joined(separator: " ")
-                code += alpha + "\n"
-                code += "-shadow "
-                let shadow = cur.shadow.map {String(
-                    Double($0))}.joined(separator: " ")
-                code += shadow + "\n"
-                code += "-gradientDirection "
-                let gradDir = cur.gradientDirection.map {(String(
-                    Double($0.x)) + " " + String(
-                        Double($0.y)) )}.joined(separator: " ")
-                code += gradDir + "\n"
-                code += "-gradientLocation "
-                let gradLoc = cur.gradientLocation.map {String(
-                    Double(truncating: $0))}.joined(separator: " ")
-                code += gradLoc + "\n"
-                code += "-colors "
-                let clr = cur.colors.map {
-                    String(Double($0.redComponent)) + " " +
-                    String(Double($0.greenComponent)) + " " +
-                    String(Double($0.blueComponent))
-                }.joined(separator: " ")
-                code += clr + "\n"
-                code += "-filter " + String(cur.filter) + "\n"
-                code += "-filterRadius " + String(
-                    Double(cur.filterRadius)) + "\n"
-                if cur.mask { code += "-mask \n" }
-                if ind > 0 { code += "-group \n" }
-                if cur.lock { code += "-lock \n" }
-                if cur.canvas.isHidden { code += "-invisible \n" }
-                if !cur.text.isEmpty {code += "-text " + cur.text + "\n"}
-                code += "-textDelta "
-                let textDelta = cur.textDelta != nil
-                    ? (String(Double(cur.textDelta?.x ?? 0)) + " " +
-                        String(Double(cur.textDelta?.y ?? 0))) + "\n"
-                    : "\n"
-                code += textDelta
-                code += "-imageScaleX " +
-                    String(Double(cur.imageScaleX)) + "\n"
-                code += "-imageScaleY " +
-                    String(Double(cur.imageScaleY)) + "\n"
-                code += "-\n"
-            }
-        }
-        do {
-            try code.write(to: fileUrl, atomically: false, encoding: .utf8)
-        } catch {
-            print(error.localizedDescription)
-        }
-    }
-
-    func saveSvg(fileUrl: URL) {
-        let view = sketchView!
     }
 
     @objc func setFileType(_ sender: NSPopUpButton) {
@@ -1630,7 +1310,6 @@ class ViewController: NSViewController,
                     NSApplication.shared.reply(
                     toApplicationShouldTerminate: true)
             })
-
         }
     }
 }

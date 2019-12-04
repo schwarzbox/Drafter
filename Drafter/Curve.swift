@@ -21,6 +21,7 @@ class Curve: Equatable {
     var imageScaleY: CGFloat = 1
     let canvasMask = CAShapeLayer()
     let canvas = CAShapeLayer()
+    var effView = NSVisualEffectView()
 
     var layers: [CALayer] = []
     var angle: CGFloat = 0.0
@@ -51,14 +52,27 @@ class Curve: Equatable {
                 switch i {
                 case 0:
                     let clr = color.cgColor.sRGB(alpha: self.alpha[0])
-                    self.canvas.strokeColor = clr
-                    self.imageLayer.strokeColor = clr.sRGB(
-                        alpha: self.alpha[6])
+                    if self.filterRadius > 0 {
+                        self.canvas.strokeColor = clr.sRGB(
+                            alpha: CGFloat(0))
+                        self.imageLayer.strokeColor = clr
+                    } else {
+                        self.canvas.strokeColor = clr
+                        self.imageLayer.strokeColor = clr.sRGB(
+                            alpha: CGFloat(0))
+                    }
                 case 1:
                     let clr = color.cgColor.sRGB(alpha: self.alpha[1])
-                    self.canvas.fillColor = clr
-                    self.imageLayer.fillColor = clr.sRGB(
-                        alpha: self.alpha[6])
+                    if self.filterRadius > 0 {
+                        self.canvas.fillColor = clr.sRGB(
+                            alpha: CGFloat(0))
+                        self.imageLayer.fillColor = clr
+
+                    } else {
+                        self.canvas.fillColor = clr
+                        self.imageLayer.fillColor = clr.sRGB(
+                            alpha: CGFloat(0))
+                    }
                 case 2:
                     let clr = color.cgColor
                     self.canvas.shadowColor = clr
@@ -75,10 +89,9 @@ class Curve: Equatable {
 
     var alpha: [CGFloat] = setCurve.alpha {
         willSet(value) {
-            self.canvas.strokeColor = self.canvas.strokeColor?.sRGB(
-                alpha: value[0])
-            self.canvas.fillColor = self.canvas.fillColor?.sRGB(
-                alpha: value[1])
+            self.setStrokeFillAlpha(radius: self.filterRadius,
+                stroke: value[0], fill: value[1])
+
             self.canvas.shadowOpacity = Float(value[2])
             var gradColors: [CGColor] = []
             for (i, color) in self.colors.enumerated() where i>2 {
@@ -86,15 +99,6 @@ class Curve: Equatable {
                 gradColors.append(srgb)
             }
             self.gradientLayer.colors = gradColors
-
-            if self.imageLayer.contents == nil {
-                self.imageLayer.strokeColor = self.canvas.strokeColor?.sRGB(
-                    alpha: value[6])
-                self.imageLayer.fillColor = self.canvas.fillColor?.sRGB(
-                    alpha: value[6])
-            } else {
-                self.imageLayer.opacity = Float(value[6])
-            }
         }
     }
 
@@ -119,56 +123,41 @@ class Curve: Equatable {
         }
     }
 
-    var filter: Int = setCurve.filter {
+    var filterRadius: Double = setCurve.minFilterRadius {
         willSet(value) {
-            let radius = self.filterRadius
-            self.filterRadius = radius
+            self.setStrokeFillAlpha(radius: value,
+                stroke: self.alpha[0], fill: self.alpha[1])
+            self.imageLayer.setValue(
+                value,
+                forKeyPath: "filters.CIGaussianBlur.inputRadius")
         }
     }
 
-    var filterRadius: Double = setCurve.minFilterRadius {
-        willSet(value) {
-//            let image = self.canvas.ciImage()
-//
-//            if let filter = CIFilter(name: setCurve.filters[self.filter]) {
-//                filter.setDefaults()
-//                filter.setValue(image, forKey: kCIInputImageKey)
-//                filter.setValue(value, forKey: kCIInputRadiusKey)
-//                if let outImg = filter.value(
-//                    forKey: kCIOutputImageKey) as? CIImage {
-//
-//                    let outputImageRect = NSRectFromCGRect(outImg.extent)
-//                    print(outputImageRect)
-//
-//                    let filImg = NSImage(size: outputImageRect.size)
-//                    filImg.lockFocus()
-//
-//                    outImg.draw(at: NSPoint(x: 0,
-//                                            y: 0),
-//                                from: outputImageRect,
-//                                operation: .copy,
-//                                fraction: 1)
-//                    filImg.unlockFocus()
-//
-//                    let scaleImg = filImg.resized(scaleX: 0.5, scaleY: 0.5)
-//                    self.imageLayer.contents = scaleImg
-//                }
-//            }
-            let name = setCurve.filters[self.filter]
-            let center = CIVector(x: self.path.bounds.midX,
-                                  y: self.path.bounds.midY)
-            switch name {
-            case "CIGaussianBlur", "CIEdgeWork":
-                self.imageLayer.setValue(value,
-                    forKeyPath: "filters.\(name).inputRadius")
-            case "CIPointillize":
-                self.imageLayer.setValue(value,
-                    forKeyPath: "filters.\(name).inputRadius")
-                self.imageLayer.setValue(center,
-                    forKeyPath: "filters.\(name).inputCenter")
-            default:
-                break
+    func setStrokeFillAlpha(radius: Double,
+                            stroke: CGFloat, fill: CGFloat) {
+        let strokeColor = self.canvas.strokeColor?.sRGB(
+            alpha: stroke)
+        let fillColor = self.canvas.fillColor?.sRGB(
+            alpha: fill)
+        let zeroStroke = strokeColor?.sRGB(alpha: CGFloat(0))
+        let zeroFill = fillColor?.sRGB(alpha: CGFloat(0))
+        if self.imageLayer.contents == nil {
+            if radius > 0 {
+                self.canvas.strokeColor = zeroStroke
+                self.canvas.fillColor = zeroFill
+                if self.imageLayer.contents == nil {
+                    self.imageLayer.strokeColor = strokeColor
+                    self.imageLayer.fillColor = fillColor
+                }
+                self.imageLayer.opacity = Float(fill)
+            } else {
+                self.canvas.strokeColor = strokeColor
+                self.canvas.fillColor = fillColor
+                self.imageLayer.strokeColor = zeroStroke
+                self.imageLayer.fillColor = zeroFill
             }
+        } else {
+            self.imageLayer.opacity = Float(fill)
         }
     }
 
@@ -229,18 +218,17 @@ class Curve: Equatable {
         self.imageLayer.filters = []
         self.imageLayer.backgroundColor = NSColor.clear.cgColor
 
-//        for filterName in setCurve.filters {
-//            if let filter = CIFilter(name: filterName,
-//                                     parameters: [:]) {
-//                self.imageLayer.filters?.append(filter)
-//            }
-//        }
+        if let filter = CIFilter(name: "CIGaussianBlur",
+                                 parameters: [:]) {
+            self.imageLayer.filters?.append(filter)
+        }
 
         for layer in self.layers {
             layer.actions = setEditor.disabledActions
             layer.contentsGravity = .center
             self.canvas.addSublayer(layer)
         }
+        self.canvas.contentsGravity = .center
         self.canvas.actions = setEditor.disabledActions
         self.updateLayer()
     }
@@ -305,7 +293,11 @@ class Curve: Equatable {
     func setName(name: String, curves: [Curve]) {
         var count = 1
         var newName = name + " " + String(count)
-        let names = curves.map {$0.name}
+        var names: [String] = []
+        for cur in curves {
+            names.append(contentsOf: cur.groups.map { $0.name })
+        }
+
         while names.contains(newName) {
             count+=1
             newName = name + " " + String(count)
@@ -775,7 +767,7 @@ class Curve: Equatable {
                                 count: setCurve.alpha.count)
 
         self.imageLayer.contents = image
-        self.alpha[6] = 1
+        self.alpha[1] = 1
 
         self.imageScaleX = scaleX
         self.imageScaleY = scaleY
@@ -783,10 +775,62 @@ class Curve: Equatable {
     }
 
     func transformImageLayer() {
-        self.imageLayer.transform = CATransform3DMakeRotation(
-            self.angle, 0, 0, 1)
-        self.imageLayer.transform = CATransform3DScale(
-            self.imageLayer.transform,
-            self.imageScaleX, self.imageScaleY, 1)
+        if self.imageLayer.contents != nil {
+            self.imageLayer.transform = CATransform3DMakeRotation(
+                self.angle, 0, 0, 1)
+            self.imageLayer.transform = CATransform3DScale(
+                self.imageLayer.transform,
+                self.imageScaleX, self.imageScaleY, 1)
+        }
+    }
+
+    func clearFilter() {
+        self.canvas.contents = nil
+//        self.canvas.contentsGravity = .resize
+        self.imageLayer.isHidden = false
+    }
+
+    func applyFilter() {
+        let line = self.lineWidth
+        let oX = self.canvas.bounds.minX - line / 2
+        let oY = self.canvas.bounds.minY - line / 2
+        var image: CIImage?
+
+        let wid = Int(self.canvas.bounds.width+line)
+        let hei = Int(self.canvas.bounds.height+line)
+
+        self.path.applyTransform(oX: oX, oY: oY,
+        transform: {
+            self.updateLayer()
+            if let img = self.canvas.ciImage(width: wid, height: hei) {
+                image = img
+            }
+        })
+        self.updateLayer()
+//        self.canvas.contentsGravity = .center
+        self.imageLayer.isHidden = true
+        if let filter = CIFilter(name: "CIGaussianBlur") {
+         filter.setDefaults()
+         filter.setValue(image, forKey: kCIInputImageKey)
+         filter.setValue(self.filterRadius/2, forKey: kCIInputRadiusKey)
+            if let outImg = filter.value(
+                forKey: kCIOutputImageKey) as? CIImage {
+
+                let outputImageRect = NSRectFromCGRect(outImg.extent)
+
+                let filImg = NSImage(size: outputImageRect.size)
+                filImg.lockFocus()
+
+                outImg.draw(at: NSPoint(x: 0,
+                                         y: 0),
+                             from: outputImageRect,
+                             operation: .copy,
+                             fraction: 1)
+                filImg.unlockFocus()
+
+                self.canvas.contents = filImg.resized(
+                    scaleX: 0.5, scaleY: 0.5)
+            }
+        }
     }
 }

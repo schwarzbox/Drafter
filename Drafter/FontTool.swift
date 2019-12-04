@@ -81,7 +81,6 @@ class FontTool: NSStackView {
                 traits: NSFontTraitMask(rawValue: traits),
                 weight: weight, size: self.fontSize)
 
-
             self.inputFont = NSFontManager.shared.font(
                 withFamily: self.fontFamily,
                 traits: NSFontTraitMask(rawValue: traits),

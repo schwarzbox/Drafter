@@ -1,5 +1,5 @@
 //
-//  Rulers.swift
+//  RulerTool.swift
 //  Drafter
 //
 //  Created by Alex Veledzimovich on 10/16/19.
@@ -16,8 +16,8 @@ struct RulerPoint {
     var dist: [CGFloat] = [0]
 }
 
-class Ruler: CAShapeLayer {
-    var parent: SketchPad?
+class RulerTool: CAShapeLayer {
+    var view: SketchPad?
     var dotSize: CGFloat = setEditor.dotRadius
     var solidPath = NSBezierPath()
     var alphaPath = NSBezierPath()
@@ -32,14 +32,14 @@ class Ruler: CAShapeLayer {
         super.init(coder: aDecoder)
     }
 
-    init(parent: SketchPad) {
-        self.parent = parent
+    init(view: SketchPad) {
+        self.view = view
         super.init()
         self.strokeColor = setEditor.controlColor.cgColor
         self.fillColor = nil
 
-        self.dotSize = parent.dotRadius
-        self.lineWidth = parent.lineWidth
+        self.dotSize = view.dotRadius
+        self.lineWidth = view.lineWidth
         self.actions = setEditor.disabledActions
         self.makeShape(
             path: NSBezierPath(),
@@ -57,8 +57,8 @@ class Ruler: CAShapeLayer {
         -> (delta: CGPoint, pnt: [String: (pos: CGPoint?,
                                             dist: CGFloat)]) {
 
-        self.dotSize = self.parent!.dotRadius
-        self.lineWidth = self.parent!.lineWidth
+        self.dotSize = self.view!.dotRadius
+        self.lineWidth = self.view!.lineWidth
         self.alphaLayer.lineWidth = self.lineWidth
 
         var minDistX: CGFloat = CGFloat(MAXFLOAT)
@@ -90,7 +90,7 @@ class Ruler: CAShapeLayer {
     }
 
     func updateWithPath() {
-        self.parent?.layer?.addSublayer(self)
+        self.view?.layer?.addSublayer(self)
     }
 
     func clearRulers() {

@@ -8,44 +8,6 @@
 
 import Cocoa
 
-struct Drf {
-    var path = NSBezierPath()
-    var fill: Bool = true
-    var rounded: CGPoint?
-    var angle: Double = setCurve.angle
-    var lineWidth: CGFloat = setCurve.lineWidth
-    var cap: Int = setCurve.lineCap
-    var join: Int = setCurve.lineJoin
-    var miter: CGFloat = setCurve.miterLimit
-    var dash: [NSNumber] = setCurve.lineDashPattern
-    var windingRule: Int = setCurve.windingRule
-    var maskRule: Int = setCurve.maskRule
-    var alpha: [CGFloat] = setCurve.alpha
-    var shadow: [CGFloat] = setCurve.shadow
-    var gradientDirection: [CGPoint] = setCurve.gradientDirection
-    var gradientLocation: [NSNumber] = setCurve.gradientLocation
-    var colors: [NSColor] = setCurve.colors
-    var filter: Int = setCurve.filter
-    var filterRadius: Double = setCurve.minFilterRadius
-
-    var points: [ControlPoint] = []
-
-    var name: String = ""
-    var oldName: String = ""
-    var mask: Bool = false
-    var group: Bool = false
-    var lock: Bool = false
-    var invisible: Bool = false
-    var text: String = ""
-    var textDelta: CGPoint?
-    var imageScaleX: CGFloat = 1
-    var imageScaleY: CGFloat = 1
-}
-
-struct SetupGlobal {
-    var saved = false
-}
-
 struct SetupCurve {
     let minResize: Double = 0.1
     let minRotate = -Double.pi
@@ -63,7 +25,7 @@ struct SetupCurve {
     let minDash: Double = 0
     let maxDash: Double = 32
 
-    let alpha: [CGFloat] = [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    let alpha: [CGFloat] = [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
     let colors: [NSColor] = [
         NSColor.white.sRGB(), NSColor.systemBlue.sRGB(),
         NSColor.black.sRGB(), NSColor.systemPink.sRGB(),
@@ -81,13 +43,8 @@ struct SetupCurve {
                              CGPoint(x: 1.0, y: 0.0)]
     let gradientLocation: [NSNumber] = [0.0, 0.50, 1.0]
 
-    let filter: Int = 0
     let minFilterRadius: Double = 0
-    let maxFilterRadius: Double = 64
-
-    let filters: [String] = ["CIGaussianBlur",
-                             "CIEdgeWork",
-                             "CIPointillize"]
+    let maxFilterRadius: Double = 32
 }
 
 struct SetupEditor {
@@ -196,7 +153,6 @@ struct SetupCursor {
         hotSpot: CGPoint(x: 8, y: 8))
 }
 
-var setGlobal = SetupGlobal()
 var setEditor = SetupEditor()
 var setCurve = SetupCurve()
 var setCursor = SetupCursor()
