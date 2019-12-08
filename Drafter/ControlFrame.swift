@@ -214,7 +214,8 @@ class ControlFrame: CAShapeLayer {
 
     func initRoundedCornerDots(parent: SketchPad,
                                curve: Curve, numDots: Int) {
-        if let rounded = curve.rounded, curve.points.count>7 {
+        if let rounded = curve.rounded, curve.points.count>7,
+            curve.imageLayer.contents == nil {
             let fillColor = setEditor.strokeColor
             let strokeColor = setEditor.fillColor
 

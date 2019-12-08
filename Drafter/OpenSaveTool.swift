@@ -36,7 +36,6 @@ struct Drf {
     var points: [ControlPoint] = []
 
     var name: String = ""
-    var oldName: String = ""
     var mask: Bool = false
     var group: Bool = false
     var lock: Bool = false
@@ -95,30 +94,32 @@ class SaveTool {
                 let file = try String(contentsOf: fileUrl, encoding: .utf8)
                 var groups: [Curve] = []
                 defer {
-                    groups[0].setGroups(curves: Array(groups.dropFirst()))
-               }
-               for line in file.split(separator: "\n") {
-                   if line == "-" {
-                       let curve = self.openCurve(drf: drf,
+                    if groups.count>0 {
+                        groups[0].setGroups(curves: Array(groups.dropFirst()))
+                    }
+                }
+                for line in file.split(separator: "\n") {
+                    if line == "-" {
+                        let curve = self.openCurve(drf: drf,
                                                   fileUrl: fileUrl)
-                       if drf.group {
-                           groups.append(curve)
-                       } else {
-                           if groups.count>0 {
-                               groups[0].setGroups(
-                                   curves: Array(groups.dropFirst()))
-                               groups.removeAll()
-                           }
-                           groups.append(curve)
-                           view.addCurve(curve: curve)
-                       }
-                       drf = Drf()
-                   }
-                   self.parseLine(drf: &drf, line: String(line))
-               }
-           } catch {
+                        if drf.group {
+                            groups.append(curve)
+                        } else {
+                            if groups.count>0 {
+                                groups[0].setGroups(
+                                    curves: Array(groups.dropFirst()))
+                                groups.removeAll()
+                            }
+                            groups.append(curve)
+                            view.addCurve(curve: curve)
+                        }
+                        drf = Drf()
+                    }
+                    self.parseLine(drf: &drf, line: String(line))
+                }
+            } catch {
                print(error.localizedDescription)
-           }
+            }
         }
     }
 
@@ -153,7 +154,6 @@ class SaveTool {
 
         let name = String(drf.name.split(separator: " ")[0])
         curve.setName(name: name, curves: view.curves)
-        curve.oldName = drf.oldName
         curve.mask = drf.mask
         curve.lock = drf.lock
         curve.canvas.isHidden = drf.invisible
@@ -176,7 +176,6 @@ class SaveTool {
             let str = String(line.suffix(from: sp).dropFirst())
             switch line.prefix(upTo: sp) {
             case "-name": drf.name = str
-            case "-oldName": drf.oldName = str
             case "-path": drf.path = drf.path.stringToPath(str: str)
             case "-points":
                 var points: [ControlPoint] = []
@@ -282,7 +281,6 @@ class SaveTool {
         for curve in view.curves {
             for (ind, cur) in curve.groups.enumerated() {
                 code += ("-name " + cur.name + "\n")
-                code += ("-oldName " + cur.oldName + "\n")
                 if let path = cur.path.copy() as? NSBezierPath {
                     code += "-path " + path.pathToString() + "\n"
                     code += "-points "

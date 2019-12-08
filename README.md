@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.91
+v0.93
 
 # Features
 
@@ -30,6 +30,10 @@ Permanent shadow layer. To remove just set alpha to zero
 Built-in rulers
 
 ![Screenshot](screenshot/screenshot5.png)
+
+# Perfomance
+
+For now comfort work is possible when used less than 100 layers
 
 
 # Tools & Hotkeys

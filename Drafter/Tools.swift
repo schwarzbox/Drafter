@@ -181,7 +181,7 @@ class Drag: Tool {
         if let curve = Tool.view!.selectedCurve, !curve.lock {
             Tool.view!.dragCurve(deltaX: event?.deltaX ?? 0,
                                    deltaY: event?.deltaY ?? 0,
-                                   ctrl: ctrl)
+                                   shift: shift, ctrl: ctrl)
         } else {
             self.action(topLeft: Tool.view!.startPos,
                         bottomRight: Tool.view!.finPos)

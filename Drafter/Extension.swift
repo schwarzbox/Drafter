@@ -291,7 +291,7 @@ extension NSStackView {
     }
 
     func setEnabled(tag: Int = -1, bool: Bool) {
-        if tag > 0, self.subviews.count > tag,
+        if tag >= 0, self.subviews.count > tag,
             let control = self.subviews[tag] as? NSControl {
             control.isEnabled = bool
         }
@@ -632,7 +632,6 @@ extension NSColorPanel {
     override open func mouseMoved(with event: NSEvent) {
         let nc = NotificationCenter.default
         nc.post(name: Notification.Name("saveHistory"), object: nil)
-        nc.post(name: Notification.Name("restoreFrame"), object: nil)
         self.acceptsMouseMovedEvents = false
     }
 }

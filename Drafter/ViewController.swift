@@ -333,10 +333,6 @@ class ViewController: NSViewController,
                              name: Notification.Name("updateSliders"),
                              object: nil)
 
-        nc.addObserver(self, selector: #selector(restoreFrame),
-                        name: Notification.Name("restoreFrame"),
-                        object: nil)
-
         nc.addObserver(self, selector: #selector(updateSketchColor),
                        name: Notification.Name("updateSketchColor"),
                        object: nil)
@@ -852,9 +848,6 @@ class ViewController: NSViewController,
         if let panel = self.colorPanel,
             let cp = panel.sharedColorPanel {
             cp.acceptsMouseMovedEvents = true
-            if let curve = view.selectedCurve {
-                view.clearControls(curve: curve)
-            }
         }
         view.colorCurve()
     }

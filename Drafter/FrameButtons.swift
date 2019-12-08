@@ -27,11 +27,21 @@ class FrameButtons: NSStackView {
         if let group = self.subviews[5] as? NSButton {
             group.state = curve.groups.count > 1 ? .on : .off
         }
+
         if let mask = self.subviews[6] as? NSButton {
             mask.state = curve.mask ? .on : .off
+            for cur in view.groups where cur.mask {
+                mask.state = .on
+                break
+            }
         }
+
         if let lock = self.subviews[7] as? NSButton {
             lock.state = curve.lock ? .on : .off
+            for cur in view.groups where cur.lock {
+                lock.state = .on
+                break
+            }
         }
 
         if curve.edit {
@@ -42,7 +52,7 @@ class FrameButtons: NSStackView {
             self.isEnabled(all: true)
         }
 
-        if !curve.text.isEmpty {
+        if !curve.text.isEmpty || curve.imageLayer.contents != nil {
             self.setEnabled(tag: 4, bool: false)
         }
 
@@ -54,9 +64,14 @@ class FrameButtons: NSStackView {
             self.setEnabled(tag: 4, bool: false)
             self.setEnabled(tag: 6, bool: false)
         }
-        for cur in view.groups where cur.groups.count>1 {
-            self.setEnabled(tag: 5, bool: false)
-            break
+
+        if view.groups.count>1 {
+            for cur in view.groups where cur.groups.count>1 {
+                self.setEnabled(tag: 5, bool: false)
+                break
+            }
+            self.setEnabled(tag: 0, bool: false)
+            self.setEnabled(tag: 1, bool: false)
         }
     }
 

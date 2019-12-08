@@ -21,7 +21,6 @@ class Curve: Equatable {
     var imageScaleY: CGFloat = 1
     let canvasMask = CAShapeLayer()
     let canvas = CAShapeLayer()
-    var effView = NSVisualEffectView()
 
     var layers: [CALayer] = []
     var angle: CGFloat = 0.0
@@ -127,9 +126,8 @@ class Curve: Equatable {
         willSet(value) {
             self.setStrokeFillAlpha(radius: value,
                 stroke: self.alpha[0], fill: self.alpha[1])
-            self.imageLayer.setValue(
-                value,
-                forKeyPath: "filters.CIGaussianBlur.inputRadius")
+            self.canvas.setValue(
+                value, forKeyPath: "filters.CIGaussianBlur.inputRadius")
         }
     }
 
@@ -185,20 +183,8 @@ class Curve: Equatable {
     var edit: Bool = false
     var lock: Bool = false
 
-    var name: String = "" {
-        didSet {
-            if !oldValue.isEmpty {
-                oldName = oldValue
-            }
-        }
-        willSet {
-            if oldName.isEmpty {
-                oldName = newValue
-            }
+    var name: String = ""
 
-        }
-    }
-    var oldName: String = ""
     var controlDot: Dot?
     var controlFrame: ControlFrame?
 
@@ -215,18 +201,16 @@ class Curve: Equatable {
 
         self.layers = [imageLayer, gradientLayer]
 
-        self.imageLayer.filters = []
-        self.imageLayer.backgroundColor = NSColor.clear.cgColor
-
-        if let filter = CIFilter(name: "CIGaussianBlur",
-                                 parameters: [:]) {
-            self.imageLayer.filters?.append(filter)
-        }
-
         for layer in self.layers {
             layer.actions = setEditor.disabledActions
             layer.contentsGravity = .center
             self.canvas.addSublayer(layer)
+        }
+
+        self.canvas.filters = []
+        if let filter = CIFilter(name: "CIGaussianBlur",
+                                 parameters: [:]) {
+            self.canvas.filters?.append(filter)
         }
         self.canvas.contentsGravity = .center
         self.canvas.actions = setEditor.disabledActions
@@ -297,7 +281,6 @@ class Curve: Equatable {
         for cur in curves {
             names.append(contentsOf: cur.groups.map { $0.name })
         }
-
         while names.contains(newName) {
             count+=1
             newName = name + " " + String(count)
@@ -786,8 +769,8 @@ class Curve: Equatable {
 
     func clearFilter() {
         self.canvas.contents = nil
-//        self.canvas.contentsGravity = .resize
         self.imageLayer.isHidden = false
+        self.gradientLayer.isHidden = false
     }
 
     func applyFilter() {
@@ -795,40 +778,41 @@ class Curve: Equatable {
         let oX = self.canvas.bounds.minX - line / 2
         let oY = self.canvas.bounds.minY - line / 2
         var image: CIImage?
-
         let wid = Int(self.canvas.bounds.width+line)
         let hei = Int(self.canvas.bounds.height+line)
 
         self.path.applyTransform(oX: oX, oY: oY,
         transform: {
             self.updateLayer()
-            if let img = self.canvas.ciImage(width: wid, height: hei) {
+            if let img = self.canvas.ciImage(width: wid,
+                                             height: hei) {
                 image = img
             }
         })
         self.updateLayer()
-//        self.canvas.contentsGravity = .center
         self.imageLayer.isHidden = true
+        self.gradientLayer.isHidden = true
+        let radius = self.imageLayer.contents != nil
+            ? self.filterRadius/2
+            : self.filterRadius
         if let filter = CIFilter(name: "CIGaussianBlur") {
-         filter.setDefaults()
-         filter.setValue(image, forKey: kCIInputImageKey)
-         filter.setValue(self.filterRadius/2, forKey: kCIInputRadiusKey)
-            if let outImg = filter.value(
-                forKey: kCIOutputImageKey) as? CIImage {
+            filter.setDefaults()
+            filter.setValue(image, forKey: kCIInputImageKey)
+            filter.setValue(radius, forKey: kCIInputRadiusKey)
+            if let cImg = filter.value(forKey: kCIOutputImageKey) as? CIImage {
 
-                let outputImageRect = NSRectFromCGRect(outImg.extent)
+                let outputImageRect = NSRectFromCGRect(cImg.extent)
 
-                let filImg = NSImage(size: outputImageRect.size)
-                filImg.lockFocus()
-
-                outImg.draw(at: NSPoint(x: 0,
-                                         y: 0),
+                let canvasImg = NSImage(size: outputImageRect.size)
+                canvasImg.lockFocus()
+                cImg.draw(at: NSPoint(x: 0, y: 0),
                              from: outputImageRect,
                              operation: .copy,
                              fraction: 1)
-                filImg.unlockFocus()
 
-                self.canvas.contents = filImg.resized(
+                canvasImg.unlockFocus()
+
+                self.canvas.contents = canvasImg.resized(
                     scaleX: 0.5, scaleY: 0.5)
             }
         }

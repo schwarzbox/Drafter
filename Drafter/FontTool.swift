@@ -126,7 +126,6 @@ class FontTool: NSStackView {
         let lim = val<1 ? 1 : val
         self.sliderFontSize.doubleValue = lim
         self.fontSize = CGFloat(val)
-
         self.setupFont()
     }
 
