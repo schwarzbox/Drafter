@@ -48,6 +48,7 @@ struct SetupCurve {
 }
 
 struct SetupEditor {
+    let maxHistory: Int = 2
     let minZoom: Double = 20
     let maxZoom: Double = 640
     let reduceZoom: CGFloat = 20
@@ -126,7 +127,7 @@ struct SetupEditor {
         "PT Sans Caption", "PT Sans Narrow",
         "PT Serif", "PT Serif Caption",
         "Rockwell", "Savoye LET", "SignPainter",
-        "Silkscreen", "Silom", "Snell Roundhand",
+        "Silkscreen", "Silom", "Skia", "Snell Roundhand",
         "Space Invaders", "Stencil Std", "Tahoma", "Times",
         "Times New Roman", "Trattatello",
         "Trebuchet MS", "Verdana", "Zapfino"]

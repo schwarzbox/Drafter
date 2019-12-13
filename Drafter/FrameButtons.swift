@@ -72,6 +72,7 @@ class FrameButtons: NSStackView {
             }
             self.setEnabled(tag: 0, bool: false)
             self.setEnabled(tag: 1, bool: false)
+            self.setEnabled(tag: 4, bool: false)
         }
     }
 

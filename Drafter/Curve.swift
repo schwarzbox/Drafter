@@ -291,7 +291,6 @@ class Curve: Equatable {
     func delete() {
         for curve in self.groups {
             curve.imageLayer.removeFromSuperlayer()
-            curve.imageLayer.removeFromSuperlayer()
             curve.gradientLayer.removeFromSuperlayer()
             curve.canvas.removeFromSuperlayer()
         }
@@ -792,15 +791,13 @@ class Curve: Equatable {
         self.updateLayer()
         self.imageLayer.isHidden = true
         self.gradientLayer.isHidden = true
-        let radius = self.imageLayer.contents != nil
-            ? self.filterRadius/2
-            : self.filterRadius
+
         if let filter = CIFilter(name: "CIGaussianBlur") {
             filter.setDefaults()
             filter.setValue(image, forKey: kCIInputImageKey)
-            filter.setValue(radius, forKey: kCIInputRadiusKey)
-            if let cImg = filter.value(forKey: kCIOutputImageKey) as? CIImage {
-
+            filter.setValue(self.filterRadius, forKey: kCIInputRadiusKey)
+            if let cImg = filter.value(
+                forKey: kCIOutputImageKey) as? CIImage {
                 let outputImageRect = NSRectFromCGRect(cImg.extent)
 
                 let canvasImg = NSImage(size: outputImageRect.size)

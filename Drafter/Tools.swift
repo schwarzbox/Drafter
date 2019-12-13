@@ -253,7 +253,9 @@ class Triangle: Tool {
         let radius = abs(size.wid) < abs(size.hei)
             ? abs(size.wid/2)
             : abs(size.hei/2)
-        let cx: CGFloat = size.wid > 0 ? topLeft.x + radius : topLeft.x - radius
+        let cx: CGFloat = size.wid > 0
+            ? topLeft.x + radius
+            : topLeft.x - radius
         var cy: CGFloat = topLeft.y - radius
         var turn90 = -CGFloat.pi / 2
         if size.hei > 0 {

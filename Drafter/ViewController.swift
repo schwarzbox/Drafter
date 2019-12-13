@@ -962,7 +962,11 @@ class ViewController: NSViewController,
         let view = sketchView!
         self.history[self.indexHistory+1..<self.history.count] = []
         self.history.append(view.copyAll())
+        if self.indexHistory > setEditor.maxHistory * 2 {
+            self.history[0..<setEditor.maxHistory] = []
+        }
         self.indexHistory = self.history.count-1
+
         self.updateStack()
     }
 
@@ -970,7 +974,8 @@ class ViewController: NSViewController,
     func updateStack() {
         sketchUI.reloadData()
         if let curve = sketchView!.selectedCurve,
-            let index = sketchView!.curves.firstIndex(of: curve) {
+            let index = sketchView!.curves.firstIndex(of: curve),
+            sketchView.groups.count<=1 {
             selectedSketch = index
         } else {
             selectedSketch = -1
@@ -1007,7 +1012,6 @@ class ViewController: NSViewController,
                 break
             }
         }
-
         view.updateMasks()
         view.needsDisplay = true
         self.updateStack()

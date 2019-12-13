@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.93
+v0.94
 
 # Features
 
@@ -33,8 +33,7 @@ Built-in rulers
 
 # Perfomance
 
-For now comfort work is possible when used less than 100 layers
-
+Now comfort work is possible when used less than 100 layers
 
 # Tools & Hotkeys
 
@@ -58,13 +57,13 @@ Save (⌘S), Save-As (⇧⌘S) - save to *.drf or *.png
 
 - Edit
 
-Undo (⌘Z), Redo (⇧⌘Z) - not implemented
+Undo (⌘Z), Redo (⇧⌘Z) - 4 operations
 
-Cut (⌘X) - place selected shape to the buffer, Copy (⌘C) - copy selected shape
+Cut (⌘X) - remove selected shape and copy to the buffer, Copy (⌘C) - copy selected shape
 
 Paste (⌘V) - paste shape to the mouse position
 
-Group (⌘G), Ungroup (⇧⌘G) 
+Group (⌘G), Ungroup (⇧⌘G)  - create/remove group for selectted shapes
 
 Delete (Delete) - remove shape or control dot
 
@@ -78,9 +77,9 @@ Drag shape or dot with ^(Control) to turn on "snap to rullers"
 
 Select shape with ⌥(Option) to clone it
 
-Drag mouse with  ⌘(Cmd) key to edit control dot
-
 Use ⌥(Option) for edit control dots separately
+
+Drag mouse with  ⌘(Cmd) key to edit control dot
 
 Use ⇧(Shift) for straight lines and diagonals with Line and Vector
 
@@ -93,18 +92,16 @@ Scroll canvas with two fingers
 
 # Road map
 
-v.0.95
-merge
+v.0.95 Improve History
 
-v.097
-perfomance
+v 096 Merge
 
-v1.0
-Bugs:  Bundle extension
+v.097 Perfomance
+
+v1.0 Bugs:  Bundle extension
 
 v1.5 .svg
 
-
-
+v2.0 Edit Text witth control dots
 
 
