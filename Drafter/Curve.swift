@@ -66,7 +66,6 @@ class Curve: Equatable {
                         self.canvas.fillColor = clr.sRGB(
                             alpha: CGFloat(0))
                         self.imageLayer.fillColor = clr
-
                     } else {
                         self.canvas.fillColor = clr
                         self.imageLayer.fillColor = clr.sRGB(
@@ -126,8 +125,14 @@ class Curve: Equatable {
         willSet(value) {
             self.setStrokeFillAlpha(radius: value,
                 stroke: self.alpha[0], fill: self.alpha[1])
-            self.canvas.setValue(
-                value, forKeyPath: "filters.CIGaussianBlur.inputRadius")
+            if let filter = CIFilter(
+                name: "CIGaussianBlur",
+                parameters: ["inputRadius": value]),
+                value>0 {
+                self.canvas.filters = [filter]
+            } else {
+                self.canvas.filters = []
+            }
         }
     }
 
@@ -186,6 +191,7 @@ class Curve: Equatable {
     var name: String = ""
 
     var controlDot: Dot?
+    var controlDots: [ControlPoint] = []
     var controlFrame: ControlFrame?
 
     var groups: [Curve] = []
@@ -208,10 +214,7 @@ class Curve: Equatable {
         }
 
         self.canvas.filters = []
-        if let filter = CIFilter(name: "CIGaussianBlur",
-                                 parameters: [:]) {
-            self.canvas.filters?.append(filter)
-        }
+
         self.canvas.contentsGravity = .center
         self.canvas.actions = setEditor.disabledActions
         self.updateLayer()
@@ -479,18 +482,24 @@ class Curve: Equatable {
         return cp
     }
 
-    func selectPoint(pos: CGPoint) {
+    func selectPoint(pos: CGPoint, shift: Bool = false) {
         if !self.lock {
             for i in stride(from: self.points.count-1,
                         through: 0, by: -1) {
             let point = self.points[i]
                 if let dot = point.collidedPoint(pos: pos) {
                     self.controlDot = dot
+                    point.showControlDots(dotMag: self.parent!.dotMag,
+                                          lineWidth: self.parent!.lineWidth)
                     return
                 } else {
-                    point.hideControlDots(lineWidth: self.parent!.lineWidth)
+                    if !self.controlDots.contains(point) {
+                        point.hideControlDots(lineWidth: self.parent!.lineWidth)
+                    }
                 }
             }
+
+            self.resetControlDots()
 
             if self.path.rectPath(self.path,
                                   pad: setEditor.dotRadius).contains(pos),
@@ -506,6 +515,7 @@ class Curve: Equatable {
                 self.controlDot = pnt.mp
                 pnt.showControlDots(dotMag: self.parent!.dotMag,
                                     lineWidth: self.parent!.lineWidth)
+                self.controlDots.append(pnt)
 
             }
         }
@@ -623,6 +633,14 @@ class Curve: Equatable {
         self.controlDot = nil
     }
 
+    func resetControlDots() {
+        for point in self.controlDots {
+                       point.hideControlDots(
+                           lineWidth: self.parent!.lineWidth)
+        }
+        self.controlDots.removeAll()
+    }
+
     func resetPoints() {
          let range = [Int](0..<self.points.count)
          self.moveControlPoints(index: range, tags: [2])
@@ -696,7 +714,7 @@ class Curve: Equatable {
     }
 
 //    MARK: Global Control
-    func showControl(pos: CGPoint) {
+    func showControl(pos: CGPoint, shift: Bool) {
         if !self.lock {
             if self.edit {
                 if self.controlDot == nil {
@@ -704,15 +722,41 @@ class Curve: Equatable {
                     for i in stride(from: self.points.count-1,
                                     through: 0, by: -1) {
                         let point = self.points[i]
-                        if point.collideDot(pos: pos, dot: point.mp) &&
+                        if shift {
+                            if point.collideDot(pos: pos, dot: point.mp) {
+                                point.showControlDots(
+                                    dotMag: self.parent!.dotMag,
+                                    lineWidth: self.parent!.lineWidth)
+                                if !self.controlDots.contains(point) {
+                                    self.controlDots.append(point)
+                                } else {
+                                    if let ind = self.controlDots.firstIndex(
+                                        of: point) {
+                                        point.hideControlDots(
+                                            lineWidth: self.parent!.lineWidth)
+                                        self.controlDots.remove(at: ind)
+                                        return
+                                    }
+                                }
+                            }
+                        } else {
+                            if point.collideDot(pos: pos, dot: point.mp) &&
                             !find {
-                            point.showControlDots(
+                                point.showControlDots(
                                 dotMag: self.parent!.dotMag,
                                 lineWidth: self.parent!.lineWidth)
-                            find = true
-                        } else {
-                            point.hideControlDots(
-                                lineWidth: self.parent!.lineWidth)
+
+                                find = true
+                                if !self.controlDots.contains(point) {
+                                    self.resetControlDots()
+                                    self.controlDots.append(point)
+                                }
+                            } else {
+                                if !self.controlDots.contains(point) {
+                                    point.hideControlDots(
+                                        lineWidth: self.parent!.lineWidth)
+                                }
+                            }
                         }
                     }
                 }

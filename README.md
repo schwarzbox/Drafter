@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.94
+v0.95
 
 # Features
 
@@ -45,8 +45,6 @@ Font (F) - type text in text field, hit Enter and create vector representation
 
 # Combos
 
-- Common
-
 Close (⌘W), Quit (⌘Q) -  safe exit
 
 - Files
@@ -67,21 +65,33 @@ Group (⌘G), Ungroup (⇧⌘G)  - create/remove group for selectted shapes
 
 Delete (Delete) - remove shape or control dot
 
+SelectAll(⌘A) - select all shapes or dots
+
 - Modifiers
 
-Create shape with ⇧(Shift) to make width and height equal
+Shape mode
+
+Use ⇧(Shift) and drag to make width and height equal when create shape
+
+Use ⇧(Shift) and drag for straight lines and diagonals when create Line and Vector
 
 Resize shapes proportionaly with ⇧(Shift)
 
-Drag shape or dot with ^(Control) to turn on "snap to rullers"
+Drag shape  with ^(Control) to turn on "snap to rullers"
 
 Select shape with ⌥(Option) to clone it
+
+Edit mode
+
+Use ⇧(Shift) and put mouse over dot to select more than one dot
+
+Use ⇧(Shift) and drag for straight lines and diagonals with Line and Vector
+
+Drag dot with ^(Control) to turn on "snap to rullers"
 
 Use ⌥(Option) for edit control dots separately
 
 Drag mouse with  ⌘(Cmd) key to edit control dot
-
-Use ⇧(Shift) for straight lines and diagonals with Line and Vector
 
 - Canvas
 
@@ -92,9 +102,9 @@ Scroll canvas with two fingers
 
 # Road map
 
-v.0.95 Improve History
+v.0.96 Figures
 
-v 096 Merge
+v 097 Improve History
 
 v.097 Perfomance
 
@@ -102,6 +112,5 @@ v1.0 Bugs:  Bundle extension
 
 v1.5 .svg
 
-v2.0 Edit Text witth control dots
-
+v2.0 Edit Text witth control dots, Merge shapes
 

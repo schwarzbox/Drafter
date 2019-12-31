@@ -33,6 +33,7 @@ protocol Drawable {
 
 class Tool: Drawable {
     var tag: Int {-1}
+    var cursor: NSCursor {NSCursor.arrow}
     static var view: SketchPad?
     func useTool(_ action: @autoclosure () -> Void) {
          Tool.view!.editedPath = NSBezierPath()
@@ -155,6 +156,7 @@ class Tool: Drawable {
 class Drag: Tool {
     override var tag: Int {0}
     override var name: String {"drag"}
+
     func action(topLeft: CGPoint, bottomRight: CGPoint) {
         let size = self.flipSize(topLeft: topLeft,
                                 bottomRight: bottomRight)
@@ -205,6 +207,7 @@ class Drag: Tool {
 }
 
 class Line: Tool {
+    override var cursor: NSCursor {NSCursor.crosshair}
     override var tag: Int {1}
     override var name: String {"line"}
     func action(topLeft: CGPoint, bottomRight: CGPoint) {
@@ -244,6 +247,7 @@ class Line: Tool {
 }
 
 class Triangle: Tool {
+    override var cursor: NSCursor {NSCursor.crosshair}
     override var tag: Int {2}
     func action(topLeft: CGPoint, bottomRight: CGPoint, sides: Int,
                 angle: CGFloat) {
@@ -292,6 +296,7 @@ class Triangle: Tool {
 }
 
 class Rectangle: Tool {
+    override var cursor: NSCursor {NSCursor.crosshair}
     override var tag: Int {3}
     func action(topLeft: CGPoint, bottomRight: CGPoint,
                 shift: Bool = false) {
@@ -402,6 +407,7 @@ class Hexagon: Triangle {
 }
 
 class Arc: Tool {
+    override var cursor: NSCursor {NSCursor.crosshair}
     override var tag: Int {6}
     func action(topLeft: CGPoint, bottomRight: CGPoint) {
         let size = self.flipSize(topLeft: topLeft,
@@ -460,6 +466,7 @@ class Arc: Tool {
 }
 
 class Oval: Tool {
+    override var cursor: NSCursor {NSCursor.crosshair}
     override var tag: Int {7}
     func action(topLeft: CGPoint, bottomRight: CGPoint,
                 shift: Bool = false) {
@@ -503,6 +510,7 @@ class Oval: Tool {
 }
 
 class Stylus: Line {
+    override var cursor: NSCursor {setCursor.pencil}
     override var tag: Int {8}
     override var name: String {"line"}
     override func action(topLeft: CGPoint, bottomRight: CGPoint) {
@@ -528,6 +536,10 @@ class Stylus: Line {
         par.filledCurve = false
     }
 
+    override var mpPoints: [CGPoint] {
+         return []
+    }
+
     override func down(shift: Bool) {
         Tool.view!.controlPoints = []
         Tool.view!.editedPath.removeAllPoints()
@@ -549,6 +561,7 @@ class Stylus: Line {
 }
 
 class Vector: Line {
+    override var cursor: NSCursor {setCursor.vector}
     override var tag: Int {9}
     override var name: String {"shape"}
     func action(topLeft: CGPoint) {
@@ -631,6 +644,7 @@ class Vector: Line {
 }
 
 class Text: Tool {
+    override var cursor: NSCursor {NSCursor.iBeam}
     override var tag: Int {10}
     override var name: String {"text"}
     func action(pos: CGPoint? = nil) {

@@ -152,6 +152,13 @@ struct SetupCursor {
     let rotateE: NSCursor = NSCursor.init(
         image: #imageLiteral(resourceName: "neswResizeCursor"),
         hotSpot: CGPoint(x: 8, y: 8))
+
+    let pencil: NSCursor = NSCursor.init(
+        image: "✎".emojiToImage(),
+        hotSpot: CGPoint(x: 16, y: 24))
+    let vector: NSCursor = NSCursor.init(
+        image: "✑".emojiToImage(),
+        hotSpot: CGPoint(x: 24, y: 12))
 }
 
 var setEditor = SetupEditor()

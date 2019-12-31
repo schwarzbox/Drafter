@@ -8,7 +8,14 @@
 
 import Cocoa
 
-class ControlPoint {
+class ControlPoint: Equatable {
+    static func == (lhs: ControlPoint, rhs: ControlPoint) -> Bool {
+        for (i, dot) in lhs.dots.enumerated()  where dot != rhs.dots[i] {
+            return false
+        }
+        return true
+    }
+
     let mp: Dot
     let cp1: Dot
     let cp2: Dot

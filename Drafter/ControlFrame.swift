@@ -319,7 +319,8 @@ class ControlFrame: CAShapeLayer {
     }
 
     func decreaseDotSize() {
-        NSCursor.arrow.set()
+        parent?.tool.cursor.set()
+
         for layer in self.sublayers ?? [] {
             if let dot = layer as? Dot, dot.tag == 12 {
                 let size = self.dotSize

@@ -373,6 +373,20 @@ extension String {
         let fontAttributes = [NSAttributedString.Key.font: font]
         return self.size(withAttributes: fontAttributes)
     }
+
+    func emojiToImage(width: CGFloat = 32, height: CGFloat = 32) -> NSImage {
+        return NSImage(
+            size: NSSize(width: width, height: height),
+            flipped: false,
+            drawingHandler: { (dstRect: NSRect) -> Bool in
+                let font = NSFont.systemFont(ofSize: 24)
+                let textAttr = [
+                    NSAttributedString.Key.font: font,
+                    NSAttributedString.Key.foregroundColor: NSColor.white]
+                self.draw(in: dstRect, withAttributes: textAttr)
+                return true
+        })
+    }
 }
 
 extension NSImage {

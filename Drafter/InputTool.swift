@@ -27,11 +27,14 @@ class InputTool: NSTextField {
 
     func resize() {
         if let cell = self.cell, let font = self.font {
-            let sz = cell.stringValue.sizeOfString(usingFont: font)
-            if let lastChar = cell.stringValue.last {
+            let txt = cell.stringValue.count < 5
+                ? "Text"
+                : cell.stringValue
+            let sz = txt.sizeOfString(usingFont: font)
+            if let lastChar = txt.last {
                 let lastSz = String(lastChar).sizeOfString(usingFont: font)
                 self.setFrameSize(
-                    CGSize(width: sz.width+lastSz.width/2,
+                    CGSize(width: sz.width+lastSz.width,
                            height: cell.cellSize.height))
             }
 

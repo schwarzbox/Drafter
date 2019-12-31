@@ -5,6 +5,45 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
+// 0.96
+// select dot with frame in edit mode
+
+// default setting for tool or reset to def
+// change selecttion frame
+// edit Readme
+
+// 0.97
+// show groups members?
+// triangle (hex, pent)
+// flex poly
+// star
+// arc from circle with middle radius
+
+// 0.98
+// improve history
+
+// 0.99
+// combine curve edit and create mode
+// edit curve on create, delete dots?
+
+// 1.0
+
+// open recent
+// preferences
+// help
+
+// Bugs
+// save draft not bundle 
+
+// 1.5
+// SVG
+
+// 2.0
+// ?
+// hide def cursor when snap to rulers
+// curved text
+// add group to group
+
 import Cocoa
 
 class SketchPad: NSView {
@@ -220,11 +259,13 @@ class SketchPad: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
+        let shift: Bool = event.modifierFlags.contains(.shift) ? true : false
         let pos = convert(event.locationInWindow, from: nil)
+
         self.showCurvedPath(pos: pos)
 
         if let curve = self.selectedCurve {
-            curve.showControl(pos: pos)
+            curve.showControl(pos: pos, shift: shift)
         }
         self.needsDisplay = true
     }
@@ -238,6 +279,7 @@ class SketchPad: NSView {
     }
 
     override func mouseMoved(with event: NSEvent) {
+
         let shift: Bool = event.modifierFlags.contains(.shift) ? true : false
         let ctrl: Bool = event.modifierFlags.contains(.control) ? true : false
         self.startPos = convert(event.locationInWindow, from: nil)
@@ -284,7 +326,6 @@ class SketchPad: NSView {
         } else {
             self.tool.move(shift: shift, ctrl: ctrl)
         }
-
         self.needsDisplay = true
     }
 
@@ -331,7 +372,31 @@ class SketchPad: NSView {
             if shift && curve.controlDot != nil {
                 self.rulers.appendCustomRule(move: mPos, line: self.finPos)
             }
-            curve.editPoint(pos: self.finPos, cmd: cmd, opt: opt)
+
+            if let selDot = curve.controlDot {
+                let delta = CGPoint(x: self.finPos.x - selDot.position.x,
+                                    y: self.finPos.y - selDot.position.y)
+
+                for pnt in curve.controlDots where !pnt.dots.contains(selDot) {
+                    var dot = pnt.mp
+                    switch selDot.tag {
+                    case 0:
+                        curve.controlDot = pnt.cp1
+                        dot = pnt.cp1
+                    case 1:
+                        curve.controlDot = pnt.cp2
+                        dot = pnt.cp2
+                    default:
+                        curve.controlDot = pnt.mp
+                    }
+
+                    let pos = CGPoint(x: dot.position.x + delta.x,
+                                      y: dot.position.y + delta.y)
+                    curve.editPoint(pos: pos, cmd: cmd, opt: opt)
+                }
+                curve.controlDot = selDot
+                curve.editPoint(pos: self.finPos, cmd: cmd, opt: opt)
+            }
             self.updateMasks()
 
         } else if let curve = self.selectedCurve, let dot = curve.controlDot {
@@ -357,7 +422,7 @@ class SketchPad: NSView {
 
         if let curve = self.selectedCurve, curve.edit {
             self.clearPathLayer(layer: self.curveLayer, path: self.curvedPath)
-            curve.selectPoint(pos: self.startPos)
+            curve.selectPoint(pos: self.startPos, shift: shift)
 
             var mpPoints: [CGPoint] = [
                 curve.boundsPoints(curves: curve.groups)[1]]
@@ -636,8 +701,8 @@ class SketchPad: NSView {
             y: scrHei - (winY + (viewY + pos.y) * self.zoomed))
 
         CGDisplayMoveCursorToPoint(disp, winPos)
-
     }
+
     @discardableResult func snapToRulers(
         points: [CGPoint], curves: [Curve],
         curvePoints: [CGPoint] = [],
@@ -650,6 +715,7 @@ class SketchPad: NSView {
         let snap = rulers.createRulers(points: points,
             curves: curves, curvePoints: curvePoints,
             exclude: exclude, ctrl: ctrl)
+
         let pad = self.dotRadius
         let width = self.locationX.frame.width
         let height = self.locationX.frame.height
@@ -677,6 +743,7 @@ class SketchPad: NSView {
                 }
             }
         }
+        tool.cursor.set()
         return snap.delta
     }
 
@@ -1183,6 +1250,7 @@ class SketchPad: NSView {
         self.clearCurvedPath()
 
         self.tool = tools[tag]
+        self.tool.cursor.set()
         self.toolUI?.isOn(on: tag)
     }
 

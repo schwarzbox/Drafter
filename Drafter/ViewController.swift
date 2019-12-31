@@ -517,6 +517,9 @@ class ViewController: NSViewController,
     }
 
     func tableViewSelectionDidChange(_ notification: Notification) {
+        if let curve = sketchView.selectedCurve, curve.edit {
+            return
+        }
         selectedSketch = sketchUI.selectedRow
         sketchView!.selectSketch(tag: selectedSketch)
         self.saveHistory()
@@ -1065,7 +1068,13 @@ class ViewController: NSViewController,
 
     @IBAction override func selectAll(_ sender: Any?) {
         let view = sketchView!
-        if let resp = self.window.firstResponder,
+        if let curve = view.selectedCurve, curve.edit {
+            curve.controlDots = curve.points
+            for point in curve.controlDots {
+                point.showControlDots(dotMag: view.dotMag,
+                                      lineWidth: view.lineWidth)
+            }
+        } else if let resp = self.window.firstResponder,
             resp.isKind(of: NSWindow.self) {
             view.groups = []
             for curve in view.curves {
@@ -1198,6 +1207,7 @@ class ViewController: NSViewController,
             for curve in view.curves {
                 for cur in curve.groups
                     where cur.imageLayer.contents != nil {
+                    
                     if let img = cur.imageLayer.contents as? NSImage {
                         do {
                             let fileUrl = dirUrl.appendingPathComponent(
