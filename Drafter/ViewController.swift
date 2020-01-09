@@ -308,13 +308,6 @@ class ViewController: NSViewController,
         sketchView.frameUI = frameUI
         sketchView.fontUI = fontUI
 
-        sketchView.curveWidth = curveWidth
-        sketchView.curveMiter = curveMiter
-        sketchView.curveShadowRadius = curveShadowRadius
-        sketchView.curveShadowOffsetX = curveShadowOffsetX
-        sketchView.curveShadowOffsetY = curveShadowOffsetY
-
-        sketchView.alphaSliders = alphaSliders
         sketchView.colorPanels = colorPanels
     }
 
@@ -984,6 +977,7 @@ class ViewController: NSViewController,
             selectedSketch = -1
         }
     }
+
     func restoreStack(history: () -> Void) {
         let view = sketchView!
         if let curve = view.selectedCurve {
@@ -1015,11 +1009,13 @@ class ViewController: NSViewController,
                 break
             }
         }
+
         view.updateMasks()
         view.needsDisplay = true
         self.updateStack()
         self.updateSliders()
     }
+
     @IBAction func undoStack(_ sender: Any) {
         if let resp = self.window.firstResponder,
             resp.isKind(of: NSWindow.self) {

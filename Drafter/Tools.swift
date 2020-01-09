@@ -163,16 +163,30 @@ class Drag: Tool {
         Tool.view!.curvedPath.appendRect(NSRect(
             x: topLeft.x, y: topLeft.y,
             width: size.wid, height: size.hei))
-        Tool.view!.groups.removeAll()
-        for cur in Tool.view!.curves {
-           let curves = cur.groupRect(curves: cur.groups)
-           if Tool.view!.curvedPath.bounds.contains(curves) &&
-               !Tool.view!.groups.contains(cur) {
-                Tool.view!.groups.append(contentsOf: cur.groups)
-           }
-        }
-        for cur in Tool.view!.groups {
-            Tool.view!.curvedPath.append(cur.path)
+
+        if let curve = Tool.view!.selectedCurve, curve.edit {
+            for point in curve.points {
+                if Tool.view!.curvedPath.bounds.contains(point.mp.position) {
+                    point.showControlDots(
+                        dotMag: Tool.view!.dotMag,
+                        lineWidth: Tool.view!.lineWidth)
+                    if !curve.controlDots.contains(point) {
+                        curve.controlDots.append(point)
+                    }
+                }
+            }
+        } else {
+            Tool.view!.groups.removeAll()
+            for cur in Tool.view!.curves {
+               let curves = cur.groupRect(curves: cur.groups)
+               if Tool.view!.curvedPath.bounds.contains(curves) &&
+                   !Tool.view!.groups.contains(cur) {
+                    Tool.view!.groups.append(contentsOf: cur.groups)
+               }
+            }
+            for cur in Tool.view!.groups {
+                Tool.view!.curvedPath.append(cur.path)
+            }
         }
     }
 
@@ -180,7 +194,7 @@ class Drag: Tool {
                          event: NSEvent? = nil) {
         Tool.view!.clearPathLayer(layer: Tool.view!.curveLayer,
                             path: Tool.view!.curvedPath)
-        if let curve = Tool.view!.selectedCurve, !curve.lock {
+        if let curve = Tool.view!.selectedCurve, !curve.edit, !curve.lock {
             Tool.view!.dragCurve(deltaX: event?.deltaX ?? 0,
                                    deltaY: event?.deltaY ?? 0,
                                    shift: shift, ctrl: ctrl)

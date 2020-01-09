@@ -51,25 +51,29 @@ class Curve: Equatable {
                 switch i {
                 case 0:
                     let clr = color.cgColor.sRGB(alpha: self.alpha[0])
-                    if self.filterRadius > 0 {
-                        self.canvas.strokeColor = clr.sRGB(
-                            alpha: CGFloat(0))
-                        self.imageLayer.strokeColor = clr
-                    } else {
-                        self.canvas.strokeColor = clr
-                        self.imageLayer.strokeColor = clr.sRGB(
-                            alpha: CGFloat(0))
+                    if self.imageLayer.contents == nil {
+                        if self.filterRadius > 0 {
+                            self.canvas.strokeColor = clr.sRGB(
+                                alpha: CGFloat(0))
+                            self.imageLayer.strokeColor = clr
+                        } else {
+                            self.canvas.strokeColor = clr
+                            self.imageLayer.strokeColor = clr.sRGB(
+                                alpha: CGFloat(0))
+                        }
                     }
                 case 1:
                     let clr = color.cgColor.sRGB(alpha: self.alpha[1])
-                    if self.filterRadius > 0 {
-                        self.canvas.fillColor = clr.sRGB(
-                            alpha: CGFloat(0))
-                        self.imageLayer.fillColor = clr
-                    } else {
-                        self.canvas.fillColor = clr
-                        self.imageLayer.fillColor = clr.sRGB(
-                            alpha: CGFloat(0))
+                    if self.imageLayer.contents == nil {
+                        if self.filterRadius > 0 {
+                            self.canvas.fillColor = clr.sRGB(
+                                alpha: CGFloat(0))
+                            self.imageLayer.fillColor = clr
+                        } else {
+                            self.canvas.fillColor = clr
+                            self.imageLayer.fillColor = clr.sRGB(
+                                alpha: CGFloat(0))
+                        }
                     }
                 case 2:
                     let clr = color.cgColor
@@ -342,20 +346,6 @@ class Curve: Equatable {
         return rect
     }
 
-    func reversed() -> Bool {
-        let tmpPath = NSBezierPath(rect: self.path.bounds)
-        tmpPath.lineWidth = 0
-        tmpPath.append(self.path)
-        let pnt = CGPoint(x: self.path.bounds.midX,
-                          y: self.path.bounds.midY)
-
-        if (tmpPath.contains(pnt) && self.path.contains(pnt)) ||
-            (!tmpPath.contains(pnt) && !self.path.contains(pnt)) {
-            return true
-        }
-        return false
-    }
-
 //    MARK: Layer func
     func updateLayer() {
         self.gradientMask.path = self.path.cgPath
@@ -374,6 +364,21 @@ class Curve: Equatable {
             layer.bounds = self.canvas.bounds
             layer.position = self.canvas.position
         }
+    }
+
+//    MARK: Mask
+    func reversed() -> Bool {
+        let tmpPath = NSBezierPath(rect: self.path.bounds)
+        tmpPath.lineWidth = 0
+        tmpPath.append(self.path)
+        let pnt = CGPoint(x: self.path.bounds.midX,
+                          y: self.path.bounds.midY)
+
+        if (tmpPath.contains(pnt) && self.path.contains(pnt)) ||
+            (!tmpPath.contains(pnt) && !self.path.contains(pnt)) {
+            return true
+        }
+        return false
     }
 
     func removeMaskBorderEdge() -> NSBezierPath? {
@@ -482,42 +487,43 @@ class Curve: Equatable {
         return cp
     }
 
-    func selectPoint(pos: CGPoint, shift: Bool = false) {
-        if !self.lock {
-            for i in stride(from: self.points.count-1,
-                        through: 0, by: -1) {
+    func selectPoint(pos: CGPoint) {
+        var find = false
+        for i in stride(from: self.points.count-1, through: 0, by: -1) {
             let point = self.points[i]
-                if let dot = point.collidedPoint(pos: pos) {
-                    self.controlDot = dot
-                    point.showControlDots(dotMag: self.parent!.dotMag,
-                                          lineWidth: self.parent!.lineWidth)
-                    return
-                } else {
-                    if !self.controlDots.contains(point) {
-                        point.hideControlDots(lineWidth: self.parent!.lineWidth)
-                    }
+            if let dot = point.collidedPoint(pos: pos), !find {
+                self.controlDot = dot
+                point.showControlDots(dotMag: self.parent!.dotMag,
+                                      lineWidth: self.parent!.lineWidth)
+                find = true
+            } else {
+                if !self.controlDots.contains(point) {
+                    point.hideControlDots(lineWidth: self.parent!.lineWidth)
                 }
             }
+        }
+        
+        if find {
+            return
+        }
 
-            self.resetControlDots()
+        self.resetControlDots()
 
-            if self.path.rectPath(self.path,
-                                  pad: setEditor.dotRadius).contains(pos),
-                let segment = self.path.findPath(pos: pos) {
+        if self.path.rectPath(self.path,
+                              pad: setEditor.dotRadius).contains(pos),
+            let segment = self.path.findPath(pos: pos) {
 
-                let pnt = self.insertPoint(pos: pos,
-                                           index: segment.index)
-                self.path = self.path.insertCurve(to: pnt.mp.position,
-                                      at: segment.index,
-                                      with: segment.points)
+            let pnt = self.insertPoint(pos: pos,
+                                       index: segment.index)
+            self.path = self.path.insertCurve(to: pnt.mp.position,
+                                  at: segment.index,
+                                  with: segment.points)
 
-                self.resetPoints()
-                self.controlDot = pnt.mp
-                pnt.showControlDots(dotMag: self.parent!.dotMag,
-                                    lineWidth: self.parent!.lineWidth)
-                self.controlDots.append(pnt)
-
-            }
+            self.resetPoints()
+            self.controlDot = pnt.mp
+            pnt.showControlDots(dotMag: self.parent!.dotMag,
+                                lineWidth: self.parent!.lineWidth)
+            self.controlDots.append(pnt)
         }
     }
 
@@ -649,19 +655,19 @@ class Curve: Equatable {
          self.updateLayer()
     }
 
-    func removePoint() {
-        for (index, point) in self.points.enumerated() {
-            if !point.cp1.isHidden || !point.cp2.isHidden {
-                self.points.remove(at: index)
-                self.path.printPath()
-                point.delete()
-                let removeAt = index == self.points.count
-                    ? index
-                    : index+1
-                self.path = self.path.removePath(at: removeAt)
-                self.path.printPath()
-                break
-            }
+    func removePoint(pnt: ControlPoint) {
+        for (index, point) in self.points.enumerated()
+            where point == pnt {
+            self.points.remove(at: index)
+//                self.path.printPath()
+            point.delete()
+            let removeAt = index == self.points.count
+                ? index
+                : index+1
+            self.path = self.path.removePath(at: removeAt)
+//                self.path.printPath()
+            break
+
         }
         self.resetPoints()
     }
@@ -714,11 +720,12 @@ class Curve: Equatable {
     }
 
 //    MARK: Global Control
-    func showControl(pos: CGPoint, shift: Bool) {
+    func showControl(pos: CGPoint, cmd: Bool, shift: Bool) {
         if !self.lock {
             if self.edit {
                 if self.controlDot == nil {
                     var find = false
+
                     for i in stride(from: self.points.count-1,
                                     through: 0, by: -1) {
                         let point = self.points[i]
@@ -729,22 +736,23 @@ class Curve: Equatable {
                                     lineWidth: self.parent!.lineWidth)
                                 if !self.controlDots.contains(point) {
                                     self.controlDots.append(point)
-                                } else {
-                                    if let ind = self.controlDots.firstIndex(
-                                        of: point) {
-                                        point.hideControlDots(
-                                            lineWidth: self.parent!.lineWidth)
-                                        self.controlDots.remove(at: ind)
-                                        return
-                                    }
+                                }
+                            }
+                        } else if cmd {
+                            if point.collideDot(pos: pos, dot: point.mp) {
+                                if let ind = self.controlDots.firstIndex(
+                                    of: point) {
+                                    point.hideControlDots(
+                                        lineWidth: self.parent!.lineWidth)
+                                    self.controlDots.remove(at: ind)
                                 }
                             }
                         } else {
                             if point.collideDot(pos: pos, dot: point.mp) &&
-                            !find {
+                                !find {
                                 point.showControlDots(
-                                dotMag: self.parent!.dotMag,
-                                lineWidth: self.parent!.lineWidth)
+                                    dotMag: self.parent!.dotMag,
+                                    lineWidth: self.parent!.lineWidth)
 
                                 find = true
                                 if !self.controlDots.contains(point) {
@@ -794,6 +802,7 @@ class Curve: Equatable {
 
         self.imageLayer.contents = image
         self.alpha[1] = 1
+        self.lineWidth = 0
 
         self.imageScaleX = scaleX
         self.imageScaleY = scaleY

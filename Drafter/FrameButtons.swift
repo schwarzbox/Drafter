@@ -24,6 +24,10 @@ class FrameButtons: NSStackView {
     }
 
     func updateState(view: SketchPad, curve: Curve) {
+        if let edit = self.subviews[4] as? NSButton {
+            edit.state = curve.edit ? .on : .off
+        }
+        
         if let group = self.subviews[5] as? NSButton {
             group.state = curve.groups.count > 1 ? .on : .off
         }

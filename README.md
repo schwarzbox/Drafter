@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.95
+v0.96
 
 # Features
 
@@ -14,7 +14,7 @@ All tools in canvas. No hidden menus with many tabs.
 
 ![Screenshot](screenshot/screenshot1.png)
 
-Use preview when edit shape. 
+Use preview when edit shape⌥(Option). 
 Use standart keys to transform shapes (⌘(Cmd), ⌥(Option), ⇧(Shift) & Delete)
 
 ![Screenshot](screenshot/screenshot2.png)
@@ -85,6 +85,8 @@ Edit mode
 
 Use ⇧(Shift) and put mouse over dot to select more than one dot
 
+Use ⌘(Cmd) and put mouse over dot to deselect dot
+
 Use ⇧(Shift) and drag for straight lines and diagonals with Line and Vector
 
 Drag dot with ^(Control) to turn on "snap to rullers"
@@ -102,11 +104,11 @@ Scroll canvas with two fingers
 
 # Road map
 
-v.0.96 Figures
+v.0.97 Figures
 
-v 097 Improve History
+v.098 Improve History
 
-v.097 Perfomance
+v.099 Perfomance
 
 v1.0 Bugs:  Bundle extension
 
