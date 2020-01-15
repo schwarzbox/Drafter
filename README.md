@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.96
+v0.97
 
 # Features
 
@@ -14,12 +14,12 @@ All tools in canvas. No hidden menus with many tabs.
 
 ![Screenshot](screenshot/screenshot1.png)
 
-Use preview when edit shape⌥(Option). 
+Use preview when edit shape. 
 Use standart keys to transform shapes (⌘(Cmd), ⌥(Option), ⇧(Shift) & Delete)
 
 ![Screenshot](screenshot/screenshot2.png)
 
-Every shape has gradient layer.  Setup alpha & color and you done
+Every shape has gradient layer.  Setup alpha & color and you are done
 
 ![Screenshot](screenshot/screenshot3.png)
 
@@ -33,11 +33,11 @@ Built-in rulers
 
 # Perfomance
 
-Now comfort work is possible when used less than 100 layers
+Drafter v0.97 comfort work is possible when used less than 100 layers
 
 # Tools & Hotkeys
 
-Select (D), Line (L), Triangle (T), Rectangle (R) Pentagon(P), Hex(H), Arc (A), Oval (O), Stylus (S)
+Select (M), Line (L), Triangle (T), Rectangle (R) Pentagon(P), Hex(H), Star(S), Arc (A), Oval (O), Stylus (D)
 
 Vector (V) - press ⚙ in pop-up menu to edit shape with control dots
 
@@ -79,13 +79,13 @@ Resize shapes proportionaly with ⇧(Shift)
 
 Drag shape  with ^(Control) to turn on "snap to rullers"
 
-Select shape with ⌥(Option) to clone it
+Click on shape with ⌘(Cmd)  to clone it
 
 Edit mode
 
 Use ⇧(Shift) and put mouse over dot to select more than one dot
 
-Use ⌘(Cmd) and put mouse over dot to deselect dot
+If dot selected use ⇧(Shift) and put mouse over dot to deselect dot
 
 Use ⇧(Shift) and drag for straight lines and diagonals with Line and Vector
 
@@ -104,15 +104,13 @@ Scroll canvas with two fingers
 
 # Road map
 
-v.0.97 Figures
+v.098 Improve History, RemoveBundle
 
-v.098 Improve History
+v.099 Group Members
 
-v.099 Perfomance
-
-v1.0 Bugs:  Bundle extension
+v1.0 Bugs:  Bundle extension UndoRedo
 
 v1.5 .svg
 
-v2.0 Edit Text witth control dots, Merge shapes
+v2.0 Edit Text witth control dots
 

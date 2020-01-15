@@ -509,8 +509,9 @@ class Curve: Equatable {
 
         self.resetControlDots()
 
-        if self.path.rectPath(self.path,
-                              pad: setEditor.dotRadius).contains(pos),
+        if self.path.rectPath(
+            self.path,
+            pad: setEditor.pathPad).contains(pos),
             let segment = self.path.findPath(pos: pos) {
 
             let pnt = self.insertPoint(pos: pos,
@@ -720,12 +721,11 @@ class Curve: Equatable {
     }
 
 //    MARK: Global Control
-    func showControl(pos: CGPoint, cmd: Bool, shift: Bool) {
+    func showControl(pos: CGPoint, shift: Bool) {
         if !self.lock {
             if self.edit {
                 if self.controlDot == nil {
                     var find = false
-
                     for i in stride(from: self.points.count-1,
                                     through: 0, by: -1) {
                         let point = self.points[i]
@@ -736,15 +736,13 @@ class Curve: Equatable {
                                     lineWidth: self.parent!.lineWidth)
                                 if !self.controlDots.contains(point) {
                                     self.controlDots.append(point)
-                                }
-                            }
-                        } else if cmd {
-                            if point.collideDot(pos: pos, dot: point.mp) {
-                                if let ind = self.controlDots.firstIndex(
-                                    of: point) {
-                                    point.hideControlDots(
-                                        lineWidth: self.parent!.lineWidth)
-                                    self.controlDots.remove(at: ind)
+                                } else {
+                                    if let ind = self.controlDots.firstIndex(
+                                        of: point) {
+                                        point.hideControlDots(
+                                            lineWidth: self.parent!.lineWidth)
+                                        self.controlDots.remove(at: ind)
+                                    }
                                 }
                             }
                         } else {
@@ -771,7 +769,7 @@ class Curve: Equatable {
             } else {
                 if let ctrlF = self.controlFrame {
                     if let dot = ctrlF.collideControlDot(pos: pos) {
-                        ctrlF.increaseDotSize(layer: dot)
+                        ctrlF.showInteractiveElement(layer: dot)
                     }
                 }
             }
@@ -781,7 +779,7 @@ class Curve: Equatable {
     func hideControl() {
         if !self.edit {
             if let ctrlF = self.controlFrame {
-                ctrlF.decreaseDotSize()
+                ctrlF.hideInteractiveElement()
             }
         }
     }

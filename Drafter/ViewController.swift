@@ -140,6 +140,7 @@ class ViewController: NSViewController,
             } else if event.keyCode == 36 {
                 if let curve = view.selectedCurve, curve.edit {
                     view.editFinished(curve: curve)
+                    self.saveHistory()
                     return true
                 } else if let curve = view.selectedCurve,
                     curve.groups.count==1, !curve.text.isEmpty,
@@ -1164,8 +1165,8 @@ class ViewController: NSViewController,
             openPanel.setupPanel()
             openPanel.beginSheetModal(
                 for: self.window!,
-                completionHandler: {(result) -> Void in
-                    if result.rawValue == NSApplication.ModalResponse.OK.rawValue {
+                completionHandler: {(res) -> Void in
+                    if res.rawValue == NSApplication.ModalResponse.OK.rawValue {
                         if openPanel.urls.count>0 {
                             let nc = NotificationCenter.default
                             nc.post(name: Notification.Name("openFiles"),
@@ -1203,7 +1204,7 @@ class ViewController: NSViewController,
             for curve in view.curves {
                 for cur in curve.groups
                     where cur.imageLayer.contents != nil {
-                    
+                        
                     if let img = cur.imageLayer.contents as? NSImage {
                         do {
                             let fileUrl = dirUrl.appendingPathComponent(

@@ -65,6 +65,7 @@ struct SetupEditor {
     let controlColor = NSColor.systemGreen.sRGB()
     let lineDashPattern: [NSNumber] = [4, 4, 4, 4]
 
+    let pathPad: CGFloat = 32
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 
@@ -153,7 +154,7 @@ struct SetupCursor {
         image: #imageLiteral(resourceName: "neswResizeCursor"),
         hotSpot: CGPoint(x: 8, y: 8))
 
-    let pencil: NSCursor = NSCursor.init(
+    let stylus: NSCursor = NSCursor.init(
         image: "✎".emojiToImage(),
         hotSpot: CGPoint(x: 16, y: 24))
     let vector: NSCursor = NSCursor.init(

@@ -300,7 +300,7 @@ class ControlFrame: CAShapeLayer {
         return nil
     }
 
-    func increaseDotSize(layer: Dot) {
+    func showInteractiveElement(layer: Dot) {
         switch layer.tag {
         case 12:
             let size = self.dotSize + self.dotMag
@@ -318,7 +318,7 @@ class ControlFrame: CAShapeLayer {
         }
     }
 
-    func decreaseDotSize() {
+    func hideInteractiveElement() {
         parent?.tool.cursor.set()
 
         for layer in self.sublayers ?? [] {

@@ -10,15 +10,15 @@ import Cocoa
 
 let tools: [Tool] = [
     Drag(), Line(), Triangle(), Rectangle(),
-    Pentagon(), Hexagon(), Arc(), Oval(),
+    Pentagon(), Hexagon(), Star(), Arc(), Oval(),
     Stylus(), Vector(), Text()
 ]
 
 let toolsKeys: [String: Tool] = [
-    "d": tools[0], "l": tools[1], "t": tools[2],
-    "r": tools[3], "p": tools[4], "h": tools[5],
-    "a": tools[6], "o": tools[7],
-    "s": tools[8], "v": tools[9], "f": tools[10]]
+    "m": tools[0], "l": tools[1], "t": tools[2],
+    "r": tools[3], "p": tools[4], "h": tools[5], "s": tools[6],
+    "a": tools[7], "o": tools[8],
+    "d": tools[9], "v": tools[10], "f": tools[11]]
 
 protocol Drawable {
     var tag: Int { get }
@@ -126,7 +126,7 @@ class Tool: Drawable {
         Tool.view!.finPos.x -= snap.x
         Tool.view!.finPos.y -= snap.y
         Tool.view!.snapMouseToRulers(snap: snap,
-                                       pos: Tool.view!.finPos)
+                                     pos: Tool.view!.finPos)
     }
 
     func down(shift: Bool) {
@@ -264,34 +264,73 @@ class Triangle: Tool {
     override var cursor: NSCursor {NSCursor.crosshair}
     override var tag: Int {2}
     func action(topLeft: CGPoint, bottomRight: CGPoint, sides: Int,
-                angle: CGFloat) {
+                shift: Bool) {
         let size = self.flipSize(topLeft: topLeft,
                                  bottomRight: bottomRight)
+        let signWid: CGFloat = size.wid > 0 ? 1 : -1
+        let signHei: CGFloat = size.hei > 0 ? 1 : -1
+        var wid = abs(size.wid)
+        var hei = abs(size.hei)
 
-        let radius = abs(size.wid) < abs(size.hei)
-            ? abs(size.wid/2)
-            : abs(size.hei/2)
-        let cx: CGFloat = size.wid > 0
-            ? topLeft.x + radius
-            : topLeft.x - radius
-        var cy: CGFloat = topLeft.y - radius
-        var turn90 = -CGFloat.pi / 2
-        if size.hei > 0 {
-            cy = topLeft.y + radius
-            turn90 *= -1
+        if shift {
+            let maxSize = wid > hei ? wid : hei
+            wid = maxSize
+            hei = maxSize
         }
 
-        var points: [CGPoint] = []
-        if radius>0 {
-            let radian = CGFloat(angle * CGFloat.pi / 180)
+        let cx: CGFloat = signWid > 0
+            ? topLeft.x + wid/2
+            : topLeft.x - wid/2
+        let cy: CGFloat = signHei > 0
+            ? topLeft.y + hei/2
+            : topLeft.y - hei/2
 
-            for i in 0..<sides {
-                let cosX = cos(turn90 + CGFloat(i) * radian)
-                let sinY = -sin(turn90 + CGFloat(i) * radian)
-                points.append(CGPoint(x: cx + cosX * radius,
-                                     y: cy + sinY * radius))
-           }
+        var points: [CGPoint] = [CGPoint(x: cx, y: topLeft.y)]
+        let midWid = signWid * wid/2
+        let midHei = signHei * hei/2
+        if sides == 3 {
+           points.append(contentsOf:
+               [CGPoint(x: cx + midWid, y: cy+midHei),
+                CGPoint(x: cx - midWid, y: cy+midHei)
+           ])
+        } else if sides == 5 {
+            let pentWid = signWid * wid * (0.381966011727603 * 0.5)
+            let pentHei = signHei * hei * 0.381966011727603
+            points.append(contentsOf:
+               [CGPoint(x: cx + midWid, y: cy - midHei + pentHei),
+                CGPoint(x: cx + midWid - pentWid, y: cy+midHei),
+                CGPoint(x: cx - midWid + pentWid, y: cy+midHei),
+                CGPoint(x: cx - midWid, y: cy - midHei + pentHei)
+           ])
+        } else if sides == 6 {
+           let hexHei = signHei * hei * 0.25
+           points.append(contentsOf:
+               [CGPoint(x: cx + midWid, y: cy - midHei + hexHei),
+                CGPoint(x: cx + midWid, y: cy + midHei - hexHei),
+                CGPoint(x: cx, y: cy + midHei),
+                CGPoint(x: cx - midWid, y: cy + midHei - hexHei),
+                CGPoint(x: cx - midWid, y: cy - midHei + hexHei)
+           ])
+        } else if sides == 10 {
+            let pentWid = signWid * wid * (0.381966011727603 * 0.5)
+            let pentHei = signHei * hei * 0.381966011727603
+            let starMinWid = signWid * wid * 0.116788321167883
+            let starMaxWid = signWid * wid * 0.187956204379562
+            let starMinHei = signHei * hei * 0.62043795620438
+            let starMaxHei = signHei * hei * 0.755474452554745
+            points.append(contentsOf:
+                [CGPoint(x: cx + starMinWid, y: cy - midHei + pentHei),
+                 CGPoint(x: cx + midWid, y: cy - midHei + pentHei),
+                 CGPoint(x: cx + starMaxWid, y: cy - midHei + starMinHei),
+                 CGPoint(x: cx + midWid - pentWid, y: cy+midHei),
+                 CGPoint(x: cx, y: cy-midHei+starMaxHei),
+                 CGPoint(x: cx - midWid + pentWid, y: cy+midHei),
+                 CGPoint(x: cx - starMaxWid, y: cy - midHei + starMinHei),
+                 CGPoint(x: cx - midWid, y: cy - midHei + pentHei),
+                 CGPoint(x: cx - starMinWid, y: cy - midHei + pentHei)
+            ])
         }
+
         if points.count>0 {
             self.appendStraightCurves(points: points)
         }
@@ -301,11 +340,7 @@ class Triangle: Tool {
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
-                                 sides: 3, angle: 120))
-    }
-
-    override func drag(shift: Bool, ctrl: Bool) {
-        Tool.view!.clearRulers()
+                                 sides: 3, shift: shift))
     }
 }
 
@@ -399,10 +434,7 @@ class Pentagon: Triangle {
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
-                                 sides: 5, angle: 72))
-    }
-    override func drag(shift: Bool, ctrl: Bool) {
-        Tool.view!.clearRulers()
+                                 sides: 5, shift: shift))
     }
 }
 
@@ -412,17 +444,23 @@ class Hexagon: Triangle {
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
-                                 sides: 6, angle: 60))
+                                 sides: 6, shift: shift))
     }
+}
 
-    override func drag(shift: Bool, ctrl: Bool) {
-        Tool.view!.clearRulers()
+class Star: Triangle {
+    override var tag: Int {6}
+    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+                         event: NSEvent? = nil) {
+        self.useTool(self.action(topLeft: Tool.view!.startPos,
+                                 bottomRight: Tool.view!.finPos,
+                                 sides: 10, shift: shift))
     }
 }
 
 class Arc: Tool {
     override var cursor: NSCursor {NSCursor.crosshair}
-    override var tag: Int {6}
+    override var tag: Int {7}
     func action(topLeft: CGPoint, bottomRight: CGPoint) {
         let size = self.flipSize(topLeft: topLeft,
                                  bottomRight: bottomRight)
@@ -481,7 +519,7 @@ class Arc: Tool {
 
 class Oval: Tool {
     override var cursor: NSCursor {NSCursor.crosshair}
-    override var tag: Int {7}
+    override var tag: Int {8}
     func action(topLeft: CGPoint, bottomRight: CGPoint,
                 shift: Bool = false) {
         let size = self.flipSize(topLeft: topLeft, bottomRight: bottomRight)
@@ -524,8 +562,8 @@ class Oval: Tool {
 }
 
 class Stylus: Line {
-    override var cursor: NSCursor {setCursor.pencil}
-    override var tag: Int {8}
+    override var cursor: NSCursor {setCursor.stylus}
+    override var tag: Int {9}
     override var name: String {"line"}
     override func action(topLeft: CGPoint, bottomRight: CGPoint) {
         Tool.view!.editedPath.curve(to: bottomRight,
@@ -576,7 +614,7 @@ class Stylus: Line {
 
 class Vector: Line {
     override var cursor: NSCursor {setCursor.vector}
-    override var tag: Int {9}
+    override var tag: Int {10}
     override var name: String {"shape"}
     func action(topLeft: CGPoint) {
         let par = Tool.view!
@@ -658,8 +696,7 @@ class Vector: Line {
 }
 
 class Text: Tool {
-    override var cursor: NSCursor {NSCursor.iBeam}
-    override var tag: Int {10}
+    override var tag: Int {11}
     override var name: String {"text"}
     func action(pos: CGPoint? = nil) {
         let topLeft = pos ?? Tool.view!.startPos
@@ -679,8 +716,8 @@ class Text: Tool {
 
     }
 
-    override func drag(shift: Bool, ctrl: Bool) {
-        Tool.view!.clearRulers()
+    override var mpPoints: [CGPoint] {
+        return []
     }
 
     override func down(shift: Bool) {

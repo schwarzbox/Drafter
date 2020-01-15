@@ -53,7 +53,7 @@ class RulerTool: CAShapeLayer {
 
     func createRulers(points: [CGPoint], curves: [Curve],
                       curvePoints: [CGPoint] = [],
-                      exclude: [Curve] = [], ctrl: Bool = false)
+                      exclude: [Curve] = [])
         -> (delta: CGPoint, pnt: [String: (pos: CGPoint?,
                                             dist: CGFloat)]) {
 
@@ -69,7 +69,7 @@ class RulerTool: CAShapeLayer {
                                                  minDistX: &minDistX,
                                                  minDistY: &minDistY)
 
-        let curvePoints = self.findRulersToPoints(point: points[0],
+        let curvePoints = self.findRulersToPoints(points: points,
                                                   curvePoints: curvePoints,
                                                   minDistX: minDistX,
                                                   minDistY: minDistY)
@@ -82,15 +82,15 @@ class RulerTool: CAShapeLayer {
         }
 
         self.showRulers(rulerPoints: rulerPoints)
-        var snap = self.deltaRulers(rulerPoints: rulerPoints)
-        if !ctrl {
-            snap.delta = CGPoint(x: 0, y: 0)
-        }
-        return snap
+        return self.deltaRulers(rulerPoints: rulerPoints)
+
     }
 
     func updateWithPath() {
         self.view?.layer?.addSublayer(self)
+        if self.view?.selectedCurve == nil {
+            self.view?.tool.cursor.set()
+        }
     }
 
     func clearRulers() {
@@ -153,8 +153,7 @@ class RulerTool: CAShapeLayer {
                 let boundsPnt = cur.boundsPoints(curves: cur.groups)
                 for curPnt in boundsPnt {
                     if pnt.x <= curPnt.x+setEditor.rulersDelta &&
-                        pnt.x >= curPnt.x-setEditor.rulersDelta {
-
+                        pnt.x >= curPnt.x-setEditor.rulersDelta {                        
                         let (minTarY, maxTarY) = self.findMinMax(
                             sel: pnt.y, tar: curPnt.y,
                             min: boundsPnt[0].y,
@@ -217,11 +216,15 @@ class RulerTool: CAShapeLayer {
         return rulerPoints
     }
 
-    func findRulersToPoints(point: CGPoint,
+    func findRulersToPoints(points: [CGPoint],
                             curvePoints: [CGPoint],
                             minDistX: CGFloat,
                             minDistY: CGFloat) -> [String: RulerPoint?] {
         var rulerPoints: [String: RulerPoint?] = [:]
+        guard points.count > 0 else { return rulerPoints}
+
+        let point = points[0]
+
         var minDistX: CGFloat = minDistX
         var minDistY: CGFloat = minDistY
         var rulerPointX: RulerPoint?

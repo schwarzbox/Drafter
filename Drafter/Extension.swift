@@ -94,8 +94,9 @@ extension NSBezierPath {
                 cPnt[2] = cPnt[0]
 
                 oldPoint = cPnt[0]
-                if self.rectPath(path,
-                                 pad: setEditor.dotSize).contains(pos) {
+                if self.rectPath(
+                    path,
+                    pad: setEditor.pathPad).contains(pos) {
                     return (index: i, points: cPnt)
                 }
             case .curveTo:
@@ -108,8 +109,9 @@ extension NSBezierPath {
                     path.close()
                 }
                 oldPoint = cPnt[2]
-                if self.rectPath(path,
-                                 pad: setEditor.dotSize).contains(pos) {
+                if self.rectPath(
+                    path,
+                    pad: setEditor.pathPad).contains(pos) {
                     return (index: i, points: cPnt)
                 }
             case .closePath:
