@@ -65,7 +65,7 @@ struct SetupEditor {
     let controlColor = NSColor.systemGreen.sRGB()
     let lineDashPattern: [NSNumber] = [4, 4, 4, 4]
 
-    let pathPad: CGFloat = 32
+    let pathPad: CGFloat = 4
     let dotSize: CGFloat =  8
     let dotRadius: CGFloat = 4
 

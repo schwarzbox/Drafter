@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.97
+v0.98
 
 # Features
 
@@ -73,27 +73,31 @@ Shape mode
 
 Use ⇧(Shift) and drag to make width and height equal when create shape
 
-Use ⇧(Shift) and drag for straight lines and diagonals when create Line and Vector
+Use ⇧(Shift) and drag for straight lines when create Line and Vector
 
 Resize shapes proportionaly with ⇧(Shift)
 
-Drag shape  with ^(Control) to turn on "snap to rullers"
+Use ^(Control) + LMB to select more than one shape
+
+If shape selected press ^(Control) + LMB to deselect dot
+
+Drag shape with fn(Function) to turn on "snap to rullers"
 
 Click on shape with ⌘(Cmd)  to clone it
 
 Edit mode
 
-Use ⇧(Shift) and put mouse over dot to select more than one dot
+Use ^(Control) + LMB to select more than one dot
 
-If dot selected use ⇧(Shift) and put mouse over dot to deselect dot
+If dot selected press ^(Control) + LMB to deselect dot
 
-Use ⇧(Shift) and drag for straight lines and diagonals with Line and Vector
+Use ⇧(Shift) and drag for move dot straight
 
-Drag dot with ^(Control) to turn on "snap to rullers"
+Drag dot with fn(Function) to turn on "snap to rullers"
 
-Use ⌥(Option) for edit control dots separately
+When select more than one dot drag  with ⌥(Option) to "zoom move"
 
-Drag mouse with  ⌘(Cmd) key to edit control dot
+Drag mouse with ⌘(Cmd)  to show control dots
 
 - Canvas
 

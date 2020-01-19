@@ -142,6 +142,11 @@ class ViewController: NSViewController,
                     view.editFinished(curve: curve)
                     self.saveHistory()
                     return true
+                } else if let curve = view.selectedCurve, !curve.edit,
+                    curve.text.isEmpty {
+                    view.editStarted(curve: curve)
+                    self.saveHistory()
+                    return true
                 } else if let curve = view.selectedCurve,
                     curve.groups.count==1, !curve.text.isEmpty,
                     !curve.canvas.isHidden {

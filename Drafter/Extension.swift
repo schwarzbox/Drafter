@@ -73,11 +73,71 @@ extension NSBezierPath {
         return path
     }
 
+//    func findPath(curve: Curve,
+//                   pos: CGPoint) -> (index: Int, points: [CGPoint])? {
+//        let mags = curve.points.map { (pnt) -> (CGFloat, CGPoint) in
+//            (pnt.mp.position.magnitude(origin: pos), pnt.mp.position)
+//        }
+//        let srt = mags.sorted(by: {$0.0<$1.0})
+//        var cnt = 1
+//        if srt.count > cnt {
+//            var minPos1 = srt[cnt-1].1
+//            var minPos2 = srt[cnt].1
+//            while srt[cnt-1].0 == srt[cnt].0 {
+//                cnt+=1
+//                if srt.count > cnt {
+//                    minPos1 = srt[cnt-1].1
+//                    minPos2 = srt[cnt].1
+//                }
+//            }
+//            print(minPos1, minPos2)
+//            var cPnt = [CGPoint](repeating: .zero, count: 3)
+//            var oldPoint: CGPoint?
+//
+//            for i in 0 ..< self.elementCount {
+//                let type = self.element(at: i, associatedPoints: &cPnt)
+//                switch type {
+//                case .moveTo:
+//                    oldPoint = cPnt[0]
+//                case .lineTo:
+//                    cPnt[1] = cPnt[0]
+//                    cPnt[2] = cPnt[0]
+//                    if let mp = oldPoint,
+//                        ((mp.equalTo(minPos1) ||
+//                            mp.equalTo(minPos2)) &&
+//                        (cPnt[0].equalTo(minPos2) ||
+//                            cPnt[0].equalTo(minPos1 ))) {
+//
+//                        return (index: i, points: cPnt)
+//                    }
+//                    oldPoint = cPnt[0]
+//
+//                case .curveTo:
+//                    if let mp = oldPoint,
+//                        ((mp.equalTo(minPos1) ||
+//                            mp.equalTo(minPos2)) &&
+//                        (cPnt[2].equalTo(minPos2) ||
+//                            cPnt[2].equalTo(minPos1 ))) {
+//
+//                        return (index: i, points: cPnt)
+//                    }
+//                    oldPoint = cPnt[2]
+//                case .closePath:
+//                    break
+//                default:
+//                    break
+//                }
+//            }
+//        }
+//        return nil
+//    }
+
     func findPath(pos: CGPoint) -> (index: Int, points: [CGPoint])? {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         var oldPoint: CGPoint?
         let path = NSBezierPath()
-
+        var res: (index: Int, points: [CGPoint])?
+        var area: CGFloat = CGFloat(MAXFLOAT)
         for i in 0 ..< self.elementCount {
             let type = self.element(at: i, associatedPoints: &cPnt)
             switch type {
@@ -94,10 +154,16 @@ extension NSBezierPath {
                 cPnt[2] = cPnt[0]
 
                 oldPoint = cPnt[0]
-                if self.rectPath(
+
+                let rect = self.rectPath(
                     path,
-                    pad: setEditor.pathPad).contains(pos) {
-                    return (index: i, points: cPnt)
+                    pad: setEditor.pathPad)
+                if rect.contains(pos) {
+                    let ar = rect.width * rect.height
+                    if ar < area {
+                        area = ar
+                        res = (index: i, points: cPnt)
+                    }
                 }
             case .curveTo:
                 path.removeAllPoints()
@@ -109,10 +175,15 @@ extension NSBezierPath {
                     path.close()
                 }
                 oldPoint = cPnt[2]
-                if self.rectPath(
+                let rect = self.rectPath(
                     path,
-                    pad: setEditor.pathPad).contains(pos) {
-                    return (index: i, points: cPnt)
+                    pad: setEditor.pathPad)
+                if rect.contains(pos) {
+                    let ar = rect.width * rect.height
+                    if ar < area {
+                        area = ar
+                        res = (index: i, points: cPnt)
+                    }
                 }
             case .closePath:
                 break
@@ -120,7 +191,7 @@ extension NSBezierPath {
                 break
             }
         }
-        return nil
+        return res
     }
 
     func findPoint(_ at: Int) -> [CGPoint] {
@@ -348,14 +419,14 @@ extension CGPoint {
     func unitVector(origin: CGPoint = CGPoint(x: 0, y: 0)) -> CGPoint {
         let mag = magnitude(origin: origin)
         if mag == 0 {
-            return CGPoint(x: 0, y: 0)
+            return origin
         }
-        return CGPoint(x: self.x/mag, y: self.y/mag)
+        return CGPoint(x: (self.x - origin.x)/mag, y: (self.y-origin.y)/mag)
     }
 
     func magnitude(origin: CGPoint = CGPoint(x: 0, y: 0)) -> CGFloat {
-        let wid = self.x - origin.x
-        let hei = self.y - origin.y
+        let wid = abs(self.x - origin.x)
+        let hei = abs(self.y - origin.y)
         return hypot(wid, hei)
     }
 

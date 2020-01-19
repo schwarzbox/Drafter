@@ -487,30 +487,58 @@ class Curve: Equatable {
         return cp
     }
 
-    func selectPoint(pos: CGPoint) {
+    func findControlDots(pos: CGPoint, ctrl: Bool) -> Bool {
         var find = false
-        for i in stride(from: self.points.count-1, through: 0, by: -1) {
+        for i in stride(from: self.points.count-1,
+                        through: 0, by: -1) {
             let point = self.points[i]
-            if let dot = point.collidedPoint(pos: pos), !find {
-                self.controlDot = dot
-                point.showControlDots(dotMag: self.parent!.dotMag,
-                                      lineWidth: self.parent!.lineWidth)
-                find = true
-            } else {
-                if !self.controlDots.contains(point) {
-                    point.hideControlDots(lineWidth: self.parent!.lineWidth)
+            if let dot = point.collidedPoint(pos: pos) {
+                if ctrl {
+                    find = true
+                    point.showControlDots(
+                        dotMag: self.parent!.dotMag,
+                        lineWidth: self.parent!.lineWidth)
+                    if !self.controlDots.contains(point) {
+                        self.controlDots.append(point)
+                    } else {
+                        if let ind = self.controlDots.firstIndex(
+                            of: point) {
+                            point.hideControlDots(
+                                lineWidth: self.parent!.lineWidth)
+                            self.controlDots.remove(at: ind)
+                        }
+                    }
+                } else {
+                    if !find {
+                        point.showControlDots(
+                            dotMag: self.parent!.dotMag,
+                            lineWidth: self.parent!.lineWidth)
+                        self.controlDot = dot
+                        find = true
+                        if !self.controlDots.contains(point) {
+                            self.resetControlDots()
+                            self.controlDots.append(point)
+                        }
+                    } else {
+                        if !self.controlDots.contains(point) {
+                            point.hideControlDots(
+                                lineWidth: self.parent!.lineWidth)
+                        }
+                    }
                 }
             }
         }
-        
-        if find {
+        return find
+    }
+
+    func selectPoint(pos: CGPoint, ctrl: Bool) {
+        if self.findControlDots(pos: pos, ctrl: ctrl) {
             return
         }
 
         self.resetControlDots()
 
-        if self.path.rectPath(
-            self.path,
+        if !ctrl, self.path.rectPath(self.path,
             pad: setEditor.pathPad).contains(pos),
             let segment = self.path.findPath(pos: pos) {
 
@@ -526,6 +554,22 @@ class Curve: Equatable {
                                 lineWidth: self.parent!.lineWidth)
             self.controlDots.append(pnt)
         }
+    }
+
+    func centerPoint() -> CGPoint {
+        var minX = CGFloat(MAXFLOAT)
+        var minY = CGFloat(MAXFLOAT)
+        var maxX = CGFloat()
+        var maxY = CGFloat()
+        for point in self.controlDots {
+            minX = min(minX, point.mp.position.x)
+            minY = min(minY, point.mp.position.y)
+            maxX = max(maxX, point.mp.position.x)
+            maxY = max(maxY, point.mp.position.y)
+        }
+        let rect = CGRect(x: minX, y: minY,
+                          width: maxX-minX, height: maxY-minY)
+        return CGPoint(x: rect.midX, y: rect.midY)
     }
 
     func movePoint(index: Int, point: ControlPoint) {
@@ -721,48 +765,25 @@ class Curve: Equatable {
     }
 
 //    MARK: Global Control
-    func showControl(pos: CGPoint, shift: Bool) {
+    func showControl(pos: CGPoint, ctrl: Bool) {
         if !self.lock {
             if self.edit {
-                if self.controlDot == nil {
-                    var find = false
-                    for i in stride(from: self.points.count-1,
-                                    through: 0, by: -1) {
-                        let point = self.points[i]
-                        if shift {
-                            if point.collideDot(pos: pos, dot: point.mp) {
-                                point.showControlDots(
-                                    dotMag: self.parent!.dotMag,
-                                    lineWidth: self.parent!.lineWidth)
-                                if !self.controlDots.contains(point) {
-                                    self.controlDots.append(point)
-                                } else {
-                                    if let ind = self.controlDots.firstIndex(
-                                        of: point) {
-                                        point.hideControlDots(
-                                            lineWidth: self.parent!.lineWidth)
-                                        self.controlDots.remove(at: ind)
-                                    }
-                                }
-                            }
-                        } else {
-                            if point.collideDot(pos: pos, dot: point.mp) &&
-                                !find {
-                                point.showControlDots(
-                                    dotMag: self.parent!.dotMag,
-                                    lineWidth: self.parent!.lineWidth)
-
-                                find = true
-                                if !self.controlDots.contains(point) {
-                                    self.resetControlDots()
-                                    self.controlDots.append(point)
-                                }
-                            } else {
-                                if !self.controlDots.contains(point) {
-                                    point.hideControlDots(
-                                        lineWidth: self.parent!.lineWidth)
-                                }
-                            }
+                var find = false
+                self.controlDot = nil
+                for i in stride(from: self.points.count-1,
+                                through: 0, by: -1) {
+                    let point = self.points[i]
+                    if point.collideDot(pos: pos, dot: point.mp) && !find {
+                        point.showControlDots(
+                            dotMag: self.parent!.dotMag,
+                            lineWidth: self.parent!.lineWidth)
+                        find = true
+                        self.controlDot = point.mp
+                    } else {
+                        if !self.controlDots.contains(point) &&
+                            self.controlDot != point.mp {
+                            point.hideControlDots(
+                                lineWidth: self.parent!.lineWidth)
                         }
                     }
                 }
@@ -777,7 +798,17 @@ class Curve: Equatable {
     }
 
     func hideControl() {
-        if !self.edit {
+        if self.edit {
+            for i in stride(from: self.points.count-1,
+                            through: 0, by: -1) {
+                let point = self.points[i]
+                if !self.controlDots.contains(point) &&
+                    self.controlDot != point.mp {
+                    point.hideControlDots(
+                        lineWidth: self.parent!.lineWidth)
+                }
+            }
+        } else {
             if let ctrlF = self.controlFrame {
                 ctrlF.hideInteractiveElement()
             }

@@ -11,12 +11,11 @@
 // default set for shapes
 // flex shapes
 // star
-
-// 0.98
-// improve history
-// save draft not bundle
+// zoom points
 
 // 0.99
+// improve history
+// save draft not bundle
 // show groups members?
 
 // 1.0
@@ -240,12 +239,12 @@ class SketchPad: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        let shift: Bool = event.modifierFlags.contains(.shift) ? true : false
+        let ctrl: Bool = event.modifierFlags.contains(.control) ? true : false
         let pos = convert(event.locationInWindow, from: nil)
         self.showCurvedPath(pos: pos)
 
         if let curve = self.selectedCurve {
-            curve.showControl(pos: pos, shift: shift)
+            curve.showControl(pos: pos, ctrl: ctrl)
         }
         self.needsDisplay = true
     }
@@ -260,6 +259,7 @@ class SketchPad: NSView {
 
     override func mouseMoved(with event: NSEvent) {
         let shift: Bool = event.modifierFlags.contains(.shift) ? true : false
+        let fn: Bool = event.modifierFlags.contains(.function) ? true : false
         let ctrl: Bool = event.modifierFlags.contains(.control) ? true : false
         self.startPos = convert(event.locationInWindow, from: nil)
 
@@ -272,8 +272,11 @@ class SketchPad: NSView {
                 }
             }
 
-            if curve.path.rectPath(
-                curve.path,
+            if !ctrl {
+
+            }
+
+            if !ctrl, curve.path.rectPath(curve.path,
                 pad: setEditor.pathPad).contains(self.startPos),
                 let segment = curve.path.findPath(pos: self.startPos) {
 
@@ -287,7 +290,8 @@ class SketchPad: NSView {
                 let snap = self.snapToRulers(points: [self.startPos],
                                              curves: [],
                                              curvePoints: mpPoints,
-                                             ctrl: ctrl)
+                                             fn: fn)
+
                 self.startPos.x -= snap.x
                 self.startPos.y -= snap.y
                 self.snapMouseToRulers(snap: snap, pos: self.startPos)
@@ -302,20 +306,19 @@ class SketchPad: NSView {
                     x: self.startPos.x-size50,
                     y: self.startPos.y-size50,
                     width: self.dotSize, height: self.dotSize))
-
             } else {
                 self.clearRulers()
             }
         } else {
-            self.tool.move(shift: shift, ctrl: ctrl)
+            self.tool.move(shift: shift, fn: fn)
         }
         self.needsDisplay = true
     }
 
     override func mouseDragged(with event: NSEvent) {
         let shift: Bool = event.modifierFlags.contains(.shift) ? true : false
+        let fn: Bool = event.modifierFlags.contains(.function) ? true : false
         let opt: Bool = event.modifierFlags.contains(.option) ? true : false
-        let ctrl: Bool = event.modifierFlags.contains(.control) ? true : false
         let cmd: Bool = event.modifierFlags.contains(.command) ? true : false
 
         self.finPos = convert(event.locationInWindow, from: nil)
@@ -339,15 +342,28 @@ class SketchPad: NSView {
                 }
             }
 
-            if shift && curve.controlDot != nil {
-                self.finPos = self.shiftAngle(
-                    topLeft: mPos, bottomRight: self.finPos)
-            }
-
             let snap = self.snapToRulers(points: [self.finPos],
                                          curves: [],
                                          curvePoints: mpPoints,
-                                         ctrl: ctrl)
+                                         fn: fn)
+
+            let center = curve.centerPoint()
+            var speed = CGFloat(0)
+            if shift && curve.controlDot != nil {
+                self.finPos = self.shiftAngle(
+                    topLeft: mPos, bottomRight: self.finPos)
+            } else if opt && curve.controlDots.count>1,
+                let selDot = curve.controlDot, selDot.tag == 2 {
+                for point in curve.controlDots {
+                    self.rulers.appendCustomRule(
+                        move: center, line: point.mp.position)
+                }
+                self.finPos = self.zoomCenter(
+                    event: event, center: center,
+                    finPos: self.finPos, dotPos: selDot.position,
+                    speed: &speed)
+            }
+
             self.finPos.x -= snap.x
             self.finPos.y -= snap.y
 
@@ -358,8 +374,9 @@ class SketchPad: NSView {
             }
 
             if let selDot = curve.controlDot {
-                let delta = CGPoint(x: self.finPos.x - selDot.position.x,
-                                    y: self.finPos.y - selDot.position.y)
+                let delta = CGPoint(
+                    x: self.finPos.x - selDot.position.x,
+                    y: self.finPos.y - selDot.position.y)
 
                 for pnt in curve.controlDots where !pnt.dots.contains(selDot) {
                     var dot = pnt.mp
@@ -372,16 +389,23 @@ class SketchPad: NSView {
                         dot = pnt.cp2
                     default: curve.controlDot = pnt.mp
                     }
-
-                    let pos = CGPoint(x: dot.position.x + delta.x,
+                    var pos = CGPoint()
+                    if opt, selDot.tag == 2 {
+                        let unit = dot.position.unitVector(origin: center)
+                        pos = CGPoint(
+                            x: dot.position.x + unit.x * speed,
+                            y: dot.position.y + unit.y * speed)
+                    } else {
+                        pos = CGPoint(x: dot.position.x + delta.x,
                                       y: dot.position.y + delta.y)
+                    }
                     curve.editPoint(pos: pos, cmd: cmd, opt: opt)
                 }
                 curve.controlDot = selDot
                 curve.editPoint(pos: self.finPos, cmd: cmd, opt: opt)
             } else {
-                self.tool.drag(shift: shift, ctrl: ctrl)
-                self.tool.create(ctrl: ctrl, shift: shift,
+                self.tool.drag(shift: shift, fn: fn)
+                self.tool.create(fn: fn, shift: shift,
                                  opt: opt, event: event)
             }
             self.updateMasks()
@@ -390,18 +414,18 @@ class SketchPad: NSView {
             self.dragFrameControlDots(curve: curve, finPos: self.finPos,
                                       deltaX: event.deltaX,
                                       deltaY: event.deltaY,
-                                      dot: dot, shift: shift, ctrl: ctrl,
+                                      dot: dot, shift: shift, fn: fn,
                                       opt: opt)
         } else {
-            self.tool.drag(shift: shift, ctrl: ctrl)
-            self.tool.create(ctrl: ctrl, shift: shift,
+            self.tool.drag(shift: shift, fn: fn)
+            self.tool.create(fn: fn, shift: shift,
                              opt: opt, event: event)
         }
         self.needsDisplay = true
     }
 
     override func mouseDown(with event: NSEvent) {
-        let shift: Bool = event.modifierFlags.contains(.shift) ? true : false
+        let ctrl: Bool = event.modifierFlags.contains(.control) ? true : false
         let cmd: Bool = event.modifierFlags.contains(.command) ? true : false
         self.startPos = convert(event.locationInWindow, from: nil)
 
@@ -410,7 +434,7 @@ class SketchPad: NSView {
 
         if let curve = self.selectedCurve, curve.edit {
             self.clearPathLayer(layer: self.curveLayer, path: self.curvedPath)
-            curve.selectPoint(pos: self.startPos)
+            curve.selectPoint(pos: self.startPos, ctrl: ctrl)
 
             var mpPoints: [CGPoint] = [
                 curve.boundsPoints(curves: curve.groups)[1]]
@@ -445,7 +469,7 @@ class SketchPad: NSView {
                 self.addSegment(mp: mp, cp1: cp1, cp2: cp2)
             })
         } else {
-            self.tool.down(shift: shift)
+            self.tool.down(ctrl: ctrl)
         }
         if cmd { self.cloneCurve() }
         self.frameUI.hide()
@@ -569,7 +593,7 @@ class SketchPad: NSView {
         self.selectedCurve = nil
     }
 
-    func selectCurve(pos: CGPoint, shift: Bool = false) {
+    func selectCurve(pos: CGPoint, ctrl: Bool = false) {
         if let curve = self.selectedCurve {
             self.deselectCurve(curve: curve)
         }
@@ -590,11 +614,14 @@ class SketchPad: NSView {
             self.selectedCurve = lockedCurve
         }
 
-        if let curve = self.selectedCurve, shift {
+        if let curve = self.selectedCurve, ctrl {
             if self.groups.contains(curve) {
                 for cur in curve.groups {
                     if let index = self.groups.firstIndex(of: cur) {
                         self.groups.remove(at: index)
+                        if self.groups.count>0 {
+                            self.selectedCurve = self.groups[0]
+                        }
                     }
                 }
             } else {
@@ -650,6 +677,18 @@ class SketchPad: NSView {
     }
 
 //    MARK: Rulers
+    func turnOffSnap(deltaX: CGFloat, deltaY: CGFloat,
+                     limit: CGFloat=setEditor.rulersDelta/2,
+                     snap: inout CGPoint) {
+        if abs(deltaX) >= limit {
+            snap.x = 0
+        }
+
+        if abs(deltaY) >= setEditor.rulersDelta/2 {
+           snap.y = 0
+        }
+    }
+
     func snapMouseToRulers(snap: CGPoint, pos: CGPoint) {
         if abs(snap.x) != 0 {
             defer {rulers.snapX = true}
@@ -691,7 +730,7 @@ class SketchPad: NSView {
         points: [CGPoint], curves: [Curve],
         curvePoints: [CGPoint] = [],
         exclude: [Curve] = [],
-        ctrl: Bool = false) -> CGPoint {
+        fn: Bool = false) -> CGPoint {
 
         self.locationX.isHidden = true
         self.locationY.isHidden = true
@@ -709,7 +748,7 @@ class SketchPad: NSView {
                 let x = (pos.x-self.bounds.minX) * self.zoomed
                 let y = (pos.y-self.bounds.minY) * self.zoomed
 
-                guard pnt.dist >= setEditor.rulersDelta || !ctrl else {
+                guard pnt.dist >= setEditor.rulersDelta || !fn else {
                     break
                 }
                 if key == "x" {
@@ -729,7 +768,7 @@ class SketchPad: NSView {
             }
         }
 
-        if !ctrl {
+        if !fn {
             snap.delta = CGPoint(x: 0, y: 0)
         }
         tool.cursor.set()
@@ -1282,6 +1321,22 @@ class SketchPad: NSView {
         return shift
     }
 
+    func zoomCenter(event: NSEvent, center: CGPoint, finPos: CGPoint,
+                      dotPos: CGPoint, speed: inout CGFloat) -> CGPoint {
+        let cen = finPos.magnitude(origin: center)
+        let sel = dotPos.magnitude(origin: center)
+        let mod = cen > sel ? CGFloat(1) : CGFloat(-1)
+
+        let unit = dotPos.unitVector(origin: center)
+
+        speed = CGPoint(
+            x: event.deltaX,
+            y: event.deltaY).magnitude() * mod
+
+        return CGPoint(x: dotPos.x + unit.x * speed,
+                       y: dotPos.y + unit.y * speed)
+    }
+
 //    MARK: Key func
     func removeAllCurves() {
         for curve in self.curves {
@@ -1596,15 +1651,17 @@ class SketchPad: NSView {
 
     func dragFrameControlDots(curve: Curve, finPos: CGPoint,
                               deltaX: CGFloat, deltaY: CGFloat, dot: Dot,
-                              shift: Bool = false, ctrl: Bool = false,
+                              shift: Bool = false, fn: Bool = false,
                               opt: Bool = false) {
         let groups = self.groups.count>1 ? self.groups : curve.groups
 
-        let snap = self.snapToRulers(
+        var snap = self.snapToRulers(
             points: self.snapPoints(curve: curve, dot: dot),
-            curves: self.curves, exclude: groups, ctrl: ctrl)
+            curves: self.curves, exclude: groups, fn: fn)
         let dX = deltaX / self.zoomed
         let dY = deltaY / self.zoomed
+
+        self.turnOffSnap(deltaX: deltaX, deltaY: deltaY, snap: &snap)
 
         let dXs = deltaX / self.zoomed - snap.x
         let dYs = deltaY / self.zoomed + snap.y
@@ -1721,7 +1778,7 @@ class SketchPad: NSView {
 
 //    MARK: Action func
     func dragCurve(deltaX: CGFloat, deltaY: CGFloat,
-                   shift: Bool = false, ctrl: Bool = false) {
+                   shift: Bool = false, fn: Bool = false) {
         if let curve = self.selectedCurve, !curve.lock,
             !curve.canvas.isHidden {
             let groups = self.groups.count>1
@@ -1739,9 +1796,9 @@ class SketchPad: NSView {
                 self.moveCurve(tag: 1, value: Double(self.finPos.y))
             }
 
-            let snap = self.snapToRulers(
+            var snap = self.snapToRulers(
                            points: curve.boundsPoints(curves: groups),
-                           curves: self.curves, exclude: groups, ctrl: ctrl)
+                           curves: self.curves, exclude: groups, fn: fn)
 
             if shift {
                 self.rulers.appendCustomRule(move: self.midPos,
@@ -1749,10 +1806,7 @@ class SketchPad: NSView {
                 return
             }
 
-            if snap.x != 0 || snap.y != 0 {
-                deltaX = 0
-                deltaY = 0
-            }
+            self.turnOffSnap(deltaX: deltaX, deltaY: deltaY, snap: &snap)
 
             deltaX = deltaX / self.zoomed - snap.x
             deltaY = deltaY / self.zoomed + snap.y

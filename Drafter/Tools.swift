@@ -23,11 +23,11 @@ let toolsKeys: [String: Tool] = [
 protocol Drawable {
     var tag: Int { get }
     var name: String { get }
-    func create(ctrl: Bool, shift: Bool, opt: Bool,
+    func create(fn: Bool, shift: Bool, opt: Bool,
                 event: NSEvent?)
-    func move(shift: Bool, ctrl: Bool)
-    func drag(shift: Bool, ctrl: Bool)
-    func down(shift: Bool)
+    func move(shift: Bool,fn: Bool)
+    func drag(shift: Bool, fn: Bool)
+    func down(ctrl: Bool)
     func up(editDone: Bool)
 }
 
@@ -76,10 +76,10 @@ class Tool: Drawable {
     // MARK: Protocol
     var name: String {"shape"}
 
-    func create(ctrl: Bool, shift: Bool, opt: Bool,
+    func create(fn: Bool, shift: Bool, opt: Bool,
                 event: NSEvent? = nil) { }
 
-    func move(shift: Bool, ctrl: Bool) {
+    func move(shift: Bool, fn: Bool) {
         var mpPoints: [CGPoint] = []
         if let mp = Tool.view!.movePoint {
            mpPoints.append(mp.position)
@@ -98,7 +98,7 @@ class Tool: Drawable {
         let snap = Tool.view!.snapToRulers(points: [Tool.view!.startPos],
                                     curves: Tool.view!.curves,
                                     curvePoints: mpPoints,
-                                    ctrl: ctrl)
+                                    fn: fn)
         Tool.view!.startPos.x -= snap.x
         Tool.view!.startPos.y -= snap.y
         Tool.view!.snapMouseToRulers(snap: snap,
@@ -118,18 +118,18 @@ class Tool: Drawable {
         }
     }
 
-    func drag(shift: Bool, ctrl: Bool) {
+    func drag(shift: Bool, fn: Bool) {
         let snap = Tool.view!.snapToRulers(
             points: [Tool.view!.finPos],
             curves: Tool.view!.curves,
-            curvePoints: mpPoints, ctrl: ctrl)
+            curvePoints: mpPoints, fn: fn)
         Tool.view!.finPos.x -= snap.x
         Tool.view!.finPos.y -= snap.y
         Tool.view!.snapMouseToRulers(snap: snap,
                                      pos: Tool.view!.finPos)
     }
 
-    func down(shift: Bool) {
+    func down(ctrl: Bool) {
         Tool.view!.controlPoints = []
         Tool.view!.editedPath.removeAllPoints()
     }
@@ -190,33 +190,33 @@ class Drag: Tool {
         }
     }
 
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         Tool.view!.clearPathLayer(layer: Tool.view!.curveLayer,
                             path: Tool.view!.curvedPath)
         if let curve = Tool.view!.selectedCurve, !curve.edit, !curve.lock {
             Tool.view!.dragCurve(deltaX: event?.deltaX ?? 0,
                                    deltaY: event?.deltaY ?? 0,
-                                   shift: shift, ctrl: ctrl)
+                                   shift: shift, fn: fn)
         } else {
             self.action(topLeft: Tool.view!.startPos,
                         bottomRight: Tool.view!.finPos)
         }
     }
 
-    override func drag(shift: Bool, ctrl: Bool) {
+    override func drag(shift: Bool, fn: Bool) {
         Tool.view!.clearRulers()
     }
 
-    override func move(shift: Bool, ctrl: Bool) {
+    override func move(shift: Bool, fn: Bool) {
         Tool.view!.clearRulers()
     }
 
-    override func down(shift: Bool) {
+    override func down(ctrl: Bool) {
         Tool.view!.clearPathLayer(layer: Tool.view!.curveLayer,
                             path: Tool.view!.curvedPath)
         Tool.view!.selectCurve(pos: Tool.view!.startPos,
-                                 shift: shift)
+                                 ctrl: ctrl)
     }
 }
 
@@ -237,21 +237,21 @@ class Line: Tool {
             ControlPoint(Tool.view!, cp1: bottomRight, cp2: bottomRight,
                                  mp: bottomRight)]
     }
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(
             topLeft: Tool.view!.startPos, bottomRight: Tool.view!.finPos))
         Tool.view!.filledCurve = false
     }
 
-    override func drag(shift: Bool, ctrl: Bool) {
+    override func drag(shift: Bool, fn: Bool) {
         let par = Tool.view!
         if shift {
             par.finPos = par.shiftAngle(topLeft: par.startPos,
                                         bottomRight: par.finPos)
         }
 
-        super.drag(shift: shift, ctrl: ctrl)
+        super.drag(shift: shift, fn: fn)
 
         if shift {
             par.rulers.appendCustomRule(move: par.startPos,
@@ -336,7 +336,7 @@ class Triangle: Tool {
         }
     }
 
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
@@ -420,7 +420,7 @@ class Rectangle: Tool {
         }
         Tool.view!.roundedCurve = CGPoint(x: 0, y: 0)
     }
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
@@ -430,7 +430,7 @@ class Rectangle: Tool {
 
 class Pentagon: Triangle {
     override var tag: Int {4}
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
@@ -440,7 +440,7 @@ class Pentagon: Triangle {
 
 class Hexagon: Triangle {
     override var tag: Int {5}
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
@@ -450,7 +450,7 @@ class Hexagon: Triangle {
 
 class Star: Triangle {
     override var tag: Int {6}
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
@@ -510,7 +510,7 @@ class Arc: Tool {
         }
     }
 
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos))
@@ -553,7 +553,7 @@ class Oval: Tool {
                              cp2: points[2][1], mp: points[2][2])]
         }
     }
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.useTool(self.action(topLeft: Tool.view!.startPos,
                                  bottomRight: Tool.view!.finPos,
@@ -575,7 +575,7 @@ class Stylus: Line {
                          cp2: bottomRight, mp: bottomRight))
     }
 
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         let par = Tool.view!
         if abs(par.startPos.x - par.finPos.x) > setEditor.dotSize ||
@@ -592,7 +592,7 @@ class Stylus: Line {
          return []
     }
 
-    override func down(shift: Bool) {
+    override func down(ctrl: Bool) {
         Tool.view!.controlPoints = []
         Tool.view!.editedPath.removeAllPoints()
         Tool.view!.editedPath.move(to: Tool.view!.startPos)
@@ -655,7 +655,7 @@ class Vector: Line {
             par.editedPath.move(to: topLeft)
         }
     }
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         if Tool.view!.editDone { return }
         Tool.view!.dragCurvedPath(topLeft: Tool.view!.startPos,
@@ -676,7 +676,7 @@ class Vector: Line {
         return points
     }
 
-    override func down(shift: Bool) {
+    override func down(ctrl: Bool) {
         self.action(topLeft: Tool.view!.startPos)
     }
 
@@ -696,6 +696,7 @@ class Vector: Line {
 }
 
 class Text: Tool {
+    override var cursor: NSCursor {NSCursor.crosshair}
     override var tag: Int {11}
     override var name: String {"text"}
     func action(pos: CGPoint? = nil) {
@@ -710,7 +711,7 @@ class Text: Tool {
         Tool.view!.fontUI.inputField.show()
     }
 
-    override func create(ctrl: Bool, shift: Bool, opt: Bool,
+    override func create(fn: Bool, shift: Bool, opt: Bool,
                          event: NSEvent? = nil) {
         self.action(pos: Tool.view!.finPos)
 
@@ -720,7 +721,7 @@ class Text: Tool {
         return []
     }
 
-    override func down(shift: Bool) {
+    override func down(ctrl: Bool) {
         self.action(pos: Tool.view!.startPos)
     }
 }
