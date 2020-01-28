@@ -77,6 +77,7 @@ class ViewController: NSViewController,
     var selectedSketch: Int = -1
 
     override func viewDidLoad() {
+
         super.viewDidLoad()
         // mouse
         self.window?.acceptsMouseMovedEvents = true
@@ -380,7 +381,7 @@ class ViewController: NSViewController,
             self.curveHei.doubleValue = Double(bounds.height)
             let ang = Double(curve.angle).truncatingRemainder(
                 dividingBy: Double.pi+0.01)
-            self.curveRotate.doubleValue = ang
+            self.curveRotate.doubleValue = ang * 180 / Double.pi
 
             if curve.groups.count==1 && view.groups.count <= 1 {
                 self.showUnusedViews(true)
@@ -778,7 +779,7 @@ class ViewController: NSViewController,
             sender: sender, limit: {x in x > maxR ? maxR : x < minR ? minR : x})
 
         self.curveRotate.doubleValue = val.value
-        view.rotateCurve(angle: val.value)
+        view.rotateCurve(angle: val.value * Double.pi / 180)
         self.restoreControlFrame(view: view)
     }
 
@@ -964,11 +965,13 @@ class ViewController: NSViewController,
         let view = sketchView!
         self.history[self.indexHistory+1..<self.history.count] = []
         self.history.append(view.copyAll())
-        if self.indexHistory > setEditor.maxHistory * 2 {
-            self.history[0..<setEditor.maxHistory] = []
-        }
-        self.indexHistory = self.history.count-1
 
+//        if self.indexHistory > setEditor.maxHistory * 2 {
+//            self.history[0..<setEditor.maxHistory] = []
+//        }
+
+        print(self.history.count)
+        self.indexHistory = self.history.count-1
         self.updateStack()
     }
 
@@ -998,8 +1001,8 @@ class ViewController: NSViewController,
         view.removeAllCurves()
 
         history()
-
         view.clearCurvedPath()
+
         view.curves = self.history[self.indexHistory]
         view.curves = view.copyAll()
         view.addAllLayers()
@@ -1030,7 +1033,6 @@ class ViewController: NSViewController,
                     self.indexHistory-=1
                 }
             }
-//            print("undo", self.indexHistory, self.history)
         }
     }
 
@@ -1042,7 +1044,6 @@ class ViewController: NSViewController,
                     self.indexHistory+=1
                 }
             }
-//            print("redo", self.indexHistory, self.history)
         }
     }
 
@@ -1146,7 +1147,7 @@ class ViewController: NSViewController,
         if let fileUrl = notification.userInfo!["fileUrl"] as? URL {
             let ext = fileUrl.pathExtension
             switch ext {
-            case "bundle":
+            case "draft":
                 self.saveTool?.openDrf(fileUrl: fileUrl)
             case "svg":
                 self.saveTool?.openSvg(fileUrl: fileUrl)
@@ -1195,9 +1196,9 @@ class ViewController: NSViewController,
         self.clearSketch(view: view)
 
         switch ext {
-        case "bundle":
+        case "draft":
             let dirUrl = url.appendingPathComponent(
-                name + ".bundle", isDirectory: true)
+                name + ".draft", isDirectory: true)
             do {
                 try FileManager.default.createDirectory(
                     atPath: dirUrl.relativePath,
@@ -1209,7 +1210,6 @@ class ViewController: NSViewController,
             for curve in view.curves {
                 for cur in curve.groups
                     where cur.imageLayer.contents != nil {
-                        
                     if let img = cur.imageLayer.contents as? NSImage {
                         do {
                             let fileUrl = dirUrl.appendingPathComponent(

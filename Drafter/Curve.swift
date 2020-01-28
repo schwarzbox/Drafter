@@ -494,11 +494,13 @@ class Curve: Equatable {
             let point = self.points[i]
             if let dot = point.collidedPoint(pos: pos) {
                 if ctrl {
+                    if find { return find }
                     find = true
-                    point.showControlDots(
-                        dotMag: self.parent!.dotMag,
-                        lineWidth: self.parent!.lineWidth)
+                    self.controlDot = dot
                     if !self.controlDots.contains(point) {
+                        point.showControlDots(
+                            dotMag: self.parent!.dotMag,
+                            lineWidth: self.parent!.lineWidth)
                         self.controlDots.append(point)
                     } else {
                         if let ind = self.controlDots.firstIndex(
@@ -510,12 +512,12 @@ class Curve: Equatable {
                     }
                 } else {
                     if !find {
-                        point.showControlDots(
-                            dotMag: self.parent!.dotMag,
-                            lineWidth: self.parent!.lineWidth)
-                        self.controlDot = dot
                         find = true
+                        self.controlDot = dot
                         if !self.controlDots.contains(point) {
+                            point.showControlDots(
+                                dotMag: self.parent!.dotMag,
+                                lineWidth: self.parent!.lineWidth)
                             self.resetControlDots()
                             self.controlDots.append(point)
                         }
@@ -622,7 +624,7 @@ class Curve: Equatable {
 
     func editPoint(pos: CGPoint, cmd: Bool = false, opt: Bool = false) {
         if !self.lock {
-            self.clearTrackArea()
+//            self.clearTrackArea()
             var find: Bool = false
             for (index, point) in self.points.enumerated() {
                 if let dot = self.controlDot {
@@ -671,9 +673,9 @@ class Curve: Equatable {
                         point.updateLines()
                     }
                 }
-                point.trackDot(parent: self.parent!, dot: point.mp)
+//                point.trackDot(parent: self.parent!, dot: point.mp)
             }
-            self.updateLayer()
+//            self.updateLayer()
         }
     }
 
@@ -686,8 +688,7 @@ class Curve: Equatable {
 
     func resetControlDots() {
         for point in self.controlDots {
-                       point.hideControlDots(
-                           lineWidth: self.parent!.lineWidth)
+            point.hideControlDots(lineWidth: self.parent!.lineWidth)
         }
         self.controlDots.removeAll()
     }
@@ -704,13 +705,11 @@ class Curve: Equatable {
         for (index, point) in self.points.enumerated()
             where point == pnt {
             self.points.remove(at: index)
-//                self.path.printPath()
             point.delete()
             let removeAt = index == self.points.count
                 ? index
                 : index+1
             self.path = self.path.removePath(at: removeAt)
-//                self.path.printPath()
             break
 
         }
@@ -769,16 +768,15 @@ class Curve: Equatable {
         if !self.lock {
             if self.edit {
                 var find = false
-                self.controlDot = nil
                 for i in stride(from: self.points.count-1,
                                 through: 0, by: -1) {
                     let point = self.points[i]
-                    if point.collideDot(pos: pos, dot: point.mp) && !find {
+                    if point.collideDot(pos: pos, dot: point.mp) &&
+                        !find {
                         point.showControlDots(
                             dotMag: self.parent!.dotMag,
                             lineWidth: self.parent!.lineWidth)
                         find = true
-                        self.controlDot = point.mp
                     } else {
                         if !self.controlDots.contains(point) &&
                             self.controlDot != point.mp {

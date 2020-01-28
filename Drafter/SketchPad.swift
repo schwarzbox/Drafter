@@ -11,25 +11,19 @@
 // default set for shapes
 // flex shapes
 // star
-// zoom points
+// zoom move for points
+// edit shapes with enter
 
-// 0.99
-// improve history
-// save draft not bundle
-// show groups members?
 
 // 1.0
+// show groups members?
+// undo
 // open recent
-// preferences
+// preferences (px, mm)
 // help
 
 // 1.5
 // SVG
-
-// 2.0
-// ?
-// sync setting
-// curved text
 
 import Cocoa
 
@@ -272,10 +266,6 @@ class SketchPad: NSView {
                 }
             }
 
-            if !ctrl {
-
-            }
-
             if !ctrl, curve.path.rectPath(curve.path,
                 pad: setEditor.pathPad).contains(self.startPos),
                 let segment = curve.path.findPath(pos: self.startPos) {
@@ -342,26 +332,36 @@ class SketchPad: NSView {
                 }
             }
 
-            let snap = self.snapToRulers(points: [self.finPos],
-                                         curves: [],
-                                         curvePoints: mpPoints,
-                                         fn: fn)
+            var snap = CGPoint()
 
             let center = curve.centerPoint()
             var speed = CGFloat(0)
-            if shift && curve.controlDot != nil {
+            if shift, let selDot = curve.controlDot, selDot.tag == 2 {
+                self.locationX.isHidden = true
+                self.locationY.isHidden = true
                 self.finPos = self.shiftAngle(
                     topLeft: mPos, bottomRight: self.finPos)
+                self.setLabel(key: "x", pos: mPos,
+                              dist: selDot.position.magnitude(origin: mPos))
+                self.rulers.appendCustomRule(move: mPos, line: self.finPos)
             } else if opt && curve.controlDots.count>1,
                 let selDot = curve.controlDot, selDot.tag == 2 {
-                for point in curve.controlDots {
-                    self.rulers.appendCustomRule(
-                        move: center, line: point.mp.position)
-                }
+                self.locationX.isHidden = true
+                self.locationY.isHidden = true
                 self.finPos = self.zoomCenter(
                     event: event, center: center,
                     finPos: self.finPos, dotPos: selDot.position,
                     speed: &speed)
+                self.setLabel(key: "x", pos: center,
+                              dist: selDot.position.magnitude(origin: center))
+                self.rulers.appendCustomRule(
+                        move: center, line: self.finPos)
+            } else {
+                snap = self.snapToRulers(points: [self.finPos],
+                                         curves: [],
+                                         curvePoints: mpPoints,
+                                         fn: fn)
+
             }
 
             self.finPos.x -= snap.x
@@ -369,10 +369,9 @@ class SketchPad: NSView {
 
             self.snapMouseToRulers(snap: snap, pos: self.finPos)
 
-            if shift && curve.controlDot != nil {
-                self.rulers.appendCustomRule(move: mPos, line: self.finPos)
+            if !curve.lock {
+                curve.clearTrackArea()
             }
-
             if let selDot = curve.controlDot {
                 let delta = CGPoint(
                     x: self.finPos.x - selDot.position.x,
@@ -403,6 +402,9 @@ class SketchPad: NSView {
                 }
                 curve.controlDot = selDot
                 curve.editPoint(pos: self.finPos, cmd: cmd, opt: opt)
+                if !curve.lock {
+                    curve.updateLayer()
+                }
             } else {
                 self.tool.drag(shift: shift, fn: fn)
                 self.tool.create(fn: fn, shift: shift,
@@ -580,9 +582,12 @@ class SketchPad: NSView {
     }
 
     func showGroup() {
-        for cur in self.groups where !cur.edit {
-            self.curvedPath.appendRect(cur.groupRect(curves: [cur]))
-//            self.curvedPath.append(cur.path)
+        if let curve = self.selectedCurve, !curve.edit {
+             for cur in self.groups {
+                self.curvedPath.appendRect(
+                    cur.groupRect(curves: [cur]))
+//                    self.curvedPath.append(cur.path)
+                }
         }
     }
 
@@ -726,45 +731,47 @@ class SketchPad: NSView {
         CGDisplayMoveCursorToPoint(disp, winPos)
     }
 
+    func setLabel(key: String, pos: CGPoint, dist: CGFloat) {
+        let pad = self.dotRadius
+        let width = self.locationX.frame.width
+        let height = self.locationX.frame.height
+        let x = (pos.x-self.bounds.minX) * self.zoomed
+        let y = (pos.y-self.bounds.minY) * self.zoomed
+        if key == "x" {
+            self.locationX.doubleValue = Double(dist)
+            self.locationX.frame = CGRect(
+                x: x - width - pad, y: y - height - pad,
+                width: width, height: height)
+            self.locationX.isHidden = false
+        } else {
+            self.locationY.doubleValue = Double(dist)
+            self.locationY.frame = CGRect(
+                x: x + pad, y: y + pad,
+                width: width,
+                height: height)
+            self.locationY.isHidden = false
+        }
+    }
+
     @discardableResult func snapToRulers(
         points: [CGPoint], curves: [Curve],
         curvePoints: [CGPoint] = [],
         exclude: [Curve] = [],
         fn: Bool = false) -> CGPoint {
 
-        self.locationX.isHidden = true
-        self.locationY.isHidden = true
-
         var snap = rulers.createRulers(points: points,
             curves: curves, curvePoints: curvePoints,
             exclude: exclude)
 
-        let pad = self.dotRadius
-        let width = self.locationX.frame.width
-        let height = self.locationX.frame.height
+        self.locationX.isHidden = true
+        self.locationY.isHidden = true
 
         for (key, pnt) in snap.pnt {
             if let pos = pnt.pos {
-                let x = (pos.x-self.bounds.minX) * self.zoomed
-                let y = (pos.y-self.bounds.minY) * self.zoomed
-
                 guard pnt.dist >= setEditor.rulersDelta || !fn else {
                     break
                 }
-                if key == "x" {
-                    self.locationX.doubleValue = Double(pnt.dist)
-                    self.locationX.frame = CGRect(
-                        x: x - width - pad, y: y - height - pad,
-                        width: width, height: height)
-                    self.locationX.isHidden = false
-                } else {
-                    self.locationY.doubleValue = Double(pnt.dist)
-                    self.locationY.frame = CGRect(
-                        x: x + pad, y: y + pad,
-                        width: width,
-                        height: height)
-                    self.locationY.isHidden = false
-                }
+                self.setLabel(key: key, pos: pos, dist: pnt.dist)
             }
         }
 
@@ -1415,6 +1422,7 @@ class SketchPad: NSView {
                     self.removeCurve(curve: curve)
                 }
                 if let nextCurve = self.selectedCurve {
+                    self.deselectCurve(curve: nextCurve)
                     self.createControls(curve: nextCurve)
                 }
             }
@@ -1788,22 +1796,26 @@ class SketchPad: NSView {
             var deltaX = deltaX
             var deltaY = deltaY
 
+            var snap = CGPoint()
+
             if shift {
+                self.locationX.isHidden = true
+                self.locationY.isHidden = true
                 self.finPos = self.shiftAngle(
                     topLeft: self.midPos,
                     bottomRight: self.finPos)
                 self.moveCurve(tag: 0, value: Double(self.finPos.x))
                 self.moveCurve(tag: 1, value: Double(self.finPos.y))
-            }
 
-            var snap = self.snapToRulers(
-                           points: curve.boundsPoints(curves: groups),
-                           curves: self.curves, exclude: groups, fn: fn)
-
-            if shift {
+                let center = curve.boundsPoints(curves: groups)[1]
+                self.setLabel(key: "x", pos: self.midPos,
+                              dist: center.magnitude(origin: self.midPos))
                 self.rulers.appendCustomRule(move: self.midPos,
                                              line: self.finPos)
-                return
+            } else {
+                snap = self.snapToRulers(
+                    points: curve.boundsPoints(curves: groups),
+                    curves: self.curves, exclude: groups, fn: fn)
             }
 
             self.turnOffSnap(deltaX: deltaX, deltaY: deltaY, snap: &snap)
@@ -2174,7 +2186,7 @@ class SketchPad: NSView {
             }
         }
 
-        if let imageRep = bitmapImageRepForCachingDisplay(
+        if let imageRep = self.bitmapImageRepForCachingDisplay(
             in: self.sketchPath.bounds) {
             self.cacheDisplay(in: self.sketchPath.bounds, to: imageRep)
                 return imageRep.representation(

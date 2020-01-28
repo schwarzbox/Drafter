@@ -283,6 +283,7 @@ class RulerTool: CAShapeLayer {
     }
 
     func appendCustomRule(move: CGPoint, line: CGPoint) {
+        self.clearRulers()
         self.solidPath.move(to: move)
         self.solidPath.addPin(pos: move, size: self.dotSize)
         self.solidPath.line(to: line)

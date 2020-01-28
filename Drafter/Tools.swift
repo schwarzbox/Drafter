@@ -89,25 +89,29 @@ class Tool: Drawable {
         }
 
         var mPos = Tool.view!.startPos
+        var snap = CGPoint()
         if let pos = mpPoints.first, shift {
+            Tool.view!.locationX.isHidden = true
+            Tool.view!.locationY.isHidden = true
             Tool.view!.startPos = Tool.view!.shiftAngle(
                 topLeft: pos, bottomRight: Tool.view!.startPos)
             mPos = pos
+            Tool.view!.setLabel(key: "x", pos: mPos,
+                                dist: Tool.view!.startPos.magnitude(
+                                    origin: mPos))
+            Tool.view!.rulers.appendCustomRule(move: mPos,
+                                         line: Tool.view!.startPos)
+        } else {
+            snap = Tool.view!.snapToRulers(points: [Tool.view!.startPos],
+                                           curves: Tool.view!.curves,
+                                           curvePoints: mpPoints,
+                                           fn: fn)
         }
 
-        let snap = Tool.view!.snapToRulers(points: [Tool.view!.startPos],
-                                    curves: Tool.view!.curves,
-                                    curvePoints: mpPoints,
-                                    fn: fn)
         Tool.view!.startPos.x -= snap.x
         Tool.view!.startPos.y -= snap.y
         Tool.view!.snapMouseToRulers(snap: snap,
-                                       pos: Tool.view!.startPos)
-
-        if shift {
-            Tool.view!.rulers.appendCustomRule(move: mPos,
-                                         line: Tool.view!.startPos)
-        }
+                                     pos: Tool.view!.startPos)
 
         if let mp = Tool.view!.movePoint,
             let cp1 = Tool.view!.controlPoint1 {
@@ -247,15 +251,16 @@ class Line: Tool {
     override func drag(shift: Bool, fn: Bool) {
         let par = Tool.view!
         if shift {
+            par.locationX.isHidden = true
+            par.locationY.isHidden = true
             par.finPos = par.shiftAngle(topLeft: par.startPos,
                                         bottomRight: par.finPos)
-        }
-
-        super.drag(shift: shift, fn: fn)
-
-        if shift {
+            par.setLabel(key: "x", pos: par.startPos,
+                          dist: par.finPos.magnitude(origin: par.startPos))
             par.rulers.appendCustomRule(move: par.startPos,
                                         line: par.finPos)
+        } else {
+            super.drag(shift: shift, fn: fn)
         }
     }
 }

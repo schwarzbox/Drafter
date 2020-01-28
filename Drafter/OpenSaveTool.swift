@@ -134,7 +134,7 @@ class SaveTool {
         return filePaths
     }
 
-    func openCurve(drf: Drf, fileUrl: URL) -> Curve {
+    func makeCurve(drf: Drf) -> Curve {
         let curve = view.initCurve(
             path: drf.path, fill: drf.fill, rounded: drf.rounded,
             angle: CGFloat(drf.angle),
@@ -160,6 +160,12 @@ class SaveTool {
         curve.text = drf.text
         curve.textDelta = drf.textDelta
 
+        return curve
+    }
+
+    func openCurve(drf: Drf, fileUrl: URL) -> Curve {
+        let curve = self.makeCurve(drf: drf)
+
         let dirUrl = fileUrl.deletingLastPathComponent()
         let imgUrl = dirUrl.appendingPathComponent(drf.name + ".tiff")
         if let image = NSImage(contentsOf: imgUrl) {
@@ -170,6 +176,7 @@ class SaveTool {
         view.layer?.addSublayer(curve.canvas)
         return curve
     }
+    
 
     func parseLine(drf: inout Drf, line: String) {
         if let sp = line.firstIndex(of: " ") {
@@ -276,7 +283,7 @@ class SaveTool {
         }
     }
 
-    func saveDrf(fileUrl: URL) {
+    func makeDrf() -> String {
         var code: String = ""
         for curve in view.curves {
             for (ind, cur) in curve.groups.enumerated() {
@@ -351,6 +358,11 @@ class SaveTool {
                 code += "-\n"
             }
         }
+        return code
+    }
+
+    func saveDrf(fileUrl: URL) {
+        let code = self.makeDrf()
         do {
             try code.write(to: fileUrl, atomically: false, encoding: .utf8)
         } catch {
@@ -359,5 +371,6 @@ class SaveTool {
     }
 
     func saveSvg(fileUrl: URL) {
+        
     }
 }

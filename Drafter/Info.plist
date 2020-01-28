@@ -7,16 +7,20 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
-			<key>LSHandlerRank</key>
-			<string>Owner</string>
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>draft</string>
 			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>DraftIcon.icns</string>
 			<key>CFBundleTypeName</key>
-			<string>Drafter File</string>
+			<string>Drafter Image</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>LSCanProvideIMVideoDataSource</key>
+    		<true/>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.veledzimovich.Drafter.draft</string>
@@ -56,10 +60,13 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-				<string>public.content</string>
+				<string>com.apple.package</string>
+    			<string>public.composite-content</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Drafter File</string>
+			<string>Drafter Image</string>
+			<key>UTTypeIconFile</key>
+			<string>DraftIcon.icns</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.veledzimovich.Drafter.draft</string>
 			<key>UTTypeTagSpecification</key>

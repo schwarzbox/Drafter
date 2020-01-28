@@ -10,8 +10,8 @@ import Cocoa
 
 struct SetupCurve {
     let minResize: Double = 0.1
-    let minRotate = -Double.pi
-    let maxRotate = Double.pi
+    let minRotate = -180.0
+    let maxRotate = 180.0
     let angle = 0.0
     let lineWidth: CGFloat = 1.0
     let maxLineWidth: CGFloat = 64
@@ -81,7 +81,7 @@ struct SetupEditor {
 
     let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
     let filename: String = "untitled"
-    let fileTypes: [String] = ["bundle", "png", "svg"]
+    let fileTypes: [String] = ["draft", "png", "svg"]
 
     let disabledActions = ["position": NSNull(),
                            "path": NSNull(),

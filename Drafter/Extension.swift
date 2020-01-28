@@ -73,65 +73,6 @@ extension NSBezierPath {
         return path
     }
 
-//    func findPath(curve: Curve,
-//                   pos: CGPoint) -> (index: Int, points: [CGPoint])? {
-//        let mags = curve.points.map { (pnt) -> (CGFloat, CGPoint) in
-//            (pnt.mp.position.magnitude(origin: pos), pnt.mp.position)
-//        }
-//        let srt = mags.sorted(by: {$0.0<$1.0})
-//        var cnt = 1
-//        if srt.count > cnt {
-//            var minPos1 = srt[cnt-1].1
-//            var minPos2 = srt[cnt].1
-//            while srt[cnt-1].0 == srt[cnt].0 {
-//                cnt+=1
-//                if srt.count > cnt {
-//                    minPos1 = srt[cnt-1].1
-//                    minPos2 = srt[cnt].1
-//                }
-//            }
-//            print(minPos1, minPos2)
-//            var cPnt = [CGPoint](repeating: .zero, count: 3)
-//            var oldPoint: CGPoint?
-//
-//            for i in 0 ..< self.elementCount {
-//                let type = self.element(at: i, associatedPoints: &cPnt)
-//                switch type {
-//                case .moveTo:
-//                    oldPoint = cPnt[0]
-//                case .lineTo:
-//                    cPnt[1] = cPnt[0]
-//                    cPnt[2] = cPnt[0]
-//                    if let mp = oldPoint,
-//                        ((mp.equalTo(minPos1) ||
-//                            mp.equalTo(minPos2)) &&
-//                        (cPnt[0].equalTo(minPos2) ||
-//                            cPnt[0].equalTo(minPos1 ))) {
-//
-//                        return (index: i, points: cPnt)
-//                    }
-//                    oldPoint = cPnt[0]
-//
-//                case .curveTo:
-//                    if let mp = oldPoint,
-//                        ((mp.equalTo(minPos1) ||
-//                            mp.equalTo(minPos2)) &&
-//                        (cPnt[2].equalTo(minPos2) ||
-//                            cPnt[2].equalTo(minPos1 ))) {
-//
-//                        return (index: i, points: cPnt)
-//                    }
-//                    oldPoint = cPnt[2]
-//                case .closePath:
-//                    break
-//                default:
-//                    break
-//                }
-//            }
-//        }
-//        return nil
-//    }
-
     func findPath(pos: CGPoint) -> (index: Int, points: [CGPoint])? {
         var cPnt = [CGPoint](repeating: .zero, count: 3)
         var oldPoint: CGPoint?

@@ -6,7 +6,7 @@ Easy tool for create sketches
 
 WIP
 
-v0.98
+v0.99
 
 # Features
 
@@ -87,6 +87,8 @@ Click on shape with ⌘(Cmd)  to clone it
 
 Edit mode
 
+Use ^(Control) to disable preview
+
 Use ^(Control) + LMB to select more than one dot
 
 If dot selected press ^(Control) + LMB to deselect dot
@@ -108,13 +110,7 @@ Scroll canvas with two fingers
 
 # Road map
 
-v.098 Improve History, RemoveBundle
-
-v.099 Group Members
-
-v1.0 Bugs:  Bundle extension UndoRedo
+v1.0 Group Members Bugs: UndoRedo
 
 v1.5 .svg
-
-v2.0 Edit Text witth control dots
 
