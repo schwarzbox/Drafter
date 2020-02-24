@@ -18,7 +18,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSCanProvideIMVideoDataSource</key>
-    		<true/>
+			<true/>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
@@ -61,12 +61,12 @@
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>com.apple.package</string>
-    			<string>public.composite-content</string>
+				<string>public.composite-content</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>Drafter Image</string>
 			<key>UTTypeIconFile</key>
-			<string>DraftIcon.icns</string>
+			<string>DraftIcon</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.veledzimovich.Drafter.draft</string>
 			<key>UTTypeTagSpecification</key>
@@ -77,6 +77,27 @@
 				</array>
 				<key>public.mime-type</key>
 				<array/>
+			</dict>
+		</dict>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+				<string>public.composite-content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Drafter Image</string>
+			<key>UTTypeIconFile</key>
+			<string>DraftIcon</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>draft</string>
+				</array>
 			</dict>
 		</dict>
 	</array>

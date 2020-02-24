@@ -153,7 +153,7 @@ class RulerTool: CAShapeLayer {
                 let boundsPnt = cur.boundsPoints(curves: cur.groups)
                 for curPnt in boundsPnt {
                     if pnt.x <= curPnt.x+setEditor.rulersDelta &&
-                        pnt.x >= curPnt.x-setEditor.rulersDelta {                        
+                        pnt.x >= curPnt.x-setEditor.rulersDelta {
                         let (minTarY, maxTarY) = self.findMinMax(
                             sel: pnt.y, tar: curPnt.y,
                             min: boundsPnt[0].y,

@@ -11,6 +11,19 @@ import Cocoa
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
+    func application(_ sender: NSApplication,
+                     openFile filename: String) -> Bool {
+        if filename.checkExtension(ext: setEditor.fileTypes) {
+            let fileUrl = URL.init(fileURLWithPath: filename)
+            let nc = NotificationCenter.default
+            nc.post(name: Notification.Name("openFiles"),
+                    object: nil,
+                    userInfo: ["fileUrl": fileUrl])
+            return true
+        }
+        return false
+    }
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         print("applicationDidFinishLaunching")
     }

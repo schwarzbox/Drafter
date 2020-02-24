@@ -940,17 +940,12 @@ class ViewController: NSViewController,
         self.saveHistory()
     }
 
-    @IBAction func ungroup(_ sender: NSMenuItem) {
-        sketchView!.groupCurve(sender: sender)
-        self.saveHistory()
-    }
-
     @IBAction func editCurve(_ sender: NSButton) {
         sketchView!.editCurve(sender: sender)
         self.saveHistory()
     }
 
-    @IBAction func lockCurve(_ sender: NSButton) {
+    @IBAction func lockCurve(_ sender: Any) {
         sketchView!.lockCurve(sender: sender)
         self.saveHistory()
     }
@@ -963,14 +958,18 @@ class ViewController: NSViewController,
 
     @objc func saveHistory() {
         let view = sketchView!
+        for curves in self.history[self.indexHistory+1..<self.history.count] {
+            view.removeAllCurves(curves: curves)
+        }
         self.history[self.indexHistory+1..<self.history.count] = []
         self.history.append(view.copyAll())
 
-//        if self.indexHistory > setEditor.maxHistory * 2 {
-//            self.history[0..<setEditor.maxHistory] = []
-//        }
-
-        print(self.history.count)
+        if self.indexHistory > setEditor.maxHistory * 2 {
+            for curves in self.history[0..<setEditor.maxHistory] {
+                view.removeAllCurves(curves: curves)
+            }
+            self.history[0..<setEditor.maxHistory] = []
+        }
         self.indexHistory = self.history.count-1
         self.updateStack()
     }
@@ -998,7 +997,10 @@ class ViewController: NSViewController,
         }
 
         view.groups = []
-        view.removeAllCurves()
+        view.removeAllCurves(curves: view.curves)
+        view.curves.removeAll()
+        view.groups.removeAll()
+        view.frameUI.isOn(on: -1)
 
         history()
         view.clearCurvedPath()
@@ -1129,10 +1131,16 @@ class ViewController: NSViewController,
         view.sketchName = nil
         view.sketchExt = nil
 
-        view.removeAllCurves()
+        view.removeAllCurves(curves: view.curves)
+        view.curves.removeAll()
+        view.groups.removeAll()
+        view.frameUI.isOn(on: -1)
 
         fontUI.inputField.hide()
 
+        for curves in self.history {
+            view.removeAllCurves(curves: curves)
+        }
         self.clearHistory()
         self.updateStack()
         self.updateSliders()

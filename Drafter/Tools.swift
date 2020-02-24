@@ -25,7 +25,7 @@ protocol Drawable {
     var name: String { get }
     func create(fn: Bool, shift: Bool, opt: Bool,
                 event: NSEvent?)
-    func move(shift: Bool,fn: Bool)
+    func move(shift: Bool, fn: Bool)
     func drag(shift: Bool, fn: Bool)
     func down(ctrl: Bool)
     func up(editDone: Bool)

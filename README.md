@@ -4,9 +4,7 @@ Vector Editor for MacOS.
 
 Easy tool for create sketches
 
-WIP
-
-v0.99
+v0.995
 
 # Features
 
@@ -33,7 +31,7 @@ Built-in rulers
 
 # Perfomance
 
-Drafter v0.97 comfort work is possible when used less than 100 layers
+Drafter v0.995 comfort work is possible when used less than 100 layers
 
 # Tools & Hotkeys
 
@@ -55,7 +53,7 @@ Save (⌘S), Save-As (⇧⌘S) - save to *.drf or *.png
 
 - Edit
 
-Undo (⌘Z), Redo (⇧⌘Z) - 4 operations
+Undo (⌘Z), Redo (⇧⌘Z) - 8 operations
 
 Cut (⌘X) - remove selected shape and copy to the buffer, Copy (⌘C) - copy selected shape
 
@@ -110,7 +108,9 @@ Scroll canvas with two fingers
 
 # Road map
 
-v1.0 Group Members Bugs: UndoRedo
+v1.0 Group Members 
+
+v1.1 Improve UndoRedo
 
 v1.5 .svg
 

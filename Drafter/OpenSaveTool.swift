@@ -176,7 +176,6 @@ class SaveTool {
         view.layer?.addSublayer(curve.canvas)
         return curve
     }
-    
 
     func parseLine(drf: inout Drf, line: String) {
         if let sp = line.firstIndex(of: " ") {
@@ -371,6 +370,5 @@ class SaveTool {
     }
 
     func saveSvg(fileUrl: URL) {
-        
     }
 }

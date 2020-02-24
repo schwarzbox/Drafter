@@ -96,8 +96,8 @@ class ControlPoint: Equatable {
 
     func delete() {
         self.clearDots()
-        self.dots = []
-        self.lines = []
+        self.dots.removeAll()
+        self.lines.removeAll()
     }
 
     func collideDot(pos: CGPoint, dot: Dot) -> Bool {

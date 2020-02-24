@@ -401,6 +401,16 @@ extension String {
                 return true
         })
     }
+
+    func checkExtension(ext: [String]) -> Bool {
+        let suffix = URL(fileURLWithPath: self).pathExtension
+        for ext in ext {
+            if ext.lowercased() == suffix {
+                return true
+            }
+        }
+        return false
+    }
 }
 
 extension NSImage {

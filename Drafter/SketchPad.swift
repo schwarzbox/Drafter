@@ -5,23 +5,27 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
+// release 1.0
 // multy select dots
 // images for cursors
 // rect frames for selected shapes
-// default set for shapes
-// flex shapes
-// star
-// zoom move for points
+// default settings when create shape
+// flexible shapes
+// star shape
+// scale edit for points
 // edit shapes with enter
-
+// lock hotkey cmd-L
+// fix BundleBug
 
 // 1.0
+// new image
+// 1.1
 // show groups members?
-// undo
 // open recent
 // preferences (px, mm)
 // help
-
+// 1.2
+// improve undo?
 // 1.5
 // SVG
 
@@ -161,23 +165,17 @@ class SketchPad: NSView {
     }
 
 //    MARK: Drag&Drop func
-    fileprivate func checkExtension(_ drag: NSDraggingInfo) -> Bool {
+    fileprivate func checkDragDrop(_ drag: NSDraggingInfo) -> Bool {
         guard let board = drag.draggingPasteboard.propertyList(
             forType: NSPasteboard.PasteboardType(
                 rawValue: "NSFilenamesPboardType")) as? NSArray,
               let path = board[0] as? String
         else { return false }
 
-        let suffix = URL(fileURLWithPath: path).pathExtension
-        for ext in setEditor.fileTypes {
-            if ext.lowercased() == suffix {
-                return true
-            }
-        }
-        return false
+        return path.checkExtension(ext: setEditor.fileTypes)
     }
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        if checkExtension(sender) == true {
+        if checkDragDrop(sender) == true {
             return .copy
         } else {
             return NSDragOperation()
@@ -1136,7 +1134,7 @@ class SketchPad: NSView {
     }
 
     func groupCurve(sender: Any) {
-        if let button  = sender as? NSButton, button.state == .on {
+        if let button = sender as? NSButton, button.state == .on {
             if self.groups.count > 1 {
                 self.makeGroup()
             } else {
@@ -1216,20 +1214,34 @@ class SketchPad: NSView {
         }
     }
 
-    func lockCurve(sender: NSButton) {
-        if sender.alternateTitle.isEmpty {
-            let curve = self.curves[sender.tag]
-            for cur in curve.groups {
-                self.setLock(curve: cur, sender: sender)
+    func lockCurve(sender: Any) {
+        if let button = sender as? NSButton {
+            if button.alternateTitle.isEmpty {
+                let curve = self.curves[button.tag]
+                for cur in curve.groups {
+                    self.setLock(curve: cur, sender: button)
+                }
+            } else {
+                if self.groups.count>1 {
+                    for cur in self.groups {
+                        self.setLock(curve: cur, sender: button)
+                    }
+                } else if let curve = self.selectedCurve {
+                    for cur in curve.groups {
+                        self.setLock(curve: cur, sender: button)
+                    }
+                }
             }
-        } else {
+        } else if let menuItem = sender as? NSMenuItem {
             if self.groups.count>1 {
                 for cur in self.groups {
-                    self.setLock(curve: cur, sender: sender)
+                    cur.lock = menuItem.tag == 0
+                        ? true : false
                 }
             } else if let curve = self.selectedCurve {
                 for cur in curve.groups {
-                    self.setLock(curve: cur, sender: sender)
+                    cur.lock = menuItem.tag == 0
+                        ? true : false
                 }
             }
         }
@@ -1329,7 +1341,7 @@ class SketchPad: NSView {
     }
 
     func zoomCenter(event: NSEvent, center: CGPoint, finPos: CGPoint,
-                      dotPos: CGPoint, speed: inout CGFloat) -> CGPoint {
+                    dotPos: CGPoint, speed: inout CGFloat) -> CGPoint {
         let cen = finPos.magnitude(origin: center)
         let sel = dotPos.magnitude(origin: center)
         let mod = cen > sel ? CGFloat(1) : CGFloat(-1)
@@ -1345,13 +1357,15 @@ class SketchPad: NSView {
     }
 
 //    MARK: Key func
-    func removeAllCurves() {
-        for curve in self.curves {
+    func removeAllCurves(curves: [Curve]) {
+        for curve in curves {
             curve.clearPoints()
             curve.delete()
+            for point in curve.points {
+                point.delete()
+            }
+            curve.points.removeAll()
         }
-        self.curves.removeAll()
-        self.frameUI.isOn(on: -1)
     }
 
     func removeCurve(curve: Curve) {
@@ -1434,7 +1448,7 @@ class SketchPad: NSView {
     }
 
     func copyAll() -> [Curve] {
-        var curves: [Curve] = []
+        var cloneCurves: [Curve] = []
         var oldCopy: Curve?
         if let cur = self.copiedCurve {
             oldCopy = cur
@@ -1442,11 +1456,11 @@ class SketchPad: NSView {
         for curve in self.curves {
             self.copyCurve(from: curve, selfGroups: false)
             if let clone = self.copiedCurve {
-                curves.append(clone)
+                cloneCurves.append(clone)
             }
         }
         self.copiedCurve = oldCopy
-        return curves
+        return cloneCurves
     }
 
     func addAllLayers() {
@@ -1480,7 +1494,8 @@ class SketchPad: NSView {
                         }
                     }
                     let clone = self.initCurve(
-                        path: path, fill: cur.fill, rounded: cur.rounded,
+                        path: path, fill: cur.fill,
+                        rounded: cur.rounded,
                         angle: cur.angle,
                         lineWidth: cur.lineWidth,
                         cap: cur.cap, join: cur.join,
@@ -1514,6 +1529,7 @@ class SketchPad: NSView {
 
             self.copiedCurve = cloneGroups[0]
         }
+
     }
 
     func pasteCurve(to: CGPoint) {

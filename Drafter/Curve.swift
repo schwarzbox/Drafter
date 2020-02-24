@@ -23,6 +23,50 @@ class Curve: Equatable {
     let canvas = CAShapeLayer()
 
     var layers: [CALayer] = []
+
+    var text: String = ""
+    var textDelta: CGPoint?
+
+    var rounded: CGPoint?
+    var gradient: Bool = false
+    var fill: Bool = false
+    var mask: Bool = false
+    var edit: Bool = false
+    var lock: Bool = false
+
+    var name: String = ""
+
+    var controlDot: Dot?
+    var controlDots: [ControlPoint] = []
+    var controlFrame: ControlFrame?
+
+    var groups: [Curve] = []
+
+    init(parent: SketchPad,
+         path: NSBezierPath, fill: Bool = true, rounded: CGPoint?) {
+
+        self.parent = parent
+        self.path = path
+
+        self.fill = fill
+        self.rounded = rounded
+        self.groups = [self]
+
+        self.layers = [imageLayer, gradientLayer]
+
+        for layer in self.layers {
+            layer.actions = setEditor.disabledActions
+            layer.contentsGravity = .center
+            self.canvas.addSublayer(layer)
+        }
+
+        self.canvas.filters = []
+
+        self.canvas.contentsGravity = .center
+        self.canvas.actions = setEditor.disabledActions
+        self.updateLayer()
+    }
+
     var angle: CGFloat = 0.0
     var lineWidth = setCurve.lineWidth {
         willSet(value) {
@@ -182,48 +226,6 @@ class Curve: Equatable {
         return CGPoint(x: bounds.midX, y: bounds.midY)
     }
 
-    var text: String = ""
-    var textDelta: CGPoint?
-
-    var rounded: CGPoint?
-    var gradient: Bool = false
-    var fill: Bool = false
-    var mask: Bool = false
-    var edit: Bool = false
-    var lock: Bool = false
-
-    var name: String = ""
-
-    var controlDot: Dot?
-    var controlDots: [ControlPoint] = []
-    var controlFrame: ControlFrame?
-
-    var groups: [Curve] = []
-
-    init(parent: SketchPad,
-         path: NSBezierPath, fill: Bool = true, rounded: CGPoint?) {
-        self.parent = parent
-        self.path = path
-
-        self.fill = fill
-        self.rounded = rounded
-        self.groups = [self]
-
-        self.layers = [imageLayer, gradientLayer]
-
-        for layer in self.layers {
-            layer.actions = setEditor.disabledActions
-            layer.contentsGravity = .center
-            self.canvas.addSublayer(layer)
-        }
-
-        self.canvas.filters = []
-
-        self.canvas.contentsGravity = .center
-        self.canvas.actions = setEditor.disabledActions
-        self.updateLayer()
-    }
-
     let lineCapStyles: [CAShapeLayerLineCap] = [
         .square, .butt, .round
     ]
@@ -301,6 +303,7 @@ class Curve: Equatable {
             curve.gradientLayer.removeFromSuperlayer()
             curve.canvas.removeFromSuperlayer()
         }
+        self.groups.removeAll()
     }
 
     func boundsPoints(curves: [Curve]) -> [CGPoint] {
