@@ -4,7 +4,7 @@ Vector Editor for MacOS.
 
 Easy tool for create sketches
 
-v0.995
+v1.0
 
 # Features
 
@@ -37,9 +37,9 @@ Drafter v0.995 comfort work is possible when used less than 100 layers
 
 Select (M), Line (L), Triangle (T), Rectangle (R) Pentagon(P), Hex(H), Star(S), Arc (A), Oval (O), Stylus (D)
 
-Vector (V) - press ⚙ in pop-up menu to edit shape with control dots
+Vector (V) - press ⚙ in pop-up menu or Return to edit shape with control dots
 
-Font (F) - type text in text field, hit Enter and create vector representation
+Font (F) - type text in text field, hit Return and create vector representation
 
 # Combos
 
@@ -53,7 +53,7 @@ Save (⌘S), Save-As (⇧⌘S) - save to *.drf or *.png
 
 - Edit
 
-Undo (⌘Z), Redo (⇧⌘Z) - 8 operations
+Undo (⌘Z), Redo (⇧⌘Z) - up to 16 operations
 
 Cut (⌘X) - remove selected shape and copy to the buffer, Copy (⌘C) - copy selected shape
 
@@ -108,9 +108,9 @@ Scroll canvas with two fingers
 
 # Road map
 
-v1.0 Group Members 
+v1.1 Show group members 
 
-v1.1 Improve UndoRedo
+v1.2 Improve UndoRedo
 
 v1.5 .svg
 

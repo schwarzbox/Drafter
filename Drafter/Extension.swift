@@ -571,9 +571,7 @@ extension NSColor {
     func sRGB(alpha: CGFloat = 1.0) -> NSColor {
         guard let color = self.usingColorSpace(NSColorSpace.sRGB) else {
 
-            return NSColor.init(
-                srgbRed: 255.0, green: 255.0,
-                blue: 255.0, alpha: alpha)
+            return self
         }
         return NSColor.init(srgbRed: color.redComponent,
                             green: color.greenComponent,

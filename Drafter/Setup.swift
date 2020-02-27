@@ -48,7 +48,8 @@ struct SetupCurve {
 }
 
 struct SetupEditor {
-    let maxHistory: Int = 8
+    var nowHistory: Int = 8
+    let maxHistory: Int = 16
     let minZoom: Double = 20
     let maxZoom: Double = 640
     let reduceZoom: CGFloat = 20

@@ -5,27 +5,14 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
-// release 1.0
-// multy select dots
-// images for cursors
-// rect frames for selected shapes
-// default settings when create shape
-// flexible shapes
-// star shape
-// scale edit for points
-// edit shapes with enter
-// lock hotkey cmd-L
-// fix BundleBug
-
 // 1.0
-// new image
+// patreon
 // 1.1
 // show groups members?
-// open recent
-// preferences (px, mm)
-// help
-// 1.2
+// improve track dots(see mouse move)
 // improve undo?
+// 1.2
+// help
 // 1.5
 // SVG
 
@@ -98,7 +85,7 @@ class SketchPad: NSView {
         super.init(coder: aDecoder)
 
         let options: NSTrackingArea.Options = [
-            .mouseMoved, .activeInActiveApp, .inVisibleRect]
+            .mouseMoved, .activeInActiveApp]
         self.trackArea = NSTrackingArea(rect: self.bounds,
                                   options: options, owner: self)
         self.addTrackingArea(self.trackArea!)
@@ -117,14 +104,7 @@ class SketchPad: NSView {
             [NSPasteboard.PasteboardType.URL,
              NSPasteboard.PasteboardType.fileURL])
     }
-//    override func updateLayer() { }
-//    override func makeBackingLayer() -> CALayer { }
-//    override func draw(_ dirtyRect: NSRect) {
-//        super.draw(dirtyRect)
-        // fill background
-//        NSColor.white.setStroke()
-//        __NSFrameRect(dirtyRect)
-//    }
+
     override func viewWillDraw() {
         self.updateWithPath(layer: self.editLayer, path: self.editedPath)
         self.updateWithPath(layer: self.curveLayer, path: self.curvedPath)
@@ -231,12 +211,11 @@ class SketchPad: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        let ctrl: Bool = event.modifierFlags.contains(.control) ? true : false
         let pos = convert(event.locationInWindow, from: nil)
         self.showCurvedPath(pos: pos)
 
         if let curve = self.selectedCurve {
-            curve.showControl(pos: pos, ctrl: ctrl)
+            curve.showControl(pos: pos)
         }
         self.needsDisplay = true
     }
@@ -300,6 +279,15 @@ class SketchPad: NSView {
         } else {
             self.tool.move(shift: shift, fn: fn)
         }
+
+        if let curve = self.selectedCurve, !curve.canvas.isHidden {
+            self.clearControls(curve: curve)
+            self.createControls(curve: curve)
+            if curve.edit {
+                curve.updatePoints(deltaX: 0, deltaY: 0)
+            }
+        }
+
         self.needsDisplay = true
     }
 
@@ -457,13 +445,7 @@ class SketchPad: NSView {
         } else if let mp = self.movePoint,
             mp.collide(pos: self.startPos, radius: mp.bounds.width),
             self.controlPoints.count>0 {
-            self.filledCurve = false
-            self.finalSegment(fin: {mp, cp1, cp2 in
-                self.editedPath.move(to: mp.position)
-                self.controlPoints.append(
-                    ControlPoint(cp1: cp1, cp2: cp2, mp: mp))
-            })
-
+            self.addOpenSegment()
         } else if self.movePoint != nil, self.closedCurve {
             self.finalSegment(fin: {mp, cp1, cp2 in
                 self.addSegment(mp: mp, cp1: cp1, cp2: cp2)
@@ -477,6 +459,12 @@ class SketchPad: NSView {
     }
 
     override func mouseUp(with event: NSEvent) {
+        self.actionUp()
+        self.startPos = convert(event.locationInWindow, from: nil)
+        self.needsDisplay = true
+    }
+
+    func actionUp() {
         self.tool.up(editDone: self.editDone)
 
         self.clearPathLayer(layer: self.curveLayer,
@@ -488,13 +476,11 @@ class SketchPad: NSView {
         self.closedCurve = false
         self.filledCurve = true
         self.editDone = false
-        self.startPos = convert(event.locationInWindow, from: nil)
 
         self.updateSliders()
         if self.selectedCurve != nil {
             self.saveHistory()
         }
-        self.needsDisplay = true
     }
 
 //    MARK: Control func
@@ -584,7 +570,6 @@ class SketchPad: NSView {
              for cur in self.groups {
                 self.curvedPath.appendRect(
                     cur.groupRect(curves: [cur]))
-//                    self.curvedPath.append(cur.path)
                 }
         }
     }
@@ -802,7 +787,8 @@ class SketchPad: NSView {
         self.translateOrigin(to: CGPoint(x: -originX,
                                          y: -originY))
 
-        self.clearPathLayer(layer: self.curveLayer, path: self.curvedPath)
+        self.clearPathLayer(layer: self.curveLayer,
+                            path: self.curvedPath)
         self.dotSize = setEditor.dotSize/self.zoomed
         self.dotRadius = self.dotSize/2
         self.dotMag = self.dotRadius/2
@@ -820,9 +806,15 @@ class SketchPad: NSView {
             if curve.edit {
                 curve.clearPoints()
                 curve.createPoints()
+                // restore selected dots
+                for pnt in curve.controlDots {
+                    pnt.showControlDots(dotMag: self.dotMag,
+                                        lineWidth: self.lineWidth)
+                }
             }
         }
         self.showGroup()
+
         self.needsDisplay = true
     }
 
@@ -856,6 +848,15 @@ class SketchPad: NSView {
                               controlPoint2: cPnt[1])
 
         self.controlPoints.append(ControlPoint(cp1: cp1, cp2: cp2, mp: mp))
+    }
+
+    func addOpenSegment() {
+        self.filledCurve = false
+        self.finalSegment(fin: {mp, cp1, cp2 in
+            self.editedPath.move(to: mp.position)
+            self.controlPoints.append(
+                ControlPoint(cp1: cp1, cp2: cp2, mp: mp))
+        })
     }
 
     func finalSegment(fin: (_ mp: Dot, _ cp1: Dot, _ cp2: Dot) -> Void ) {
@@ -1174,6 +1175,7 @@ class SketchPad: NSView {
 
     func editFinished(curve: Curve) {
         curve.edit = false
+        curve.controlDots = []
         curve.clearPoints()
         curve.createControlFrame()
         self.clearRulers()
@@ -1426,7 +1428,6 @@ class SketchPad: NSView {
                     curve.removePoint(pnt: pnt)
                 }
             } else {
-
                 if self.groups.count>0 {
                     for cur in self.groups {
                         self.removeCurve(curve: cur)
@@ -1436,7 +1437,7 @@ class SketchPad: NSView {
                     self.removeCurve(curve: curve)
                 }
                 if let nextCurve = self.selectedCurve {
-                    self.deselectCurve(curve: nextCurve)
+//                    self.deselectCurve(curve: nextCurve)
                     self.createControls(curve: nextCurve)
                 }
             }

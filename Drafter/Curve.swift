@@ -627,7 +627,6 @@ class Curve: Equatable {
 
     func editPoint(pos: CGPoint, cmd: Bool = false, opt: Bool = false) {
         if !self.lock {
-//            self.clearTrackArea()
             var find: Bool = false
             for (index, point) in self.points.enumerated() {
                 if let dot = self.controlDot {
@@ -676,9 +675,7 @@ class Curve: Equatable {
                         point.updateLines()
                     }
                 }
-//                point.trackDot(parent: self.parent!, dot: point.mp)
             }
-//            self.updateLayer()
         }
     }
 
@@ -767,7 +764,7 @@ class Curve: Equatable {
     }
 
 //    MARK: Global Control
-    func showControl(pos: CGPoint, ctrl: Bool) {
+    func showControl(pos: CGPoint) {
         if !self.lock {
             if self.edit {
                 var find = false

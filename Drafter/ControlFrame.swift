@@ -37,7 +37,7 @@ class ControlFrame: CAShapeLayer {
         self.dotMag = parent.dotMag
         self.ctrlPad = self.dotSize * 4
         self.ctrlPad50 = self.dotSize * 2
-        self.ctrlRot = self.dotSize * 1.5
+        self.ctrlRot = self.dotSize * 1.2
 
         self.lineWidth = parent.lineWidth
         self.lineDashPattern = parent.lineDashPattern

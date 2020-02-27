@@ -139,7 +139,16 @@ class ViewController: NSViewController,
                 view.dragCurve(deltaX: dt.x, deltaY: dt.y)
                 return true
             } else if event.keyCode == 36 {
-                if let curve = view.selectedCurve, curve.edit {
+                if let tool = view.tool as? Vector {
+                    tool.action(topLeft: view.startPos)
+                    if view.controlPoints.count>0 {
+                        view.addOpenSegment()
+                        view.editDone = true
+                        view.actionUp()
+                        view.needsDisplay = true
+                    }
+                    return true
+                } else if let curve = view.selectedCurve, curve.edit {
                     view.editFinished(curve: curve)
                     self.saveHistory()
                     return true
@@ -851,6 +860,7 @@ class ViewController: NSViewController,
         if let panel = self.colorPanel,
             let cp = panel.sharedColorPanel {
             cp.acceptsMouseMovedEvents = true
+
         }
         view.colorCurve()
     }
@@ -958,17 +968,18 @@ class ViewController: NSViewController,
 
     @objc func saveHistory() {
         let view = sketchView!
+
         for curves in self.history[self.indexHistory+1..<self.history.count] {
             view.removeAllCurves(curves: curves)
         }
         self.history[self.indexHistory+1..<self.history.count] = []
         self.history.append(view.copyAll())
 
-        if self.indexHistory > setEditor.maxHistory * 2 {
-            for curves in self.history[0..<setEditor.maxHistory] {
+        if self.indexHistory >= setEditor.nowHistory {
+            for curves in self.history[0..<1] {
                 view.removeAllCurves(curves: curves)
             }
-            self.history[0..<setEditor.maxHistory] = []
+            self.history[0..<1] = []
         }
         self.indexHistory = self.history.count-1
         self.updateStack()
@@ -1117,6 +1128,7 @@ class ViewController: NSViewController,
             curve.clearPoints()
         }
         view.clearCurvedPath()
+        view.clearRulers()
         frameUI.hide()
     }
 
