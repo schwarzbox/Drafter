@@ -5,13 +5,13 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
-// 1.0
-// patreon
-// 1.1
+// 1.2
+// improve undo?
 // show groups members?
 // improve track dots(see mouse move)
-// improve undo?
-// 1.2
+// 1.3
+// improve history
+// save user pref
 // help
 // 1.5
 // SVG
@@ -1583,8 +1583,28 @@ class SketchPad: NSView {
                 var correctPos = pos
                 correctPos.y -= hei
                 self.editedPath.move(to: correctPos)
+
+                let spGlyph = font.glyph(withName: "A") - 33
+                let spScal = UInt32(UnicodeScalar(" "))
                 for char in value {
-                    let glyph = font.glyph(withName: String(char))
+                    var glyph = font.glyph(withName: String(char))
+                    if glyph == 0 {
+                        let diff =  UInt32(
+                            UnicodeScalar(String(char))!) - spScal
+                        glyph = spGlyph + diff
+
+                        if setEditor.fontsA34.contains(font.fontName) {
+                            if char == " " {
+                                glyph += 2
+                            }
+                        }
+
+                        if setEditor.fontsA41.contains(font.fontName) {
+                            if char == " " {
+                                glyph -= 5
+                            }
+                        }
+                    }
                     self.editedPath.append(
                         withCGGlyph: CGGlyph(glyph), in: font)
                 }

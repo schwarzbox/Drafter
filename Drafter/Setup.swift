@@ -107,32 +107,35 @@ struct SetupEditor {
     let fontSize: Double = 16
     let minFont: Double = 8
     let maxFont: Double = 128
+
+    let fontsA34 = ["Trattatello", "Stencil Std"]
+    let fontsA41 = ["AmericanTypewriter", "Herculanum",
+                    "MarkerFelt", "Papyrus"]
+
     let fonts: [String] = [
         "American Typewriter", "Andale Mono",
         "Arcade", "Arial", "Arial Black",
-        "Arial Narrow", "Avenir", "Avenir Next",
+        "Arial Narrow", "Avenir Next",
         "Bradley Hand", "Brush Script MT",
-        "Chalkboard", "Chalkduster", "Comic Sans MS",
+        "Chalkboard", "Chalkduster",
+        "Comic Sans MS",
         "Copperplate", "Courier",
-        "Courier New", "Didot", "DIN Alternate",
-        "DIN Condensed", "Futura", "Geneva", "Georgia",
-        "Gill Sans", "Helvetica", "Helvetica Neue",
+        "Courier New", "Geneva", "Georgia",
+        "Helvetica",
         "Herculanum", "Hoefler Text", "Impact",
-        "InaiMathi", "Kefa", "Kohinoor Bangla",
-        "Kohinoor Devanagari", "Kohinoor Gujarati",
-        "Kohinoor Telugu", "Krungthep",
-        "Monaco", "Mukta Mahee", "Lucida Grande",
-        "Luminari", "Marker Felt", "Menlo",
-        "Microsoft Sans Serif", "Monaco", "Mukta Mahee",
-        "Noteworthy", "Optima", "Papyrus",
-        "PCBius", "Phosphate", "PT Mono", "PT Sans",
+        "InaiMathi", "Kefa",
+        "Monaco", "Lucida Grande",
+        "Marker Felt", "Menlo",
+        "Microsoft Sans Serif", "Monaco",
+        "Noteworthy", "Papyrus",
+        "Phosphate", "PT Mono", "PT Sans",
         "PT Sans Caption", "PT Sans Narrow",
         "PT Serif", "PT Serif Caption",
-        "Rockwell", "Savoye LET", "SignPainter",
-        "Silkscreen", "Silom", "Skia", "Snell Roundhand",
-        "Space Invaders", "Stencil Std", "Tahoma", "Times",
+        "Rockwell", "Silkscreen",
+        "Snell Roundhand",
+        "Stencil Std", "Tahoma", "Times",
         "Times New Roman", "Trattatello",
-        "Trebuchet MS", "Verdana", "Zapfino"]
+        "Trebuchet MS", "Verdana"]
 }
 
 struct SetupCursor {

@@ -12,8 +12,9 @@ class Curve: Equatable {
     static func == (lhs: Curve, rhs: Curve) -> Bool {
         return lhs.path == rhs.path
     }
+
     var parent: SketchPad?
-    var path: NSBezierPath
+    var path: NSBezierPath = NSBezierPath()
     let gradientMask = CAShapeLayer()
     let gradientLayer = CAGradientLayer()
     let imageLayer = CAShapeLayer()
@@ -65,6 +66,7 @@ class Curve: Equatable {
         self.canvas.contentsGravity = .center
         self.canvas.actions = setEditor.disabledActions
         self.updateLayer()
+
     }
 
     var angle: CGFloat = 0.0

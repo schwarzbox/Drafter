@@ -41,7 +41,7 @@ class ViewController: NSViewController,
 
     @IBOutlet weak var curveDashGap: NSStackView!
     @IBOutlet weak var curveDashGapLabel: NSStackView!
-    @IBOutlet weak var curveWindingRule: NSSegmentedControl!
+//    @IBOutlet weak var curveWindingRule: NSSegmentedControl!
     @IBOutlet weak var curveMaskRule: NSSegmentedControl!
 
     @IBOutlet weak var curveStrokeColor: ColorPanel!
@@ -276,7 +276,7 @@ class ViewController: NSViewController,
                  slider.maxValue = setCurve.maxDash
              }
         }
-        curveWindingRule.selectedSegment = setCurve.windingRule
+//        curveWindingRule.selectedSegment = setCurve.windingRule
         curveMaskRule.selectedSegment = setCurve.maskRule
 
         curveMiter.doubleValue = Double(setCurve.miterLimit)
@@ -393,12 +393,17 @@ class ViewController: NSViewController,
             self.curveRotate.doubleValue = ang * 180 / Double.pi
 
             if curve.groups.count==1 && view.groups.count <= 1 {
-                self.showUnusedViews(true)
+                self.showUnusedViews(true, from: 2,
+                                     to: actionUI.subviews.count)
             } else {
-                self.showUnusedViews(true)
-                self.showUnusedViews(false, from: 3)
+                self.showUnusedViews(true, from: 2,
+                                     to: actionUI.subviews.count)
+                self.showUnusedViews(false, from: 4,
+                                     to: actionUI.subviews.count)
                 return
             }
+
+            self.enableGradient(curve.gradient)
 
             self.curveWidth.doubleValue = Double(curve.lineWidth)
             self.curveCap.selectedSegment = curve.cap
@@ -414,7 +419,7 @@ class ViewController: NSViewController,
                      label.doubleValue = value
                  }
             }
-            self.curveWindingRule.selectedSegment = curve.windingRule
+//            self.curveWindingRule.selectedSegment = curve.windingRule
             self.curveMaskRule.selectedSegment = curve.maskRule
 
             for (i, color) in curve.colors.enumerated() {
@@ -440,14 +445,15 @@ class ViewController: NSViewController,
 
             self.enableMiter(sender: curveJoin)
         } else {
-            self.showUnusedViews(false)
+            self.showUnusedViews(false, from: 2,
+                                 to: actionUI.subviews.count-1)
             self.curveWid.doubleValue = Double(view.sketchPath.bounds.width)
             self.curveHei.doubleValue = Double(view.sketchPath.bounds.height)
         }
     }
 
-    func showUnusedViews(_ bool: Bool, from: Int = 2) {
-        for index in from..<actionUI.subviews.count-1 {
+    func showUnusedViews(_ bool: Bool, from: Int, to: Int) {
+        for index in from..<to {
             let subs = actionUI.subviews[index].subviews
 
             if index==2 {
@@ -468,6 +474,16 @@ class ViewController: NSViewController,
         }
         if let sharedPanel = self.colorPanel, !bool {
             sharedPanel.closeSharedColorPanel()
+        }
+    }
+
+    func enableGradient(_ bool: Bool) {
+        if let stack = actionUI.subviews[6] as? NSStackView {
+            for i in 12..<stack.subviews.count {
+                if let stack = stack.subviews[i] as? NSStackView {
+                    stack.isEnabled(all: bool)
+                }
+            }
         }
     }
 
@@ -701,7 +717,8 @@ class ViewController: NSViewController,
 //    MARK: Tools Actions
     @IBAction func setTool(_ sender: NSButton) {
         sketchView!.setTool(tag: sender.tag)
-        self.showUnusedViews(true)
+        self.showUnusedViews(true, from: 2,
+                             to: actionUI.subviews.count-1)
     }
 
     func getTagValue(sender: Any,
@@ -836,10 +853,10 @@ class ViewController: NSViewController,
         self.restoreControlFrame(view: view)
     }
 
-    @IBAction func windingCurve(_ sender: NSSegmentedControl) {
-        sketchView!.windingCurve(value: sender.indexOfSelectedItem)
-        self.saveHistory()
-    }
+//    @IBAction func windingCurve(_ sender: NSSegmentedControl) {
+//        sketchView!.windingCurve(value: sender.indexOfSelectedItem)
+//        self.saveHistory()
+//    }
 
     @IBAction func maskRuleCurve(_ sender: NSSegmentedControl) {
         sketchView!.maskRuleCurve(value: sender.indexOfSelectedItem)

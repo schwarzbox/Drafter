@@ -2,9 +2,9 @@
 
 Vector Editor for MacOS.
 
-Easy tool for create sketches
+Simple tool for create images
 
-v1.0
+v1.1
 
 # Features
 
@@ -108,9 +108,9 @@ Scroll canvas with two fingers
 
 # Road map
 
-v1.1 Show group members 
+v1.2 Show group members 
 
-v1.2 Improve UndoRedo
+v1.3 Improve UndoRedo
 
 v1.5 .svg
 

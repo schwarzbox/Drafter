@@ -72,6 +72,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E1F2A2024201E0000C3FB40 /* CustomView */ = {
+			isa = PBXGroup;
+			children = (
+				1EEBDFF623623A8600FF7797 /* ActionSlider.swift */,
+				1E337DE82382C094009747A3 /* InputTool.swift */,
+				1E157C592332299200B191DF /* ColorPanel.swift */,
+				1EA0519C232DB449004F693F /* ColorBox.swift */,
+				1E337DEF238C1CA2009747A3 /* FontTool.swift */,
+			);
+			name = CustomView;
+			sourceTree = "<group>";
+		};
 		1E4A3F1923011B790038D924 = {
 			isa = PBXGroup;
 			children = (
@@ -102,14 +114,10 @@
 				1E70171A2356795800E28869 /* RulerTool.swift */,
 				1E7426D22397161000769ECD /* OpenSaveTool.swift */,
 				1E4D48F12379773C00EC9325 /* Tools.swift */,
-				1E337DE82382C094009747A3 /* InputTool.swift */,
 				1EC1464A234CA76E00CB4A55 /* FrameButtons.swift */,
-				1EEBDFF623623A8600FF7797 /* ActionSlider.swift */,
-				1E157C592332299200B191DF /* ColorPanel.swift */,
-				1EA0519C232DB449004F693F /* ColorBox.swift */,
-				1E337DEF238C1CA2009747A3 /* FontTool.swift */,
 				1E056DE2231337210078A488 /* Extension.swift */,
 				1EA051982327E2BC004F693F /* Setup.swift */,
+				1E1F2A2024201E0000C3FB40 /* CustomView */,
 				1E4A3F2523011B790038D924 /* AppDelegate.swift */,
 				1E1DD6CE23E0BBFD006BEDF5 /* DraftIcon.icns */,
 				1E4A3F2923011B7A0038D924 /* Assets.xcassets */,
