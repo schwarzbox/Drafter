@@ -27,6 +27,7 @@ class Curve: Equatable {
 
     var text: String = ""
     var textDelta: CGPoint?
+    var textSize: Double = setEditor.fontSize
 
     var rounded: CGPoint?
     var gradient: Bool = false

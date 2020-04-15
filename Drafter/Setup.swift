@@ -56,8 +56,8 @@ struct SetupEditor {
 
     let screenWidth: Double = 640
     let screenHeight: Double = 480
-    let maxScreenWidth: Double = 1600
-    let maxScreenHeight: Double = 1200
+    let maxScreenWidth: Double = 1024
+    let maxScreenHeight: Double = 768
 
     let lineWidth: CGFloat = 1.0
     let strokeColor = NSColor.white.sRGB()

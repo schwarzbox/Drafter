@@ -42,6 +42,7 @@ struct Drf {
     var invisible: Bool = false
     var text: String = ""
     var textDelta: CGPoint?
+    var textSize: Double = setEditor.fontSize
     var imageScaleX: CGFloat = 1
     var imageScaleY: CGFloat = 1
 }
@@ -150,6 +151,7 @@ class SaveTool {
             gradientLocation: drf.gradientLocation,
             colors: drf.colors,
             filterRadius: drf.filterRadius,
+            fontSize: drf.textSize,
             points: drf.points)
 
         let name = String(drf.name.split(separator: " ")[0])
@@ -258,6 +260,7 @@ class SaveTool {
                         x: CGFloat(Double(float[0]) ?? 0.0),
                         y: CGFloat(Double(float[1]) ?? 0.0))
                 }
+            case "-textSize": drf.textSize = Double(str) ?? 0.0
             case "-imageScaleX":
                 drf.imageScaleX = CGFloat(Double(str) ?? 0.0)
             case "-imageScaleY":
@@ -272,8 +275,21 @@ class SaveTool {
     }
 
     func savePng(fileUrl: URL) {
+//        if let image = self.layer?.cgImage(
+//            width: Int(self.sketchPath.bounds.width),
+//            height: Int(self.sketchPath.bounds.height)) {
+//            return image
+//        }
+//       if let image = view.imageFromLayer() {
+//            if let dest = CGImageDestinationCreateWithURL(
+//                fileUrl as CFURL, kUTTypePNG, 1, nil) {
+//                CGImageDestinationAddImage(dest, image, nil)
+//                CGImageDestinationFinalize(dest)
+//            }
+//        }
         if let image = view.imageData() {
             do {
+
                 try image.write(to: fileUrl, options: .atomic)
 
             } catch {
@@ -350,6 +366,7 @@ class SaveTool {
                         String(Double(cur.textDelta?.y ?? 0))) + "\n"
                     : "\n"
                 code += textDelta
+                code += "-textSize " + String(Double(cur.textSize)) + "\n"
                 code += "-imageScaleX " +
                     String(Double(cur.imageScaleX)) + "\n"
                 code += "-imageScaleY " +

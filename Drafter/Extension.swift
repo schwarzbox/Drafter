@@ -383,9 +383,11 @@ extension CGPoint {
 }
 
 extension String {
-    func sizeOfString(usingFont font: NSFont) -> CGSize {
+    func sizeOfString(usingFont font: NSFont,
+                      upper: Bool = false) -> CGSize {
+        let str = upper ? self.uppercased() : self
         let fontAttributes = [NSAttributedString.Key.font: font]
-        return self.size(withAttributes: fontAttributes)
+        return str.size(withAttributes: fontAttributes)
     }
 
     func emojiToImage(width: CGFloat = 32, height: CGFloat = 32) -> NSImage {
@@ -466,6 +468,7 @@ extension CALayer {
         return false
     }
 
+
     func ciImage(width: Int, height: Int) -> CIImage? {
         let imageRepresentation = NSBitmapImageRep(
             bitmapDataPlanes: nil,
@@ -485,10 +488,7 @@ extension CALayer {
         return nil
     }
 
-    func cgSquareImage(pad: CGFloat) -> CGImage? {
-        let maxSide = max(self.bounds.width, self.bounds.height)
-        let width = Int(maxSide+pad+1)
-        let height = Int(maxSide+pad+1)
+    func cgImage(width: Int, height: Int) ->CGImage? {
         let context = CGContext(
             data: nil, width: width, height: height,
             bitsPerComponent: 8, bytesPerRow: 0,
@@ -498,6 +498,16 @@ extension CALayer {
         self.render(in: context)
         if let image = context.makeImage() {
             return image
+        }
+        return nil
+    }
+
+    func cgSquareImage(pad: CGFloat) -> CGImage? {
+        let maxSide = max(self.bounds.width, self.bounds.height)
+        let width = Int(maxSide+pad+1)
+        let height = Int(maxSide+pad+1)
+        if let img = self.cgImage(width: width, height: height) {
+            return img
         }
         return nil
     }

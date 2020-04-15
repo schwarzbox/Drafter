@@ -153,25 +153,15 @@ class ViewController: NSViewController,
                     self.saveHistory()
                     return true
                 } else if let curve = view.selectedCurve, !curve.edit,
-                    curve.text.isEmpty {
+                    curve.text.isEmpty, curve.imageLayer.contents == nil {
                     view.editStarted(curve: curve)
                     self.saveHistory()
                     return true
                 } else if let curve = view.selectedCurve,
                     curve.groups.count==1, !curve.text.isEmpty,
                     !curve.canvas.isHidden {
-                    view.groups = []
-                    view.tool = tools[tools.count-1]
-                    view.toolUI?.isOn(on: tools.count-1)
-                    fontUI.inputField.stringValue = curve.text
-                    if let tool = view.tool as? Text, let dt = curve.textDelta {
-                        let pos = CGPoint(x: curve.canvas.bounds.minX-dt.x,
-                                          y: curve.canvas.bounds.minY-dt.y)
-                        tool.action(pos: pos)
-                        curve.canvas.isHidden = true
-                        curve.clearControlFrame()
-                        return true
-                    }
+                    view.editTextCurve(curve: curve)
+                    return true
                 }
             }
         }
@@ -247,11 +237,12 @@ class ViewController: NSViewController,
 
         self.setupObservers()
         self.showFileName()
+
         self.updateSliders()
     }
 
     func setupZoom() {
-        zoomSketch.minValue = setEditor.minZoom * 2
+        zoomSketch.minValue = setEditor.minZoom
         zoomSketch.maxValue = setEditor.maxZoom
         zoomDefaultSketch.removeAllItems()
         for step in stride(from: Int(setEditor.minZoom),
@@ -403,7 +394,7 @@ class ViewController: NSViewController,
                 return
             }
 
-            self.enableGradient(curve.gradient)
+//            self.enableGradient(curve.gradient)
 
             self.curveWidth.doubleValue = Double(curve.lineWidth)
             self.curveCap.selectedSegment = curve.cap
@@ -443,6 +434,9 @@ class ViewController: NSViewController,
 
             self.curveFilterRadius.doubleValue = Double(curve.filterRadius)
 
+            self.fontUI.updateFontSize(value: curve.textSize)
+            self.fontUI.setupFont()
+            
             self.enableMiter(sender: curveJoin)
         } else {
             self.showUnusedViews(false, from: 2,
@@ -477,15 +471,15 @@ class ViewController: NSViewController,
         }
     }
 
-    func enableGradient(_ bool: Bool) {
-        if let stack = actionUI.subviews[6] as? NSStackView {
-            for i in 12..<stack.subviews.count {
-                if let stack = stack.subviews[i] as? NSStackView {
-                    stack.isEnabled(all: bool)
-                }
-            }
-        }
-    }
+//    func enableGradient(_ bool: Bool) {
+//        if let stack = actionUI.subviews[6] as? NSStackView {
+//            for i in 12..<stack.subviews.count {
+//                if let stack = stack.subviews[i] as? NSStackView {
+//                    stack.isEnabled(all: bool)
+//                }
+//            }
+//        }
+//    }
 
     func enableMiter(sender: NSSegmentedControl) {
         if let stack = actionUI.subviews[4] as? NSStackView {
@@ -682,7 +676,7 @@ class ViewController: NSViewController,
         let mag = Double(sender.magnification / setEditor.reduceZoom)
         var zoom = (zoomed + mag) * 100
 
-        if zoom < setEditor.minZoom * 2 || zoom > setEditor.maxZoom {
+        if zoom < setEditor.minZoom || zoom > setEditor.maxZoom {
             zoom = zoomed * 100
         }
         view.zoomSketch(value: zoom)
@@ -1191,8 +1185,11 @@ class ViewController: NSViewController,
             default:
                 self.saveTool?.openPng(fileUrl: fileUrl)
             }
+
             view.updateMasks()
+            self.updateSliders()
             self.saveHistory()
+
             setGlobal.saved = false
         }
     }

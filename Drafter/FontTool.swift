@@ -92,6 +92,20 @@ class FontTool: NSStackView {
         }
     }
 
+    func updateFontSize(value: Double) {
+        let lim = value < 1 ? 1 : value
+        self.sliderFontSize.doubleValue = lim
+        self.fontSize = CGFloat(lim)
+    }
+
+    func updateTextCurve() {
+        if let curve = sketchView.selectedCurve, curve.groups.count==1, !curve.text.isEmpty,
+            !curve.canvas.isHidden {
+            curve.textSize = Double(self.fontSize)
+            sketchView.editTextCurve(curve: curve)
+        }
+    }
+
     @IBAction func selectFont(_ sender: NSPopUpButton) {
         if let family = sender.titleOfSelectedItem {
             self.fontFamily = family
@@ -105,6 +119,7 @@ class FontTool: NSStackView {
             self.fontType = fType
 
             self.setupFont()
+            self.updateTextCurve()
         }
     }
 
@@ -113,6 +128,7 @@ class FontTool: NSStackView {
             self.fontType = type
             sender.title = type
             self.setupFont()
+            self.updateTextCurve()
         }
     }
 
@@ -123,10 +139,9 @@ class FontTool: NSStackView {
         } else if let tf = sender as? NSTextField {
             val = tf.doubleValue
         }
-        let lim = val<1 ? 1 : val
-        self.sliderFontSize.doubleValue = lim
-        self.fontSize = CGFloat(val)
+        self.updateFontSize(value: val)
         self.setupFont()
+        self.updateTextCurve()
     }
 
 }

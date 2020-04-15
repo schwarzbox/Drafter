@@ -5,12 +5,19 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
+// 1.14
+// broken preview vector?
+// when select hidden control frames stay
+// shift? ctrl? fn?
+
+// 1.15
+// check save process
+
 // 1.2
-// improve undo?
 // show groups members?
 // improve track dots(see mouse move)
 // 1.3
-// improve history
+// improve undo?
 // save user pref
 // help
 // 1.5
@@ -494,6 +501,7 @@ class SketchPad: NSView {
                    gradientDirection: [CGPoint],
                    gradientLocation: [NSNumber],
                    colors: [NSColor], filterRadius: Double,
+                   fontSize: Double,
                    points: [ControlPoint]) -> Curve {
 
         let curve = Curve.init(parent: self, path: path,
@@ -511,6 +519,7 @@ class SketchPad: NSView {
         curve.gradientLocation = gradientLocation
         curve.colors = colors
         curve.filterRadius = filterRadius
+        curve.textSize = fontSize
         curve.setPoints(points: points)
         return curve
     }
@@ -542,6 +551,7 @@ class SketchPad: NSView {
             gradientLocation: setCurve.gradientLocation,
             colors: colors,
             filterRadius: setCurve.minFilterRadius,
+            fontSize: setEditor.fontSize,
             points: self.controlPoints)
 
         let name = filledCurve ? self.tool.name : "line"
@@ -1509,6 +1519,7 @@ class SketchPad: NSView {
                         gradientLocation: cur.gradientLocation,
                         colors: cur.colors,
                         filterRadius: cur.filterRadius,
+                        fontSize: cur.textSize,
                         points: points)
                     clone.controlFrame = cur.controlFrame
                     clone.edit = cur.edit
@@ -1631,6 +1642,8 @@ class SketchPad: NSView {
             if let curve = self.selectedCurve, !curve.text.isEmpty {
                 if let path = self.editedPath.copy() as? NSBezierPath {
                     curve.text = value
+                    curve.textSize = Double(fontUI.fontSize)
+
                     curve.path = path
                     self.setTextDelta(curve: curve,
                                       rect: curve.path.bounds,
@@ -1653,11 +1666,29 @@ class SketchPad: NSView {
             self.newCurve()
             if let newCurve = self.selectedCurve {
                 newCurve.text = value
+                newCurve.textSize = Double(fontUI.fontSize)
+
                 self.setTextDelta(curve: newCurve,
                                   rect: newCurve.canvas.frame,
                                   inputPos: inputPos)
                 self.createControls(curve: newCurve)
             }
+
+        }
+    }
+
+    func editTextCurve(curve: Curve) {
+        self.groups = []
+        self.tool = tools[tools.count-1]
+        self.toolUI?.isOn(on: tools.count-1)
+        fontUI.inputField.stringValue = curve.text
+        if let tool = self.tool as? Text,
+            let dt = curve.textDelta {
+            let pos = CGPoint(x: curve.canvas.bounds.minX-dt.x,
+                             y: curve.canvas.bounds.minY-dt.y)
+            tool.action(pos: pos)
+            curve.canvas.isHidden = true
+            curve.clearControlFrame()
         }
     }
 
@@ -2208,8 +2239,8 @@ class SketchPad: NSView {
 
 //    MARK: Support
     func imageData(
-        fileType: NSBitmapImageRep.FileType = .png,
-        properties: [NSBitmapImageRep.PropertyKey: Any] = [:]) -> Data? {
+    fileType: NSBitmapImageRep.FileType = .png,
+    properties: [NSBitmapImageRep.PropertyKey: Any] = [:]) -> Data? {
         defer {
             for curve in self.curves {
                 for cur in curve.groups {
@@ -2222,7 +2253,6 @@ class SketchPad: NSView {
                 cur.applyFilter()
             }
         }
-
         if let imageRep = self.bitmapImageRepForCachingDisplay(
             in: self.sketchPath.bounds) {
             self.cacheDisplay(in: self.sketchPath.bounds, to: imageRep)
