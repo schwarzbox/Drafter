@@ -100,7 +100,18 @@ class SaveTool {
                     }
                 }
                 for line in file.split(separator: "\n") {
-                    if line == "-" {
+                    if line[line.startIndex] == "#" {
+                        let size = line.dropFirst(2).split(separator: " ")
+                        let wid = Double(size[0]) ?? setEditor.screenWidth
+                        let hei = Double(size[1]) ?? setEditor.screenHeight
+
+                        if CGFloat(wid) > view.sketchPath.bounds.width {
+                            view.resizeSketch(tag: 0, value: wid)
+                        }
+                        if CGFloat(hei) > view.sketchPath.bounds.height {
+                            view.resizeSketch(tag: 1, value: hei)
+                        }
+                    } else if line == "-" {
                         let curve = self.openCurve(drf: drf,
                                                   fileUrl: fileUrl)
                         if drf.group {
@@ -275,23 +286,9 @@ class SaveTool {
     }
 
     func savePng(fileUrl: URL) {
-//        if let image = self.layer?.cgImage(
-//            width: Int(self.sketchPath.bounds.width),
-//            height: Int(self.sketchPath.bounds.height)) {
-//            return image
-//        }
-//       if let image = view.imageFromLayer() {
-//            if let dest = CGImageDestinationCreateWithURL(
-//                fileUrl as CFURL, kUTTypePNG, 1, nil) {
-//                CGImageDestinationAddImage(dest, image, nil)
-//                CGImageDestinationFinalize(dest)
-//            }
-//        }
         if let image = view.imageData() {
             do {
-
                 try image.write(to: fileUrl, options: .atomic)
-
             } catch {
                 print(error.localizedDescription)
             }
@@ -299,7 +296,10 @@ class SaveTool {
     }
 
     func makeDrf() -> String {
-        var code: String = ""
+        let size = view.sketchPath.bounds
+
+        var code: String = "# " + (String(Double(size.width)) + " " +
+            String(Double(size.height))) + "\n"
         for curve in view.curves {
             for (ind, cur) in curve.groups.enumerated() {
                 code += ("-name " + cur.name + "\n")
@@ -387,5 +387,6 @@ class SaveTool {
     }
 
     func saveSvg(fileUrl: URL) {
+
     }
 }

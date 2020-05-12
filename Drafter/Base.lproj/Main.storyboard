@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15705"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="16096"/>
         <capability name="System colors introduced in macOS 10.14" minToolsVersion="10.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -901,7 +901,6 @@ CA
                                             <tableColumns>
                                                 <tableColumn editable="NO" width="128" minWidth="40" maxWidth="1000" id="yq2-i8-Afj">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="▵ □ ○">
-                                                        <font key="font" metaFont="message" size="11"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                     </tableHeaderCell>
@@ -1008,7 +1007,7 @@ CA
                                 </tableHeaderView>
                             </scrollView>
                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="4" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hb4-rr-j5H" userLabel="ActionUI">
-                                <rect key="frame" x="894" y="13" width="130" height="743"/>
+                                <rect key="frame" x="894" y="25" width="130" height="743"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tt1-Nb-GLs" userLabel="ZoomUI">
                                         <rect key="frame" x="0.0" y="727" width="130" height="16"/>
@@ -1040,7 +1039,7 @@ CA
                                                 </connections>
                                             </slider>
                                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WfQ-tr-m6g" userLabel="Default">
-                                                <rect key="frame" x="80" y="-1" width="51" height="16"/>
+                                                <rect key="frame" x="80" y="0.0" width="51" height="16"/>
                                                 <popUpButtonCell key="cell" type="push" title="100" bezelStyle="rounded" alignment="center" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="K4m-Np-TAF" id="bQ9-oP-ET9">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="menu" size="9"/>
@@ -3095,16 +3094,16 @@ CA
                         <constraints>
                             <constraint firstItem="8J2-pI-a7r" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="1dX-dI-E0F"/>
                             <constraint firstAttribute="bottom" secondItem="l9s-bd-hBc" secondAttribute="bottom" id="2AX-II-e3Z"/>
-                            <constraint firstItem="O9R-EM-mHj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="7Qj-t1-5X2"/>
-                            <constraint firstItem="hb4-rr-j5H" firstAttribute="centerY" secondItem="m2S-Jp-Qdl" secondAttribute="centerY" id="EBt-vM-Adl"/>
-                            <constraint firstAttribute="trailing" secondItem="O9R-EM-mHj" secondAttribute="trailing" id="Pob-Ho-uZS"/>
+                            <constraint firstItem="O9R-EM-mHj" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="GPm-Nw-TxR"/>
+                            <constraint firstAttribute="trailing" secondItem="O9R-EM-mHj" secondAttribute="trailing" id="L1f-ls-ydx"/>
                             <constraint firstItem="l9s-bd-hBc" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="Tei-xm-9au"/>
                             <constraint firstAttribute="bottom" secondItem="arS-jm-yha" secondAttribute="bottom" id="ZMZ-2K-9dI"/>
+                            <constraint firstItem="O9R-EM-mHj" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="acL-Ew-H7h"/>
                             <constraint firstItem="8J2-pI-a7r" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="bOW-3C-6TX"/>
-                            <constraint firstAttribute="bottom" secondItem="O9R-EM-mHj" secondAttribute="bottom" id="dVA-sY-4r9"/>
+                            <constraint firstItem="hb4-rr-j5H" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="e51-n9-VxX"/>
+                            <constraint firstAttribute="bottom" secondItem="O9R-EM-mHj" secondAttribute="bottom" id="j1Z-g7-9XQ"/>
                             <constraint firstItem="arS-jm-yha" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="lbo-54-ent"/>
                             <constraint firstAttribute="trailing" secondItem="hb4-rr-j5H" secondAttribute="trailing" id="rie-nJ-Jrm"/>
-                            <constraint firstItem="O9R-EM-mHj" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="ukc-ce-9pE"/>
                             <constraint firstItem="l9s-bd-hBc" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="yWT-VN-Kaf"/>
                         </constraints>
                     </view>

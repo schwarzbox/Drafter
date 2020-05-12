@@ -4,7 +4,7 @@ Vector Editor for MacOS.
 
 Simple tool for create images
 
-v1.1
+v1.14
 
 # Features
 
@@ -31,7 +31,7 @@ Built-in rulers
 
 # Perfomance
 
-Drafter v0.995 comfort work is possible when used less than 100 layers
+Drafter v1.14 comfort work is possible when used less than 100 layers
 
 # Tools & Hotkeys
 

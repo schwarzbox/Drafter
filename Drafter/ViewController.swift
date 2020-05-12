@@ -203,10 +203,10 @@ class ViewController: NSViewController,
         curveY.maxValue = setEditor.screenHeight
         curveX.minValue = -setEditor.screenWidth
         curveY.minValue = -setEditor.screenHeight
-        curveWid.minValue = setCurve.minResize
-        curveHei.minValue = setCurve.minResize
-        curveWid.maxValue = setEditor.maxScreenWidth
-        curveHei.maxValue = setEditor.maxScreenHeight
+        curveWid.minValue = setEditor.minResize
+        curveHei.minValue = setEditor.minResize
+        curveWid.maxValue = setEditor.maxResizeWid
+        curveHei.maxValue = setEditor.maxResizeHei
         curveWid.doubleValue = setEditor.screenWidth
         curveHei.doubleValue = setEditor.screenHeight
         curveRotate.doubleValue = setCurve.angle
@@ -436,7 +436,7 @@ class ViewController: NSViewController,
 
             self.fontUI.updateFontSize(value: curve.textSize)
             self.fontUI.setupFont()
-            
+
             self.enableMiter(sender: curveJoin)
         } else {
             self.showUnusedViews(false, from: 2,
@@ -556,13 +556,13 @@ class ViewController: NSViewController,
         }
         let curve = sketchView!.curves[row]
         if tableColumn == tableView.tableColumns[0] {
-            if curve.canvas.isHidden {
+            if curve.groups.count>1 {
+                let img = NSImage.iconViewTemplateName
+                image = NSImage.init(imageLiteralResourceName: img)
+            } else if curve.canvas.isHidden {
                 curve.canvas.isHidden = false
                 image = self.getImage(index: row, curve: curve)
                 curve.canvas.isHidden = true
-            } else if curve.groups.count>1 {
-                let img = NSImage.iconViewTemplateName
-                image = NSImage.init(imageLiteralResourceName: img)
             } else if curve.mask {
                 image = setEditor.maskGrayImg
             } else {
@@ -716,7 +716,7 @@ class ViewController: NSViewController,
     }
 
     func getTagValue(sender: Any,
-                     limit: (_ :Double) -> Double = {x in x})
+                     limit: (_ :Double, _ : Int) -> Double = {x, tg in x})
         -> (tag: Int, value: Double) {
         var tag: Int = 0
         var doubleValue: Double = 0
@@ -730,7 +730,7 @@ class ViewController: NSViewController,
             tag = tuple.tag
             doubleValue = tuple.doubleValue
         }
-        doubleValue = limit(doubleValue)
+        doubleValue = limit(doubleValue, tag)
         return (tag: tag, value: doubleValue)
     }
 
@@ -781,7 +781,17 @@ class ViewController: NSViewController,
     @IBAction func resizeCurve(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(
-            sender: sender, limit: {x in x <= 0 ? setCurve.minResize : x})
+            sender: sender, limit: {x, tg in
+                var lim = x <= 0 ? setEditor.minResize
+                    : x
+                if tg == 0 && x > setEditor.maxResizeWid {
+                    lim = setEditor.maxResizeWid
+                }
+                if tg==1 && x > setEditor.maxResizeHei {
+                    lim = setEditor.maxResizeHei
+                }
+                return lim
+        })
         if val.tag == 0 {
             self.curveWid.doubleValue = val.value
         } else {
@@ -796,7 +806,8 @@ class ViewController: NSViewController,
         let minR = setCurve.minRotate
         let maxR = setCurve.maxRotate
         let val = self.getTagValue(
-            sender: sender, limit: {x in x > maxR ? maxR : x < minR ? minR : x})
+            sender: sender, limit: {x, _ in
+                x > maxR ? maxR : x < minR ? minR : x})
 
         self.curveRotate.doubleValue = val.value
         view.rotateCurve(angle: val.value * Double.pi / 180)
@@ -806,7 +817,7 @@ class ViewController: NSViewController,
     @IBAction func widthCurve(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(
-            sender: sender, limit: {x in x < 0 ? 0 : x})
+            sender: sender, limit: {x, _ in x < 0 ? 0 : x})
 
         self.curveWidth.doubleValue = val.value
         view.lineWidthCurve(value: val.value)
@@ -828,7 +839,7 @@ class ViewController: NSViewController,
     @IBAction func miterCurve(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(
-            sender: sender, limit: {x in x < 0 ? 0 : x})
+            sender: sender, limit: {x, _ in x < 0 ? 0 : x})
 
         self.curveMiter.doubleValue = val.value
         view.miterCurve(value: val.value)
@@ -903,7 +914,7 @@ class ViewController: NSViewController,
     @IBAction func alphaCurve(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(
-            sender: sender, limit: {x in x > 1 ? 1 : x < 0 ? 0 : x})
+            sender: sender, limit: {x, _ in x > 1 ? 1 : x < 0 ? 0 : x})
         if val.tag < self.alphaSliders.count {
             self.alphaSliders[val.tag].doubleValue = val.value
         }
@@ -932,7 +943,7 @@ class ViewController: NSViewController,
     @IBAction func filterRadius(_ sender: Any) {
         let view = sketchView!
         let val = self.getTagValue(
-            sender: sender, limit: {x in x < 0 ? 0 : x})
+            sender: sender, limit: {x, _ in x < 0 ? 0 : x})
         curveFilterRadius.doubleValue = val.value
         view.filterRadius(value: val.value)
         self.restoreControlFrame(view: view)

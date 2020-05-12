@@ -14,7 +14,6 @@
 		1E056DE523135D500078A488 /* ControlFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E056DE423135D500078A488 /* ControlFrame.swift */; };
 		1E157C5A2332299200B191DF /* ColorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E157C592332299200B191DF /* ColorPanel.swift */; };
 		1E1DD6CF23E0BBFD006BEDF5 /* DraftIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 1E1DD6CE23E0BBFD006BEDF5 /* DraftIcon.icns */; };
-		1E244AB52346A17F0037214C /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 1E244AB42346A17F0037214C /* .swiftlint.yml */; };
 		1E337DE92382C094009747A3 /* InputTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E337DE82382C094009747A3 /* InputTool.swift */; };
 		1E337DF0238C1CA2009747A3 /* FontTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E337DEF238C1CA2009747A3 /* FontTool.swift */; };
 		1E46316C24072856002E309C /* PrefViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E46316B24072856002E309C /* PrefViewController.swift */; };
@@ -192,7 +191,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E244AB52346A17F0037214C /* .swiftlint.yml in Resources */,
 				1E4A3F2A23011B7A0038D924 /* Assets.xcassets in Resources */,
 				1E4A3F2D23011B7A0038D924 /* Main.storyboard in Resources */,
 				1E1DD6CF23E0BBFD006BEDF5 /* DraftIcon.icns in Resources */,

@@ -181,7 +181,8 @@ class Drag: Tool {
             }
         } else {
             Tool.view!.groups.removeAll()
-            for cur in Tool.view!.curves {
+            for cur in Tool.view!.curves where (
+                !cur.lock && !cur.canvas.isHidden) {
                let curves = cur.groupRect(curves: cur.groups)
                if Tool.view!.curvedPath.bounds.contains(curves) &&
                    !Tool.view!.groups.contains(cur) {
@@ -219,6 +220,7 @@ class Drag: Tool {
     override func down(ctrl: Bool) {
         Tool.view!.clearPathLayer(layer: Tool.view!.curveLayer,
                             path: Tool.view!.curvedPath)
+
         Tool.view!.selectCurve(pos: Tool.view!.startPos,
                                  ctrl: ctrl)
     }

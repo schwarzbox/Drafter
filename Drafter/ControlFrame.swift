@@ -64,14 +64,22 @@ class ControlFrame: CAShapeLayer {
             y: gradMinY + curve.gradientDirection[1].y * height)
 
         let points: [CGPoint] = [
-            CGPoint(x: self.bounds.minX, y: self.bounds.minY),
-            CGPoint(x: self.bounds.minX, y: self.bounds.midY),
-            CGPoint(x: self.bounds.minX, y: self.bounds.maxY),
-            CGPoint(x: self.bounds.midX, y: self.bounds.maxY),
-            CGPoint(x: self.bounds.maxX, y: self.bounds.maxY),
-            CGPoint(x: self.bounds.maxX, y: self.bounds.midY),
-            CGPoint(x: self.bounds.maxX, y: self.bounds.minY),
-            CGPoint(x: self.bounds.midX, y: self.bounds.minY),
+            CGPoint(x: self.bounds.minX,
+                    y: self.bounds.minY),
+            CGPoint(x: self.bounds.minX-self.dotRadius/2,
+                    y: self.bounds.midY),
+            CGPoint(x: self.bounds.minX,
+                    y: self.bounds.maxY),
+            CGPoint(x: self.bounds.midX,
+                    y: self.bounds.maxY+self.dotRadius/2),
+            CGPoint(x: self.bounds.maxX,
+                    y: self.bounds.maxY),
+            CGPoint(x: self.bounds.maxX+self.dotRadius/2,
+                    y: self.bounds.midY),
+            CGPoint(x: self.bounds.maxX,
+                    y: self.bounds.minY),
+            CGPoint(x: self.bounds.midX,
+                    y: self.bounds.minY-self.dotRadius/2),
             CGPoint(x: self.bounds.minX-self.ctrlRot,
                     y: self.bounds.minY-self.ctrlRot),
             CGPoint(x: self.bounds.minX-self.ctrlRot,
@@ -159,28 +167,24 @@ class ControlFrame: CAShapeLayer {
 
         for i in 0..<pnt.count {
             if self.frameHandles.contains(i) {
-                var dx: CGFloat = 0
-                var dy: CGFloat = 0
-                let pad = self.dotSize * 2
+                let pad = self.dotSize
                 var width = self.frame.width - pad
-                var height: CGFloat = self.dotRadius
-                let dt = self.dotMag/2
+                width = width>0 ? width : 0
+                var height: CGFloat = self.dotRadius/2
                 if i==1 || i==5 {
-                    dx = i==1 ? dt : -dt
-                    width = self.dotRadius
+                    width = self.dotRadius/2
                     height = self.frame.height - pad
-                } else {
-                    dy = i==3 ? -dt : dt
+                    height = height>0 ? height : 0
                 }
                 self.makeDot(parent: parent, tag: i,
-                             x: pnt[i].x + dx, y: pnt[i].y + dy,
+                             x: pnt[i].x, y: pnt[i].y,
                              width: width, height: height,
                              lineWidth: 0,
                              strokeColor: NSColor.clear,
                              fillColor: NSColor.clear)
                 continue
             }
-            if i>=pnt.count-11 && i<=pnt.count-7 {
+            if i>pnt.count-11 && i<=pnt.count-7 {
                 rounded = self.dotRadius
 //                fillColor = NSColor.clear
 //                strokeColor = NSColor.clear

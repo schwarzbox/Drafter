@@ -9,7 +9,6 @@
 import Cocoa
 
 struct SetupCurve {
-    let minResize: Double = 0.1
     let minRotate = -180.0
     let maxRotate = 180.0
     let angle = 0.0
@@ -54,10 +53,11 @@ struct SetupEditor {
     let maxZoom: Double = 640
     let reduceZoom: CGFloat = 20
 
-    let screenWidth: Double = 640
-    let screenHeight: Double = 480
-    let maxScreenWidth: Double = 1024
-    let maxScreenHeight: Double = 768
+    let screenWidth: Double = 512
+    let screenHeight: Double = 384
+    let minResize: Double = 1.0
+    let maxResizeWid: Double = 1024
+    let maxResizeHei: Double = 768
 
     let lineWidth: CGFloat = 1.0
     let strokeColor = NSColor.white.sRGB()

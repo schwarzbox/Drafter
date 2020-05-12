@@ -99,10 +99,12 @@ class FontTool: NSStackView {
     }
 
     func updateTextCurve() {
-        if let curve = sketchView.selectedCurve, curve.groups.count==1, !curve.text.isEmpty,
-            !curve.canvas.isHidden {
+        if let curve = sketchView.selectedCurve {
             curve.textSize = Double(self.fontSize)
-            sketchView.editTextCurve(curve: curve)
+            if curve.groups.count==1 && !curve.text.isEmpty
+                && !curve.canvas.isHidden {
+                sketchView.editTextCurve(curve: curve)
+            }
         }
     }
 
