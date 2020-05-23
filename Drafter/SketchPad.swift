@@ -5,29 +5,17 @@
 //  Created by Alex Veledzimovich on 8/8/19.
 //  Copyright © 2019 Alex Veledzimovich. All rights reserved.
 
-// 1.15
-// update font when load
-// crash emoji?
-
 // 1.16
-// round corner? 8 dots?
-// snap to grid?
-// shift? ctrl? fn?
+// merge shapes masks
 
 // 1.2
-// bake masks?
-// bigger menu
-
+// unpack inplace
 // show groups members?
-// ungroup
-// refactor track dots(see mouse move)
 
 // 1.3
 // inf undo?
 // save user pref
 // help
-// 1.5
-// SVG
 
 import Cocoa
 
@@ -305,7 +293,6 @@ class SketchPad: NSView {
                 curve.updatePoints(deltaX: 0, deltaY: 0)
             }
         }
-
         self.needsDisplay = true
     }
 
@@ -363,9 +350,7 @@ class SketchPad: NSView {
             } else {
                 snap = self.snapToRulers(points: [self.finPos],
                                          curves: [],
-                                         curvePoints: mpPoints,
-                                         fn: fn)
-
+                                         curvePoints: mpPoints, fn: fn)
             }
 
             self.finPos.x -= snap.x
@@ -512,6 +497,8 @@ class SketchPad: NSView {
                    gradientDirection: [CGPoint],
                    gradientLocation: [NSNumber],
                    colors: [NSColor], filterRadius: Double,
+                   fontFamily: String,
+                   fontType: String,
                    fontSize: Double,
                    points: [ControlPoint]) -> Curve {
 
@@ -530,7 +517,9 @@ class SketchPad: NSView {
         curve.gradientLocation = gradientLocation
         curve.colors = colors
         curve.filterRadius = filterRadius
-        curve.textSize = fontSize
+        curve.fontFamily = fontFamily
+        curve.fontType = fontType
+        curve.fontSize = fontSize
         curve.setPoints(points: points)
         return curve
     }
@@ -562,6 +551,8 @@ class SketchPad: NSView {
             gradientLocation: setCurve.gradientLocation,
             colors: colors,
             filterRadius: setCurve.minFilterRadius,
+            fontFamily: setEditor.fontFamily,
+            fontType: setEditor.fontType,
             fontSize: setEditor.fontSize,
             points: self.controlPoints)
 
@@ -1535,7 +1526,9 @@ class SketchPad: NSView {
                         gradientLocation: cur.gradientLocation,
                         colors: cur.colors,
                         filterRadius: cur.filterRadius,
-                        fontSize: cur.textSize,
+                        fontFamily: cur.fontFamily,
+                        fontType: cur.fontType,
+                        fontSize: cur.fontSize,
                         points: points)
                     clone.controlFrame = cur.controlFrame
                     clone.edit = cur.edit
@@ -1597,6 +1590,7 @@ class SketchPad: NSView {
 //    MARK: TextTool func
     func makeGlyphs(value: String, sharedFont: NSFont?) -> CGPoint? {
         self.editedPath = NSBezierPath()
+
         if !value.isEmpty {
             if let font = sharedFont {
                 let hei = font.descender
@@ -1658,7 +1652,9 @@ class SketchPad: NSView {
             if let curve = self.selectedCurve, !curve.text.isEmpty {
                 if let path = self.editedPath.copy() as? NSBezierPath {
                     curve.text = value
-                    curve.textSize = Double(fontUI.fontSize)
+                    curve.fontFamily = fontUI.fontFamily
+                    curve.fontType = fontUI.fontType
+                    curve.fontSize = Double(fontUI.fontSize)
 
                     curve.path = path
                     self.setTextDelta(curve: curve,
@@ -1682,7 +1678,9 @@ class SketchPad: NSView {
             self.newCurve()
             if let newCurve = self.selectedCurve {
                 newCurve.text = value
-                newCurve.textSize = Double(fontUI.fontSize)
+                newCurve.fontFamily = fontUI.fontFamily
+                newCurve.fontType = fontUI.fontType
+                newCurve.fontSize = Double(fontUI.fontSize)
 
                 self.setTextDelta(curve: newCurve,
                                   rect: newCurve.canvas.frame,

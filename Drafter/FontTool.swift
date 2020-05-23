@@ -26,16 +26,12 @@ class FontTool: NSStackView {
 
     func setupFontTool() {
         self.setupFontFamily()
-        self.popFontFamily.selectItem(withTitle: setEditor.fontFamily)
-        let fFam = self.popFontFamily.titleOfSelectedItem ??
-            setEditor.fontFamily
-        self.popFontFamily.setTitle(fFam)
+        self.updateFontFamily(
+            value: self.fontFamily)
         self.setupFontMembers()
         self.setupFontType()
-        self.popFontType.selectItem(withTitle: setEditor.fontType)
-        let titType = self.popFontType.titleOfSelectedItem ??
-            setEditor.fontType
-        self.popFontType.setTitle(titType)
+        self.updateFontType(
+            value: self.fontType)
 
         self.setupFontSize()
         self.setupFont()
@@ -92,6 +88,22 @@ class FontTool: NSStackView {
         }
     }
 
+    func updateFontFamily(value: String?) {
+        self.fontFamily = value ?? setEditor.fontFamily
+        self.popFontFamily.selectItem(withTitle: value ?? setEditor.fontFamily)
+        let fFam = self.popFontFamily.titleOfSelectedItem ??
+            setEditor.fontFamily
+        self.popFontFamily.setTitle(fFam)
+    }
+
+    func updateFontType(value: String?) {
+        self.fontType = value ?? setEditor.fontType
+        self.popFontType.selectItem(withTitle: value ?? setEditor.fontType)
+        let fType = self.popFontType.titleOfSelectedItem ??
+            setEditor.fontType
+        self.popFontType.setTitle(fType)
+    }
+
     func updateFontSize(value: Double) {
         let lim = value < 1 ? 1 : value
         self.sliderFontSize.doubleValue = lim
@@ -100,7 +112,9 @@ class FontTool: NSStackView {
 
     func updateTextCurve() {
         if let curve = sketchView.selectedCurve {
-            curve.textSize = Double(self.fontSize)
+            curve.fontFamily = self.fontFamily
+            curve.fontType = self.fontType
+            curve.fontSize = Double(self.fontSize)
             if curve.groups.count==1 && !curve.text.isEmpty
                 && !curve.canvas.isHidden {
                 sketchView.editTextCurve(curve: curve)
@@ -110,15 +124,12 @@ class FontTool: NSStackView {
 
     @IBAction func selectFont(_ sender: NSPopUpButton) {
         if let family = sender.titleOfSelectedItem {
-            self.fontFamily = family
-            sender.title = family
+            self.updateFontFamily(value: family)
 
             self.setupFontMembers()
 
             self.setupFontType()
-            let fType = self.popFontType.selectedItem?.title ??
-                setEditor.fontType
-            self.fontType = fType
+            self.updateFontType(value: nil)
 
             self.setupFont()
             self.updateTextCurve()
@@ -127,8 +138,7 @@ class FontTool: NSStackView {
 
     @IBAction func selectType(_ sender: NSPopUpButton) {
         if let type = sender.titleOfSelectedItem {
-            self.fontType = type
-            sender.title = type
+            self.updateFontType(value: type)
             self.setupFont()
             self.updateTextCurve()
         }
@@ -145,5 +155,4 @@ class FontTool: NSStackView {
         self.setupFont()
         self.updateTextCurve()
     }
-
 }

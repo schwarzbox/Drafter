@@ -170,9 +170,9 @@ class ControlFrame: CAShapeLayer {
                 let pad = self.dotSize
                 var width = self.frame.width - pad
                 width = width>0 ? width : 0
-                var height: CGFloat = self.dotRadius/2
+                var height: CGFloat = self.dotRadius
                 if i==1 || i==5 {
-                    width = self.dotRadius/2
+                    width = self.dotRadius
                     height = self.frame.height - pad
                     height = height>0 ? height : 0
                 }

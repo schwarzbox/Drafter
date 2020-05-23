@@ -383,6 +383,16 @@ extension CGPoint {
 }
 
 extension String {
+    func isAscii() -> Bool {
+        var ascii = true
+        for ch in self.unicodeScalars {
+            if isascii(Int32(ch.value)) != 1 {
+                ascii = false
+            }
+        }
+        return ascii
+    }
+    
     func sizeOfString(usingFont font: NSFont,
                       upper: Bool = false) -> CGSize {
         let str = upper ? self.uppercased() : self

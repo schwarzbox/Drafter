@@ -27,7 +27,10 @@ class Curve: Equatable {
 
     var text: String = ""
     var textDelta: CGPoint?
-    var textSize: Double = setEditor.fontSize
+    var fontFamily = setEditor.fontFamily
+    var fontType = setEditor.fontType
+    var fontSize: Double = setEditor.fontSize
+
 
     var rounded: CGPoint?
     var gradient: Bool = false
@@ -337,7 +340,8 @@ class Curve: Equatable {
                 let maxX = allMaxX.max(), let maxY = allMaxY.max() {
 
                 rect = CGRect(x: minX, y: minY,
-                              width: maxX - minX, height: maxY - minY)
+                              width: maxX - minX,
+                              height: maxY - minY)
             }
         } else {
             let line50: CGFloat = includeStroke

@@ -142,7 +142,7 @@ class Tool: Drawable {
         if let curve = Tool.view!.selectedCurve {
             Tool.view!.clearControls(curve: curve)
         } else {
-            if Tool.view!.groups.count>0 {
+            if Tool.view!.groups.count>1 {
                 Tool.view!.selectedCurve = Tool.view!.groups[0]
             }
         }

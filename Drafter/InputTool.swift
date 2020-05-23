@@ -9,6 +9,18 @@
 import Cocoa
 
 class InputTool: NSTextField {
+    override func textShouldEndEditing(_ textObject: NSText) -> Bool {
+        var st = ""
+        for ch in textObject.string {
+            if !(ch.isASCII) {
+                continue
+            }
+            st += String(ch)
+        }
+        textObject.string = st
+        return true
+    }
+
     override func textDidChange(_ notification: Notification) {
         self.resize()
     }

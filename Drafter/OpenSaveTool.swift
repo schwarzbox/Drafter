@@ -42,7 +42,9 @@ struct Drf {
     var invisible: Bool = false
     var text: String = ""
     var textDelta: CGPoint?
-    var textSize: Double = setEditor.fontSize
+    var fontFamily: String = setEditor.fontFamily
+    var fontType: String = setEditor.fontType
+    var fontSize: Double = setEditor.fontSize
     var imageScaleX: CGFloat = 1
     var imageScaleY: CGFloat = 1
 }
@@ -162,7 +164,9 @@ class SaveTool {
             gradientLocation: drf.gradientLocation,
             colors: drf.colors,
             filterRadius: drf.filterRadius,
-            fontSize: drf.textSize,
+            fontFamily: drf.fontFamily,
+            fontType: drf.fontType,
+            fontSize: drf.fontSize,
             points: drf.points)
 
         let name = String(drf.name.split(separator: " ")[0])
@@ -271,7 +275,9 @@ class SaveTool {
                         x: CGFloat(Double(float[0]) ?? 0.0),
                         y: CGFloat(Double(float[1]) ?? 0.0))
                 }
-            case "-textSize": drf.textSize = Double(str) ?? 0.0
+            case "-fontFamily": drf.fontFamily = str
+            case "-fontType": drf.fontType = str
+            case "-fontSize": drf.fontSize = Double(str) ?? 0.0
             case "-imageScaleX":
                 drf.imageScaleX = CGFloat(Double(str) ?? 0.0)
             case "-imageScaleY":
@@ -279,10 +285,6 @@ class SaveTool {
             default: break
             }
         }
-    }
-
-    func openSvg(fileUrl: URL) {
-        print("open svg")
     }
 
     func savePng(fileUrl: URL) {
@@ -366,7 +368,9 @@ class SaveTool {
                         String(Double(cur.textDelta?.y ?? 0))) + "\n"
                     : "\n"
                 code += textDelta
-                code += "-textSize " + String(Double(cur.textSize)) + "\n"
+                code += "-fontFamily " + cur.fontFamily + "\n"
+                code += "-fontType " + cur.fontType + "\n"
+                code += "-fontSize " + String(Double(cur.fontSize)) + "\n"
                 code += "-imageScaleX " +
                     String(Double(cur.imageScaleX)) + "\n"
                 code += "-imageScaleY " +
@@ -384,9 +388,5 @@ class SaveTool {
         } catch {
             print(error.localizedDescription)
         }
-    }
-
-    func saveSvg(fileUrl: URL) {
-
     }
 }

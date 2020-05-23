@@ -434,7 +434,11 @@ class ViewController: NSViewController,
 
             self.curveFilterRadius.doubleValue = Double(curve.filterRadius)
 
-            self.fontUI.updateFontSize(value: curve.textSize)
+            self.fontUI.updateFontFamily(
+                value: curve.fontFamily)
+            self.fontUI.updateFontType(
+                value: curve.fontType)
+            self.fontUI.updateFontSize(value: curve.fontSize)
             self.fontUI.setupFont()
 
             self.enableMiter(sender: curveJoin)
@@ -679,6 +683,12 @@ class ViewController: NSViewController,
         if zoom < setEditor.minZoom || zoom > setEditor.maxZoom {
             zoom = zoomed * 100
         }
+        if let curve = view.selectedCurve {
+            let bounds = view.groups.count>1
+            ? curve.groupRect(curves: view.groups, includeStroke: false)
+            : curve.groupRect(curves: curve.groups, includeStroke: false)
+            view.zoomOrigin = CGPoint(x: bounds.midX, y: bounds.midY)
+        }
         view.zoomSketch(value: zoom)
         zoomSketch.doubleValue = zoom
         zoomDefaultSketch.title = String(Int(zoom))
@@ -687,8 +697,12 @@ class ViewController: NSViewController,
 
     @IBAction func zoomSketch(_ sender: NSSlider) {
         let view = sketchView!
-        view.zoomOrigin = CGPoint(x: view.sketchPath.bounds.midX,
-                                  y: view.sketchPath.bounds.midY)
+        if let curve = view.selectedCurve {
+            let bounds = view.groups.count>1
+            ? curve.groupRect(curves: view.groups, includeStroke: false)
+            : curve.groupRect(curves: curve.groups, includeStroke: false)
+            view.zoomOrigin = CGPoint(x: bounds.midX, y: bounds.midY)
+        }
         view.zoomSketch(value: sender.doubleValue)
         zoomDefaultSketch.title = String(sender.intValue)
         fontUI.setupFont()
@@ -698,8 +712,15 @@ class ViewController: NSViewController,
         let view = sketchView!
         if let value = Double(sender.itemTitle(
             at: sender.indexOfSelectedItem)) {
-            view.zoomOrigin = CGPoint(x: view.sketchPath.bounds.midX,
-                                      y: view.sketchPath.bounds.midY)
+            if let curve = view.selectedCurve {
+                let bounds = view.groups.count>1
+                ? curve.groupRect(curves: view.groups, includeStroke: false)
+                : curve.groupRect(curves: curve.groups, includeStroke: false)
+                view.zoomOrigin = CGPoint(x: bounds.midX, y: bounds.midY)
+            } else {
+                view.zoomOrigin = CGPoint(x: view.sketchPath.bounds.midX,
+                                          y: view.sketchPath.bounds.midY)
+            }
 
             sender.title = sender.itemTitle(at: sender.indexOfSelectedItem)
             zoomSketch.doubleValue = value
@@ -1191,8 +1212,6 @@ class ViewController: NSViewController,
             switch ext {
             case "draft":
                 self.saveTool?.openDrf(fileUrl: fileUrl)
-            case "svg":
-                self.saveTool?.openSvg(fileUrl: fileUrl)
             default:
                 self.saveTool?.openPng(fileUrl: fileUrl)
             }
@@ -1267,9 +1286,6 @@ class ViewController: NSViewController,
                 }
             }
             saveTool?.saveDrf(fileUrl: fileUrl)
-        case "svg":
-            let fileUrl = url.appendingPathComponent(name + "." + ext)
-            saveTool?.saveSvg(fileUrl: fileUrl)
         default:
             let fileUrl = url.appendingPathComponent(name + "." + ext)
             saveTool?.savePng(fileUrl: fileUrl)

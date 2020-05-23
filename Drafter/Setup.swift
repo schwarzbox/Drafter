@@ -82,7 +82,7 @@ struct SetupEditor {
 
     let stackButtonSize: CGSize = CGSize(width: 16, height: 16)
     let filename: String = "untitled"
-    let fileTypes: [String] = ["draft", "png", "svg"]
+    let fileTypes: [String] = ["draft", "png"]
 
     let disabledActions = ["position": NSNull(),
                            "path": NSNull(),
