@@ -1,10 +1,10 @@
 ![Screenshot](screenshot/logo.png)
 
+v1.15
+
 Vector Editor for MacOS.
 
 Simple tool for create images
-
-v1.14
 
 # Features
 
@@ -29,11 +29,11 @@ Built-in rulers
 
 ![Screenshot](screenshot/screenshot5.png)
 
-# Perfomance
+## Perfomance
 
 Drafter v1.14 comfort work is possible when used less than 100 layers
 
-# Tools & Hotkeys
+## Tools & Hotkeys
 
 Select (M), Line (L), Triangle (T), Rectangle (R) Pentagon(P), Hex(H), Star(S), Arc (A), Oval (O), Stylus (D)
 
@@ -41,7 +41,7 @@ Vector (V) - press ⚙ in pop-up menu or Return to edit shape with control dots
 
 Font (F) - type text in text field, hit Return and create vector representation
 
-# Combos
+## Combos
 
 Close (⌘W), Quit (⌘Q) -  safe exit
 
