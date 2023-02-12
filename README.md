@@ -1,6 +1,6 @@
 ![Screenshot](screenshot/logo.png)
 
-v1.15
+v1.16
 
 Vector Editor for MacOS.
 
@@ -31,7 +31,7 @@ Built-in rulers
 
 ## Perfomance
 
-Drafter v1.14 comfort work is possible when used less than 100 layers
+Drafter v1.16 comfort work is possible when used less than 100 layers
 
 ## Tools & Hotkeys
 

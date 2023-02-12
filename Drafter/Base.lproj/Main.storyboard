@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="16096"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
         <capability name="System colors introduced in macOS 10.14" minToolsVersion="10.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -362,7 +362,7 @@ CA
                                                 <rect key="frame" x="50" y="0.0" width="118" height="18"/>
                                                 <subviews>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gjn-X0-HqO" userLabel="HistorySlider">
-                                                        <rect key="frame" x="0.0" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="-2" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="UoI-58-fpb"/>
                                                             <constraint firstAttribute="width" constant="64" id="nhy-es-o2R"/>
@@ -496,7 +496,7 @@ CA
                                 </textFieldCell>
                             </textField>
                             <textField hidden="YES" focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iqw-kg-3iC" userLabel="InputField" customClass="InputTool" customModule="Drafter" customModuleProvider="target">
-                                <rect key="frame" x="130" y="322" width="64" height="21"/>
+                                <rect key="frame" x="160" y="322" width="64" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" enabled="NO" focusRingType="none" title="Text" placeholderString="Text" id="pfX-8d-Qlm">
                                     <font key="font" metaFont="system"/>
@@ -508,7 +508,7 @@ CA
                                 </connections>
                             </textField>
                             <stackView hidden="YES" distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" fixedFrame="YES" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tZ4-A6-VtG" userLabel="FrameUI" customClass="FrameButtons" customModule="Drafter" customModuleProvider="target">
-                                <rect key="frame" x="130" y="151" width="16" height="135"/>
+                                <rect key="frame" x="160" y="151" width="16" height="135"/>
                                 <subviews>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="51t-HD-8xx">
                                         <rect key="frame" x="0.0" y="119" width="16" height="16"/>
@@ -846,10 +846,10 @@ CA
                                 </customSpacing>
                             </stackView>
                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="arS-jm-yha" userLabel="AlignUI">
-                                <rect key="frame" x="460" y="0.0" width="104" height="36"/>
+                                <rect key="frame" x="457" y="0.0" width="110" height="32"/>
                                 <subviews>
                                     <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hkv-8O-iiD" userLabel="LCR">
-                                        <rect key="frame" x="0.0" y="17" width="104" height="19"/>
+                                        <rect key="frame" x="-1" y="14" width="112" height="19"/>
                                         <segmentedCell key="cell" controlSize="small" borderStyle="border" alignment="left" style="texturedRounded" trackingMode="momentary" id="4gZ-mh-NgJ">
                                             <font key="font" metaFont="controlContent" size="11"/>
                                             <segments>
@@ -863,7 +863,7 @@ CA
                                         </connections>
                                     </segmentedControl>
                                     <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="2lg-FN-NNT" userLabel="UCD">
-                                        <rect key="frame" x="0.0" y="-1" width="104" height="19"/>
+                                        <rect key="frame" x="-1" y="-2" width="112" height="19"/>
                                         <segmentedCell key="cell" controlSize="small" borderStyle="border" alignment="left" style="texturedRounded" trackingMode="momentary" id="MxJ-ht-hmR">
                                             <font key="font" metaFont="controlContent" size="11"/>
                                             <segments>
@@ -887,13 +887,13 @@ CA
                                 </customSpacing>
                             </stackView>
                             <scrollView horizontalLineScroll="19" horizontalPageScroll="1" verticalLineScroll="19" verticalPageScroll="1" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="l9s-bd-hBc">
-                                <rect key="frame" x="0.0" y="0.0" width="130" height="768"/>
+                                <rect key="frame" x="0.0" y="0.0" width="160" height="768"/>
                                 <clipView key="contentView" drawsBackground="NO" copiesOnScroll="NO" id="zAO-05-McX">
-                                    <rect key="frame" x="1" y="0.0" width="128" height="767"/>
+                                    <rect key="frame" x="1" y="1" width="158" height="766"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" selectionHighlightStyle="sourceList" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="Okl-p3-ToV" viewBased="YES" floatsGroupRows="NO" id="F2V-hU-mGz">
-                                            <rect key="frame" x="0.0" y="0.0" width="129" height="742"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="160" height="741"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="1" height="2"/>
                                             <color key="backgroundColor" name="unemphasizedSelectedContentBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -905,18 +905,18 @@ CA
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                     </tableHeaderCell>
                                                     <textFieldCell key="dataCell" lineBreakMode="truncatingTail" selectable="YES" editable="YES" refusesFirstResponder="YES" id="Eoc-Le-be3">
-                                                        <font key="font" metaFont="controlContent"/>
+                                                        <font key="font" metaFont="cellTitle"/>
                                                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                     <sortDescriptor key="sortDescriptorPrototype" selector="compare:" sortKey="key"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="shapeID" id="2la-s2-gUT">
-                                                            <rect key="frame" x="0.0" y="1" width="128" height="17"/>
+                                                            <rect key="frame" x="10" y="1" width="140" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <button verticalHuggingPriority="750" springLoaded="YES" id="DfV-cr-co4">
-                                                                    <rect key="frame" x="1" y="0.0" width="17" height="17"/>
+                                                                    <rect key="frame" x="1" y="0.5" width="17" height="17"/>
                                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                     <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSActionTemplate" imagePosition="only" alignment="center" refusesFirstResponder="YES" imageScaling="proportionallyDown" inset="2" id="TyG-qO-yU6">
                                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -927,7 +927,7 @@ CA
                                                                     </connections>
                                                                 </button>
                                                                 <textField focusRingType="none" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C39-f9-qTe">
-                                                                    <rect key="frame" x="19" y="0.0" width="72" height="17"/>
+                                                                    <rect key="frame" x="19" y="3" width="84" height="12"/>
                                                                     <textFieldCell key="cell" lineBreakMode="truncatingTail" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" focusRingType="none" drawsBackground="YES" usesSingleLineMode="YES" id="0uF-pY-FnY">
                                                                         <font key="font" metaFont="controlContent" size="11"/>
                                                                         <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
@@ -941,7 +941,7 @@ CA
                                                                     </connections>
                                                                 </textField>
                                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="r5t-Sd-3yg">
-                                                                    <rect key="frame" x="92" y="0.0" width="17" height="17"/>
+                                                                    <rect key="frame" x="104" y="3" width="17" height="12"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="17" id="f8Y-F1-xQz"/>
                                                                     </constraints>
@@ -954,7 +954,7 @@ CA
                                                                     </connections>
                                                                 </button>
                                                                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="mFG-nY-nv6">
-                                                                    <rect key="frame" x="110" y="0.0" width="17" height="17"/>
+                                                                    <rect key="frame" x="122" y="3" width="17" height="12"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="17" id="VL9-6G-d4v"/>
                                                                     </constraints>
@@ -991,7 +991,7 @@ CA
                                     <nil key="backgroundColor"/>
                                 </clipView>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="130" id="YQW-sU-3YR"/>
+                                    <constraint firstAttribute="width" constant="160" id="YQW-sU-3YR"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="WK7-Q8-oBO">
                                     <rect key="frame" x="-100" y="-100" width="128" height="16"/>
@@ -1001,16 +1001,16 @@ CA
                                     <rect key="frame" x="-100" y="-100" width="15" height="102"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
-                                <tableHeaderView key="headerView" id="Okl-p3-ToV">
-                                    <rect key="frame" x="0.0" y="0.0" width="129" height="25"/>
+                                <tableHeaderView key="headerView" wantsLayer="YES" id="Okl-p3-ToV">
+                                    <rect key="frame" x="0.0" y="0.0" width="160" height="25"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableHeaderView>
                             </scrollView>
                             <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="4" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hb4-rr-j5H" userLabel="ActionUI">
-                                <rect key="frame" x="894" y="25" width="130" height="743"/>
+                                <rect key="frame" x="894" y="33" width="130" height="735"/>
                                 <subviews>
                                     <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tt1-Nb-GLs" userLabel="ZoomUI">
-                                        <rect key="frame" x="0.0" y="727" width="130" height="16"/>
+                                        <rect key="frame" x="0.0" y="719" width="130" height="16"/>
                                         <subviews>
                                             <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E9Y-ZP-pyd">
                                                 <rect key="frame" x="-2" y="0.0" width="18" height="16"/>
@@ -1028,7 +1028,7 @@ CA
                                                 </textFieldCell>
                                             </textField>
                                             <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="346-3O-kDM" userLabel="Zoom">
-                                                <rect key="frame" x="16" y="-1" width="62" height="17"/>
+                                                <rect key="frame" x="14" y="-2" width="66" height="20"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="16" id="RR9-lm-yWJ"/>
                                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="62" id="vrt-Wm-dUq"/>
@@ -1039,7 +1039,7 @@ CA
                                                 </connections>
                                             </slider>
                                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="WfQ-tr-m6g" userLabel="Default">
-                                                <rect key="frame" x="80" y="0.0" width="51" height="16"/>
+                                                <rect key="frame" x="78" y="0.0" width="55" height="16"/>
                                                 <popUpButtonCell key="cell" type="push" title="100" bezelStyle="rounded" alignment="center" controlSize="mini" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" pullsDown="YES" selectedItem="K4m-Np-TAF" id="bQ9-oP-ET9">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" metaFont="menu" size="9"/>
@@ -1072,10 +1072,10 @@ CA
                                         </customSpacing>
                                     </stackView>
                                     <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="CwB-jj-Wma">
-                                        <rect key="frame" x="0.0" y="720" width="96" height="5"/>
+                                        <rect key="frame" x="0.0" y="712" width="96" height="5"/>
                                     </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Em-2e-JeU" userLabel="BasicUI">
-                                        <rect key="frame" x="0.0" y="609" width="130" height="109"/>
+                                        <rect key="frame" x="0.0" y="601" width="130" height="109"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FRE-6b-slA" userLabel="Key">
                                                 <rect key="frame" x="0.0" y="95" width="34" height="14"/>
@@ -1104,7 +1104,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pJG-uj-eHb" userLabel="XSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="64" id="ntA-Le-qOG"/>
                                                             <constraint firstAttribute="height" constant="18" id="pkd-sJ-c1C"/>
@@ -1167,7 +1167,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="jQF-8o-lX9" userLabel="YSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="SIr-AC-J6F"/>
                                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="64" id="iEq-Zg-hpd"/>
@@ -1230,7 +1230,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="UL1-f8-Me1" userLabel="WidthSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="bjB-6d-x3H"/>
                                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="64" id="fUV-Ip-ce1"/>
@@ -1293,7 +1293,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="na4-Sk-thz" userLabel="HeightSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="Cal-BC-Dit"/>
                                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="64" id="oma-cw-Oho"/>
@@ -1356,7 +1356,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="KFm-wT-9Q2" userLabel="RotateSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="XRU-Y3-hiK"/>
                                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="64" id="oh2-ra-yc3"/>
@@ -1428,13 +1428,13 @@ CA
                                         </customSpacing>
                                     </stackView>
                                     <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="xGo-G5-52y">
-                                        <rect key="frame" x="0.0" y="602" width="96" height="5"/>
+                                        <rect key="frame" x="0.0" y="594" width="96" height="5"/>
                                     </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VsG-jT-1k6" userLabel="StrokeUI">
-                                        <rect key="frame" x="0.0" y="454" width="130" height="146"/>
+                                        <rect key="frame" x="0.0" y="450" width="130" height="142"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ekO-2p-KIb" userLabel="Stroke">
-                                                <rect key="frame" x="0.0" y="132" width="39" height="14"/>
+                                                <rect key="frame" x="0.0" y="128" width="39" height="14"/>
                                                 <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Stroke" id="zem-nd-5xX" userLabel="Stroke">
                                                     <font key="font" size="12" name="HelveticaNeue"/>
                                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
@@ -1442,7 +1442,7 @@ CA
                                                 </textFieldCell>
                                             </textField>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="V2L-9t-x5W" userLabel="▣" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
-                                                <rect key="frame" x="0.0" y="113" width="130" height="18"/>
+                                                <rect key="frame" x="0.0" y="109" width="130" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZVa-vf-Tvd" userLabel="Label">
                                                         <rect key="frame" x="-2" y="0.0" width="20" height="18"/>
@@ -1460,7 +1460,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="W12-jJ-JFl" userLabel="StrokeSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="Bv7-eQ-gYg"/>
                                                             <constraint firstAttribute="width" constant="64" id="aVQ-cQ-j2U"/>
@@ -1505,10 +1505,10 @@ CA
                                                 </connections>
                                             </stackView>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="6" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wfY-Xa-kod" userLabel="CapJoin">
-                                                <rect key="frame" x="0.0" y="97" width="130" height="15"/>
+                                                <rect key="frame" x="0.0" y="95" width="130" height="13"/>
                                                 <subviews>
                                                     <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CUY-UM-Qrn" userLabel="Cap">
-                                                        <rect key="frame" x="0.0" y="-1" width="62" height="16"/>
+                                                        <rect key="frame" x="-1" y="-2" width="58" height="16"/>
                                                         <segmentedCell key="cell" controlSize="mini" borderStyle="border" alignment="left" segmentDistribution="fillEqually" style="capsule" trackingMode="selectOne" id="9DN-Ma-cCg">
                                                             <font key="font" metaFont="menu" size="9"/>
                                                             <segments>
@@ -1521,8 +1521,8 @@ CA
                                                             <action selector="capCurve:" target="XfG-lQ-9wD" id="o1J-Mb-AMw"/>
                                                         </connections>
                                                     </segmentedControl>
-                                                    <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="bcx-p5-59K" userLabel="Join">
-                                                        <rect key="frame" x="68" y="-1" width="62" height="16"/>
+                                                    <segmentedControl verticalHuggingPriority="750" horizontalCompressionResistancePriority="751" translatesAutoresizingMaskIntoConstraints="NO" id="bcx-p5-59K" userLabel="Join">
+                                                        <rect key="frame" x="61" y="-2" width="70" height="16"/>
                                                         <segmentedCell key="cell" controlSize="mini" borderStyle="border" alignment="left" style="capsule" trackingMode="selectOne" id="GNz-jE-XMT">
                                                             <font key="font" metaFont="menu" size="9"/>
                                                             <segments>
@@ -1546,7 +1546,7 @@ CA
                                                 </customSpacing>
                                             </stackView>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="2" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LCC-B7-QFQ" userLabel="▲" customClass="ActionSlider" customModule="Drafter" customModuleProvider="target">
-                                                <rect key="frame" x="0.0" y="78" width="130" height="18"/>
+                                                <rect key="frame" x="0.0" y="76" width="130" height="18"/>
                                                 <subviews>
                                                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hHf-yi-WIP" userLabel="Label">
                                                         <rect key="frame" x="-2" y="0.0" width="20" height="18"/>
@@ -1564,7 +1564,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="78o-qQ-8j9" userLabel="MiterSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="64" id="7ci-gT-RrQ"/>
                                                             <constraint firstAttribute="height" constant="18" id="XSi-X4-xA0"/>
@@ -1609,7 +1609,7 @@ CA
                                                 </connections>
                                             </stackView>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wvH-bU-9aH" userLabel="Mask">
-                                                <rect key="frame" x="0.0" y="63" width="34" height="14"/>
+                                                <rect key="frame" x="0.0" y="61" width="34" height="14"/>
                                                 <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Mask" id="nqQ-1u-Avo" userLabel="Stroke">
                                                     <font key="font" size="12" name="HelveticaNeue"/>
                                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
@@ -1617,10 +1617,10 @@ CA
                                                 </textFieldCell>
                                             </textField>
                                             <stackView distribution="fill" orientation="horizontal" alignment="top" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hbP-iL-XCE" userLabel="MaskRule">
-                                                <rect key="frame" x="0.0" y="47" width="129" height="15"/>
+                                                <rect key="frame" x="0.0" y="47" width="130" height="13"/>
                                                 <subviews>
                                                     <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QPg-gN-lEo" userLabel="maskRule">
-                                                        <rect key="frame" x="0.0" y="-1" width="129" height="16"/>
+                                                        <rect key="frame" x="-1" y="-2" width="132" height="16"/>
                                                         <segmentedCell key="cell" controlSize="mini" borderStyle="border" alignment="left" segmentDistribution="fillEqually" style="capsule" trackingMode="selectOne" id="a2f-sY-QQV">
                                                             <font key="font" metaFont="menu" size="9"/>
                                                             <segments>
@@ -1737,7 +1737,7 @@ CA
                                                 <rect key="frame" x="1" y="0.0" width="128" height="16"/>
                                                 <subviews>
                                                     <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="1L9-lD-onz">
-                                                        <rect key="frame" x="0.0" y="-1" width="32" height="17"/>
+                                                        <rect key="frame" x="-2" y="-2" width="36" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="32" id="4M3-ZG-NZB"/>
                                                             <constraint firstAttribute="height" constant="16" id="IrL-j6-0JK" userLabel="height = 64"/>
@@ -1748,7 +1748,7 @@ CA
                                                         </connections>
                                                     </slider>
                                                     <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="eMc-gD-jqG">
-                                                        <rect key="frame" x="32" y="-1" width="32" height="17"/>
+                                                        <rect key="frame" x="30" y="-2" width="36" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="16" id="Hif-uJ-PIe" userLabel="height = 64"/>
                                                             <constraint firstAttribute="width" constant="32" id="fVT-gg-maV"/>
@@ -1759,7 +1759,7 @@ CA
                                                         </connections>
                                                     </slider>
                                                     <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="Adl-nz-dBC">
-                                                        <rect key="frame" x="64" y="-1" width="32" height="17"/>
+                                                        <rect key="frame" x="62" y="-2" width="36" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="16" id="6ya-Jo-PL1" userLabel="height = 64"/>
                                                             <constraint firstAttribute="width" constant="32" id="VAV-rX-Al8"/>
@@ -1770,7 +1770,7 @@ CA
                                                         </connections>
                                                     </slider>
                                                     <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="kDJ-hY-hAe">
-                                                        <rect key="frame" x="96" y="-1" width="32" height="17"/>
+                                                        <rect key="frame" x="94" y="-2" width="36" height="20"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="16" id="Wry-f9-pmI" userLabel="height = 64"/>
                                                             <constraint firstAttribute="width" constant="32" id="nLa-81-0ZR"/>
@@ -1830,10 +1830,10 @@ CA
                                         </customSpacing>
                                     </stackView>
                                     <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="ODY-7c-OOL">
-                                        <rect key="frame" x="0.0" y="447" width="96" height="5"/>
+                                        <rect key="frame" x="0.0" y="443" width="96" height="5"/>
                                     </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="crj-eD-SYI" userLabel="ColorUI">
-                                        <rect key="frame" x="0.0" y="116" width="130" height="329"/>
+                                        <rect key="frame" x="0.0" y="112" width="130" height="329"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Wsr-HC-Yul">
                                                 <rect key="frame" x="0.0" y="315" width="34" height="14"/>
@@ -1917,7 +1917,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="chd-Ga-uy4" userLabel="AlphaSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="3NG-6E-1kO"/>
                                                             <constraint firstAttribute="width" constant="64" id="gt2-nk-UKi"/>
@@ -2035,7 +2035,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="qDl-mn-AG2" userLabel="AlphaSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="CO2-ao-L7G"/>
                                                             <constraint firstAttribute="width" constant="64" id="Mhx-tg-j3C"/>
@@ -2161,7 +2161,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="mdq-6Q-8wn" userLabel="AlphaSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="64" id="Bib-rR-k5b"/>
                                                             <constraint firstAttribute="height" constant="18" id="eLC-PS-gsn"/>
@@ -2224,7 +2224,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="d8m-Xg-ZdH" userLabel="RadiusSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="64" id="0cy-FE-YXh"/>
                                                             <constraint firstAttribute="height" constant="18" id="hIM-j7-YCZ"/>
@@ -2287,7 +2287,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="tyT-In-lGL" userLabel="XSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="AHh-ir-9np"/>
                                                             <constraint firstAttribute="width" constant="64" id="Z9T-tH-05N"/>
@@ -2350,7 +2350,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="qPp-QE-MN6" userLabel="YSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="64" id="N0c-8t-892"/>
                                                             <constraint firstAttribute="height" constant="18" id="RYd-WU-uQM"/>
@@ -2476,7 +2476,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="xp7-PQ-WcA" userLabel="AlphaGradientSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="75t-XL-b68"/>
                                                             <constraint firstAttribute="width" constant="64" id="FZ3-uM-0mo"/>
@@ -2594,7 +2594,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="4" translatesAutoresizingMaskIntoConstraints="NO" id="cc2-J6-k2T" userLabel="AlphaGradientSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="64" id="YX5-3l-HAC"/>
                                                             <constraint firstAttribute="height" constant="18" id="rQi-5q-zQ5"/>
@@ -2712,7 +2712,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" tag="5" translatesAutoresizingMaskIntoConstraints="NO" id="1E3-aF-a4L" userLabel="AlphaGradientSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="PfY-9E-dxL"/>
                                                             <constraint firstAttribute="width" constant="64" id="QpD-Y3-BKg"/>
@@ -2820,10 +2820,10 @@ CA
                                         </customSpacing>
                                     </stackView>
                                     <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="Hyi-jB-hKP">
-                                        <rect key="frame" x="0.0" y="109" width="96" height="5"/>
+                                        <rect key="frame" x="0.0" y="105" width="96" height="5"/>
                                     </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Dt8-Zp-RN6" userLabel="BlurUI">
-                                        <rect key="frame" x="0.0" y="74" width="130" height="33"/>
+                                        <rect key="frame" x="0.0" y="70" width="130" height="33"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VSX-NE-m9f" userLabel="Blur">
                                                 <rect key="frame" x="0.0" y="19" width="26" height="14"/>
@@ -2852,7 +2852,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="CiC-ru-YHV" userLabel="BlurSlider">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="280-ub-2q3"/>
                                                             <constraint firstAttribute="width" constant="64" id="7dH-ut-Pr1"/>
@@ -2912,13 +2912,13 @@ CA
                                         </customSpacing>
                                     </stackView>
                                     <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="ODZ-bj-pWM">
-                                        <rect key="frame" x="0.0" y="67" width="96" height="5"/>
+                                        <rect key="frame" x="0.0" y="63" width="96" height="5"/>
                                     </box>
                                     <stackView distribution="fill" orientation="vertical" alignment="leading" spacing="1" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ima-ap-f6k" userLabel="Fonts" customClass="FontTool" customModule="Drafter" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="130" height="65"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="130" height="61"/>
                                         <subviews>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" textCompletion="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ENJ-HB-nc4">
-                                                <rect key="frame" x="0.0" y="51" width="29" height="14"/>
+                                                <rect key="frame" x="0.0" y="47" width="29" height="14"/>
                                                 <textFieldCell key="cell" controlSize="small" lineBreakMode="clipping" alignment="left" title="Font" id="i2i-Nu-HMm">
                                                     <font key="font" size="12" name="HelveticaNeue"/>
                                                     <color key="textColor" name="secondaryLabelColor" catalog="System" colorSpace="catalog"/>
@@ -2926,7 +2926,7 @@ CA
                                                 </textFieldCell>
                                             </textField>
                                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oCo-dL-3Pg" userLabel="Fonts">
-                                                <rect key="frame" x="-1" y="34" width="133" height="16"/>
+                                                <rect key="frame" x="-2" y="31" width="135" height="16"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="130" id="tAS-AC-79r"/>
                                                 </constraints>
@@ -2946,7 +2946,7 @@ CA
                                                 </connections>
                                             </popUpButton>
                                             <popUpButton verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="ate-yZ-Lio" userLabel="Type">
-                                                <rect key="frame" x="-1" y="18" width="133" height="16"/>
+                                                <rect key="frame" x="-2" y="17" width="135" height="16"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="130" id="weV-0x-a6P"/>
                                                 </constraints>
@@ -2984,7 +2984,7 @@ CA
                                                         </textFieldCell>
                                                     </textField>
                                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="DTB-eg-Kko" userLabel="FontSize">
-                                                        <rect key="frame" x="18" y="-1" width="64" height="20"/>
+                                                        <rect key="frame" x="16" y="-2" width="68" height="22"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="18" id="bbb-Es-df1"/>
                                                             <constraint firstAttribute="width" constant="64" id="wp8-pt-jAM"/>
@@ -3155,10 +3155,10 @@ CA
         </scene>
     </scenes>
     <resources>
-        <image name="NSActionTemplate" width="14" height="14"/>
-        <image name="NSIconViewTemplate" width="14" height="10"/>
-        <image name="NSLockUnlockedTemplate" width="10" height="14"/>
-        <image name="NSQuickLookTemplate" width="19" height="12"/>
+        <image name="NSActionTemplate" width="20" height="20"/>
+        <image name="NSIconViewTemplate" width="19" height="18"/>
+        <image name="NSLockUnlockedTemplate" width="21" height="19"/>
+        <image name="NSQuickLookTemplate" width="26" height="17"/>
         <image name="exclude" width="84" height="64"/>
         <image name="include" width="84" height="64"/>
         <image name="mask" width="64" height="64"/>

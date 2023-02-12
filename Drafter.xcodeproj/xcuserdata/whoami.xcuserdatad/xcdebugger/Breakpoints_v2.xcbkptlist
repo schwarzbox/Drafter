@@ -3,22 +3,4 @@
    uuid = "A981F494-A0EA-4D56-AF1B-6CDA5DE47F2D"
    type = "1"
    version = "2.0">
-   <Breakpoints>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "B193B945-0D3E-4966-ADCD-E9F56870A776"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../../../../../var/folders/dd/bq8s9gwd2rv_9q1ztwv47h2w0000gn/T/0F9A8DAA-EE7B-40F6-AA4B-AABA853F3A99/SketchPad.swift/Drafter/SketchPad.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "164"
-            endingLineNumber = "164"
-            landmarkName = "setupLayers()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-   </Breakpoints>
 </Bucket>

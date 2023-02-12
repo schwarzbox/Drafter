@@ -478,7 +478,6 @@ extension CALayer {
         return false
     }
 
-
     func ciImage(width: Int, height: Int) -> CIImage? {
         let imageRepresentation = NSBitmapImageRep(
             bitmapDataPlanes: nil,
@@ -498,7 +497,7 @@ extension CALayer {
         return nil
     }
 
-    func cgImage(width: Int, height: Int) ->CGImage? {
+    func cgImage(width: Int, height: Int) -> CGImage? {
         let context = CGContext(
             data: nil, width: width, height: height,
             bitsPerComponent: 8, bytesPerRow: 0,

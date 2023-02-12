@@ -39,7 +39,6 @@
 		1E056DE423135D500078A488 /* ControlFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlFrame.swift; sourceTree = "<group>"; };
 		1E157C592332299200B191DF /* ColorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPanel.swift; sourceTree = "<group>"; };
 		1E1DD6CE23E0BBFD006BEDF5 /* DraftIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = DraftIcon.icns; sourceTree = "<group>"; };
-		1E244AB42346A17F0037214C /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text; path = .swiftlint.yml; sourceTree = "<group>"; };
 		1E337DE82382C094009747A3 /* InputTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputTool.swift; sourceTree = "<group>"; };
 		1E337DEF238C1CA2009747A3 /* FontTool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FontTool.swift; sourceTree = "<group>"; };
 		1E46316B24072856002E309C /* PrefViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrefViewController.swift; sourceTree = "<group>"; };
@@ -86,7 +85,6 @@
 		1E4A3F1923011B790038D924 = {
 			isa = PBXGroup;
 			children = (
-				1E244AB42346A17F0037214C /* .swiftlint.yml */,
 				1E4A3F2423011B790038D924 /* Drafter */,
 				1E4A3F2323011B790038D924 /* Products */,
 			);
@@ -137,7 +135,6 @@
 				1E4A3F1E23011B790038D924 /* Sources */,
 				1E4A3F1F23011B790038D924 /* Frameworks */,
 				1E4A3F2023011B790038D924 /* Resources */,
-				1E244AB323469DFE0037214C /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -155,7 +152,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1030;
-				LastUpgradeCheck = 1130;
+				LastUpgradeCheck = 1420;
 				ORGANIZATIONNAME = "Alex Veledzimovich";
 				TargetAttributes = {
 					1E4A3F2123011B790038D924 = {
@@ -198,26 +195,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		1E244AB323469DFE0037214C /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which swiftlint >/dev/null; then\nswiftlint\nelse\necho \"error: SwiftLint does not exist, download it from https://github.com/realm/SwiftLint\"\nexit 1\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1E4A3F1E23011B790038D924 /* Sources */ = {
@@ -286,6 +263,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -294,6 +272,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -315,7 +294,6 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				"OTHER_SWIFT_FLAGS[arch=*]" = "-Xfrontend -warn-long-expression-type-checking=100 -Xfrontend -warn-long-expression-type-checking=100";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[arch=*]" = "";
@@ -349,6 +327,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -357,6 +336,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -383,14 +363,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drafter/Drafter.entitlements;
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = CJBM9UAU25;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = P3K4VFB7S3;
 				INFOPLIST_FILE = Drafter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				PRODUCT_BUNDLE_IDENTIFIER = veledzimovich.Drafter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -403,14 +386,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drafter/Drafter.entitlements;
 				CODE_SIGN_IDENTITY = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = CJBM9UAU25;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = P3K4VFB7S3;
 				INFOPLIST_FILE = Drafter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
 				PRODUCT_BUNDLE_IDENTIFIER = veledzimovich.Drafter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
