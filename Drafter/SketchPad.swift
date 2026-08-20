@@ -10,12 +10,14 @@
 
 // 1.2
 // unpack inplace
-// show groups members?
+// show groups members
 
 // 1.3
-// inf undo?
+// infinity undo / redo
 // save user pref
 // help
+
+// v1.5 .svg
 
 import Cocoa
 

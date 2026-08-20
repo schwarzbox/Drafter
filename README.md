@@ -1,116 +1,127 @@
-![Screenshot](screenshot/logo.png)
+# Drafter
 
-v1.16
+## v1.16
 
-Vector Editor for MacOS.
+Vector editor.
 
-Simple tool for create images
-
-# Features
-
-All tools in canvas. No hidden menus with many tabs.
+Create, edit, and export images as a `.drf` file or `.png` file.
 
 ![Screenshot](screenshot/screenshot1.png)
 
-Use preview when edit shape. 
-Use standart keys to transform shapes (⌘(Cmd), ⌥(Option), ⇧(Shift) & Delete)
+### Usage
 
-![Screenshot](screenshot/screenshot2.png)
+All tools are available directly on the canvas. No hidden menus or multiple tabs.
 
-Every shape has gradient layer.  Setup alpha & color and you are done
+Edit shapes with control dots. Shape preview is available while editing.
 
-![Screenshot](screenshot/screenshot3.png)
+Each shape has a gradient layer. Set color and alpha to adjust it.
 
-Permanent shadow layer. To remove just set alpha to zero
+Each shape has a permanent shadow layer. Set alpha to `0` to remove it.
 
-![Screenshot](screenshot/screenshot4.png)
+Built-in rulers are available for alignment.
 
-Built-in rulers
+#### Tools & Hotkeys
 
-![Screenshot](screenshot/screenshot5.png)
+`Select` (`M`) - select shapes.
 
-## Perfomance
+`Line` (`L`) - create lines.
 
-Drafter v1.16 comfort work is possible when used less than 100 layers
+`Triangle` (`T`) - create triangles.
 
-## Tools & Hotkeys
+`Rectangle` (`R`) - create rectangles.
 
-Select (M), Line (L), Triangle (T), Rectangle (R) Pentagon(P), Hex(H), Star(S), Arc (A), Oval (O), Stylus (D)
+`Pentagon` (`P`) - create pentagons.
 
-Vector (V) - press ⚙ in pop-up menu or Return to edit shape with control dots
+`Hex` (`H`) - create hexagons.
 
-Font (F) - type text in text field, hit Return and create vector representation
+`Star` (`S`) - create stars.
 
-## Combos
+`Arc` (`A`) - create arcs.
 
-Close (⌘W), Quit (⌘Q) -  safe exit
+`Oval` (`O`) - create ovals.
 
-- Files
+`Stylus` (`D`) - draw with a stylus.
 
-New (⌘N) Open (⌘O) - open *.drf or *.png  
+`Vector` (`V`) - edit a shape with control dots. Press `⚙` or `Return` to enter vector edit mode.
 
-Save (⌘S), Save-As (⇧⌘S) - save to *.drf or *.png
+`Font` (`F`) - enter text and create a vector representation.
 
-- Edit
+#### Files
 
-Undo (⌘Z), Redo (⇧⌘Z) - up to 16 operations
+`New` (`⌘N`) - create a new document.
 
-Cut (⌘X) - remove selected shape and copy to the buffer, Copy (⌘C) - copy selected shape
+`Open` (`⌘O`) - open a `.drf` or `.png` file.
 
-Paste (⌘V) - paste shape to the mouse position
+`Save` (`⌘S`) - save as `.drf` or `.png`.
 
-Group (⌘G), Ungroup (⇧⌘G)  - create/remove group for selectted shapes
+`Save As` (`⇧⌘S`) - save as `.drf` or `.png`.
 
-Delete (Delete) - remove shape or control dot
+#### Edit
 
-SelectAll(⌘A) - select all shapes or dots
+`Undo` (`⌘Z`) - undo up to 16 operations.
 
-- Modifiers
+`Redo` (`⇧⌘Z`) - redo up to 16 operations.
 
-Shape mode
+`Cut` (`⌘X`) - remove the selected shape and copy it to the buffer.
 
-Use ⇧(Shift) and drag to make width and height equal when create shape
+`Copy` (`⌘C`) - copy the selected shape.
 
-Use ⇧(Shift) and drag for straight lines when create Line and Vector
+`Paste` (`⌘V`) - paste a shape at the mouse position.
 
-Resize shapes proportionaly with ⇧(Shift)
+`Group` (`⌘G`) - group selected shapes.
 
-Use ^(Control) + LMB to select more than one shape
+`Ungroup` (`⇧⌘G`) - remove a group.
 
-If shape selected press ^(Control) + LMB to deselect dot
+`Delete` (`Delete`) - remove a shape or control dot.
 
-Drag shape with fn(Function) to turn on "snap to rullers"
+`Select All` (`⌘A`) - select all shapes or control dots.
 
-Click on shape with ⌘(Cmd)  to clone it
+#### Modifiers
 
-Edit mode
+##### Shape Mode
 
-Use ^(Control) to disable preview
+`⇧` `Shift` + drag - create shapes with equal width and height.
 
-Use ^(Control) + LMB to select more than one dot
+`⇧` `Shift` + drag - create straight lines and vectors.
 
-If dot selected press ^(Control) + LMB to deselect dot
+`⇧` `Shift` + resize - keep proportions.
 
-Use ⇧(Shift) and drag for move dot straight
+`⌃` `Control` + `LMB` - select multiple shapes.
 
-Drag dot with fn(Function) to turn on "snap to rullers"
+`⌃` `Control` + `LMB` - deselect a selected shape.
 
-When select more than one dot drag  with ⌥(Option) to "zoom move"
+`fn` `Function` + drag - enable ruler snapping.
 
-Drag mouse with ⌘(Cmd)  to show control dots
+`⌘` `Cmd` + click - clone a shape.
 
-- Canvas
+##### Edit Mode
 
-Magnification gesture. Two fingers zoom
+`⌃` `Control` - disable preview.
 
-Scroll canvas with two fingers
+`⌃` `Control` + `LMB` - select multiple control dots.
 
+`⌃` `Control` + `LMB` - deselect a selected control dot.
 
-# Road map
+`⇧` `Shift` + drag - move a control dot in a straight line.
 
-v1.2 Show group members 
+`fn` `Function` + drag - enable ruler snapping.
 
-v1.3 Improve UndoRedo
+`⌥` `Option` + drag - move selected control dots toward or away from their center point.
 
-v1.5 .svg
+`⌘` `Cmd` + drag - show control dots.
+
+#### Canvas
+
+Two-finger gesture - zoom the canvas.
+
+Two-finger scroll - move the canvas.
+
+### Performance
+
+Comfortable editing is possible with fewer than `100` layers.
+
+### Credits
+
+Design/Art/Code: [Aliaksandr Veledzimovich](https://twitter.com/veledzimovich)<br>
+
 
