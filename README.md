@@ -6,7 +6,7 @@ Vector editor.
 
 Create, edit, and export images as a `.drf` file or `.png` file.
 
-![Screenshot](screenshot/screenshot1.png)
+![Screenshot](.media/screenshot1.png)
 
 ### Usage
 
